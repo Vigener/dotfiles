@@ -1,0 +1,189 @@
+{
+  "title": "AZIK風カスタム設定（長音・促音・頻出単語）",
+  "rules": [
+    {
+      "description": "日本語入力時のみ有効：セミコロン(;)で長音(ー)、コロン(:)で促音(っ)",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "semicolon"
+          },
+          "to": [
+            {
+              "key_code": "hyphen"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "input_source_if",
+              "input_sources": [
+                {
+                  "language": "ja"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "quote1"
+          },
+          "to": [
+            {
+              "key_code": "x"
+            },
+            {
+              "key_code": "t"
+            },
+            {
+              "key_code": "u"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "input_source_if",
+              "input_sources": [
+                {
+                  "language": "ja"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "日本語入力時のみ有効：ttで「たち」、mnで「もの」、ktで「こと」（同時押し判定）",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "simultaneous": [
+              {
+                "key_code": "t"
+              },
+              {
+                "key_code": "t"
+              }
+            ],
+            "simultaneous_options": {
+              "key_down_order": "strict",
+              "key_up_order": "strict_inverse"
+            }
+          },
+          "to": [
+            {
+              "key_code": "t"
+            },
+            {
+              "key_code": "a"
+            },
+            {
+              "key_code": "c"
+            },
+            {
+              "key_code": "h"
+            },
+            {
+              "key_code": "i"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "input_source_if",
+              "input_sources": [
+                {
+                  "language": "ja"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "simultaneous": [
+              {
+                "key_code": "m"
+              },
+              {
+                "key_code": "n"
+              }
+            ],
+            "simultaneous_options": {
+              "key_down_order": "strict",
+              "key_up_order": "strict_inverse"
+            }
+          },
+          "to": [
+            {
+              "key_code": "m"
+            },
+            {
+              "key_code": "o"
+            },
+            {
+              "key_code": "n"
+            },
+            {
+              "key_code": "o"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "input_source_if",
+              "input_sources": [
+                {
+                  "language": "ja"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "simultaneous": [
+              {
+                "key_code": "k"
+              },
+              {
+                "key_code": "t"
+              }
+            ],
+            "simultaneous_options": {
+              "key_down_order": "strict",
+              "key_up_order": "strict_inverse"
+            }
+          },
+          "to": [
+            {
+              "key_code": "k"
+            },
+            {
+              "key_code": "o"
+            },
+            {
+              "key_code": "t"
+            },
+            {
+              "key_code": "o"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "input_source_if",
+              "input_sources": [
+                {
+                  "language": "ja"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
