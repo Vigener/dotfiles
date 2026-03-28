@@ -126,10 +126,27 @@ hash -d univ=/home/vgnri_wsl/univ
 alias univ="cd /home/vgnri_wsl/univ"eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Homebrewのパスを設定
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# 'command -v brew' でbrewコマンドが存在するかチェック
+if command -v brew >/dev/null; then
+  # Homebrewの記述がいくつかある
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  export HOMEBREW_NO_AUTO_UPDATE=1
+fi
 
 ### Load machine-specific settings ###
 # もし ~/.zshrc.local ファイルが存在すれば、それを読み込む
 if [ -f ~/.zshrc.local ]; then
     source ~/.zshrc.local
 fi
+
+export PATH="$HOME/.cargo/bin:$PATH"
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+eval "$(mise activate zsh)"
+
+# WSLでのブラウザ設定 (WSL2ではwslviewを使う.これはURLをWindows側のデフォルトブラウザに渡してくれるコマンド)
+
+export BROWSER=wslview
+export PATH="$HOME/.local/bin:$PATH"
+alias nv="nvim"
+alias em="emacs -nw"
+alias docker=podman
