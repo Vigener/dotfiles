@@ -1,6 +1,6 @@
-# 🚀 Mikoto's Dotfiles
+# 🚀 Vigener's Dotfiles
 
-五十嵐 尊人 (Mikoto Igarashi) の開発環境設定ファイル群。
+開発環境設定ファイル群。
 HPC/量子コンピュータ研究者として、「ノイズレス」「OS非依存（Mac/WSL共通）」「高パフォーマンス」をテーマに構築されたターミナル環境です。
 
 ## 思想 (Philosophy)
