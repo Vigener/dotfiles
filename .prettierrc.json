@@ -1,0 +1,13 @@
+{
+    "useTabs": false,
+    "tabWidth": 4,
+    "overrides": [
+        {
+            "files": [".vscode/settings.json"],
+            "options": {
+                "parser": "jsonc",
+                "tabWidth": 4
+            }
+        }
+    ]
+}
