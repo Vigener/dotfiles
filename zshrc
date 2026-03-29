@@ -101,3 +101,40 @@ fi
 if [ -f ~/.zshrc.local ]; then
     source ~/.zshrc.local
 fi
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# -----------------------------
+# ghq + fzf integration (Repository Jump)
+# -----------------------------
+function ghq_fzf_cd() {
+    # ghqで管理しているリポジトリ一覧を取得し、fzfで絞り込み（プレビュー付き）
+    local selected_repo=$(ghq list | fzf --prompt="Git Repo > " --preview="ls -lah $(ghq root)/{}")
+    
+    # リポジトリが選択された場合のみcdコマンドを実行
+    if [ -n "$selected_repo" ]; then
+        BUFFER="cd $(ghq root)/${selected_repo}"
+        zle accept-line
+    fi
+    zle reset-prompt
+}
+
+# Zshのラインエディタ(zle)に自作関数をウィジェットとして登録
+zle -N ghq_fzf_cd
+
+# Ctrl + ] (コントロールキーと右ブラケット) に割り当て
+bindkey '^]' ghq_fzf_cd
+
+# -----------------------------
+# ghq + fzf integration for Warp (Command approach)
+# -----------------------------
+function gcd() {
+    # ghqで管理しているリポジトリ一覧を取得し、fzfで絞り込み
+    local selected_repo=$(ghq list | fzf --prompt="Git Repo > " --preview="ls -lah $(ghq root)/{}")
+    
+    # リポジトリが選択された場合のみcdコマンドを実行
+    if [ -n "$selected_repo" ]; then
+        cd "$(ghq root)/${selected_repo}"
+        # Warpのブロックに出力として分かりやすく表示させる
+        echo "🚀 Jumped to: $(pwd)"
+    fi
+}
