@@ -124,10 +124,11 @@ zle -N ghq_fzf_cd
 # Ctrl + ] (コントロールキーと右ブラケット) に割り当て
 bindkey '^]' ghq_fzf_cd
 
+
 # -----------------------------
 # ghq + fzf integration for Warp (Command approach)
 # -----------------------------
-function gcd() {
+function cdg() {
     # ghqで管理しているリポジトリ一覧を取得し、fzfで絞り込み
     local selected_repo=$(ghq list | fzf --prompt="Git Repo > " --preview="ls -lah $(ghq root)/{}")
     
