@@ -1,0 +1,20 @@
+[tools]
+rust = "stable"
+
+[tasks.copy-fonts]
+description = "フォントをカレントにコピー"
+run = "cp -r /home/vgnri_wsl/dotfiles/fonts ."
+
+[tasks.copy-typst-template]
+description = "Typstレポートテンプレートをカレントディレクトリにコピー"
+run = "cp ~/dev/github.com/Vigener/win-env/Typst/report_template.typ ."
+
+[tasks.new-typst-report]
+description = "新しいTypstレポートを作成（使い方: mise run new-typst-report -- myreport.typ）"
+run = '''
+#!/bin/bash
+FILENAME="${1:-report.typ}"
+cp ~/dev/github.com/Vigener/win-env/Typst/report_template.typ "$FILENAME"
+echo "✓ $FILENAME を作成しました"
+ls -lh "$FILENAME"
+'''
