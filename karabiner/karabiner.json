@@ -760,21 +760,6 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "p",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "kana_pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
                                     "key_code": "h",
                                     "modifiers": { "optional": ["any"] }
                                 },
@@ -949,7 +934,7 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "return_or_enter",
+                                    "key_code": "p",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "shell_command": "open -a 'Warp'" }],
