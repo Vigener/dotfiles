@@ -1,20 +1,31 @@
 [tools]
+node = "lts"
 rust = "stable"
 
 [tasks.copy-fonts]
 description = "フォントをカレントにコピー"
-run = "cp -r /home/vgnri_wsl/dotfiles/fonts ."
+run = "cp -r ~/dotfiles/fonts ."
 
 [tasks.copy-typst-template]
 description = "Typstレポートテンプレートをカレントディレクトリにコピー"
-run = "cp ~/dev/github.com/Vigener/win-env/Typst/report_template.typ ."
+# ghqコマンドを使って動的にパスを解決する堅牢な設計に変更
+run = "cp $(ghq root)/github.com/Vigener/win-env/Typst/report_template.typ ."
 
 [tasks.new-typst-report]
 description = "新しいTypstレポートを作成（使い方: mise run new-typst-report -- myreport.typ）"
 run = '''
 #!/bin/bash
 FILENAME="${1:-report.typ}"
-cp ~/dev/github.com/Vigener/win-env/Typst/report_template.typ "$FILENAME"
+TEMPLATE_PATH="$(ghq root)/github.com/Vigener/win-env/Typst/report_template.typ"
+
+# テンプレートが存在するかどうかのフェイルセーフを追加
+if [ ! -f "$TEMPLATE_PATH" ]; then
+    echo "エラー: テンプレートが見つかりません。ghq get でリポジトリをCloneしていますか？"
+    echo "パス: $TEMPLATE_PATH"
+    exit 1
+fi
+
+cp "$TEMPLATE_PATH" "$FILENAME"
 echo "✓ $FILENAME を作成しました"
 ls -lh "$FILENAME"
 '''
