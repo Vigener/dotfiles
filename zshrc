@@ -60,6 +60,9 @@ export EDITOR='nvim'
 alias nv="nvim"
 alias em="emacs -nw"
 
+
+alias cdp="cd ~/Documents/Presentations"
+
 # ディレクトリ移動系 (ghq連携)
 # 以前のunivエイリアスは環境依存だったため、Mac/WSL共通の ~/univ 等が存在する場合のみ移動する関数に
 function univ() {
