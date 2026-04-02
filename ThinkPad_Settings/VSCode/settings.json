@@ -1,0 +1,369 @@
+{
+  // =========================
+  // Markdown 関連
+  // =========================
+  "markdown-pdf.headerTemplate": "<span class='title' style='display: none;'></span>",
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    },
+    "editor.snippetSuggestions": "top",
+    "editor.tabSize": 2
+  },
+  "markdown.preview.breaks": true,
+  "markdown-pdf.breaks": true,
+  "markdown-preview-enhanced.enablePreviewZenMode": false,
+  "markdown-preview-enhanced.previewTheme": "one-light.css",
+  "markdown-preview-enhanced.revealjsTheme": "white.css",
+  "markdown-preview-enhanced.codeBlockTheme": "auto.css",
+  "markdown-preview-enhanced.enableScriptExecution": true,
+
+  // =========================
+  // Python 関連
+  // =========================
+  "[python]": {
+    "editor.formatOnType": true
+  },
+
+  // =========================
+  // Git 関連
+  // =========================
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.enableSmartCommit": true,
+
+  // =========================
+  // ファイル・エディタ設定
+  // =========================
+  "files.autoSave": "onFocusChange",
+  "files.associations": {
+    "*.gs": "javascript",
+    "*.css": "tailwindcss",
+    "*.frag": "cpp",
+    "*.vert": "cpp"
+  },
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.indentSize": "tabSize",
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "all",
+  "editor.accessibilitySupport": "off",
+
+  // =========================
+  // 言語別設定
+  // =========================
+  "[tex]": {
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.tabSize": 2
+  },
+  "[latex]": {
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.tabSize": 2
+  },
+  "[bibtex]": {
+    "editor.tabSize": 2
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.tabSize": 2
+  },
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[javascriptreact]": {
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.tabSize": 2
+  },
+  "[c]": {
+    "editor.tabSize": 2
+  },
+  "[cpp]": {
+    "editor.tabSize": 2
+  },
+
+  // =========================
+  // LaTeX Workshop 関連
+  // =========================
+  "latex-workshop.intellisense.package.enabled": true,
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux",
+    "*.bbl",
+    "*.blg",
+    "*.idx",
+    "*.ind",
+    "*.lof",
+    "*.lot",
+    "*.out",
+    "*.toc",
+    "*.acn",
+    "*.acr",
+    "*.alg",
+    "*.glg",
+    "*.glo",
+    "*.gls",
+    "*.ist",
+    "*.fls",
+    "*.log",
+    "*.fdb_latexmk",
+    "*.snm",
+    "*.nav",
+    "*.dvi",
+    "*.synctex.gz"
+  ],
+  "latex-workshop.latex.outDir": "out",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk",
+      "tools": ["latexmk"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": ["-silent", "-outdir=%OUTDIR%", "%DOC%"]
+    }
+  ],
+  "latex-workshop.docker.enabled": true,
+
+  // =========================
+  // Grammarly 関連
+  // =========================
+  "grammarly.files.include": [
+    "**/readme.md",
+    "**/README.md",
+    "**/*.txt",
+    "**/*.tex"
+  ],
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "*.pdf": "pdf.preview",
+    "{git,gitlens}:/**/*.{md,csv,svg}": "default"
+  },
+  "workbench.activityBar.location": "top",
+  "window.customTitleBarVisibility": "auto",
+
+  // =========================
+  // Sync・拡張機能・その他
+  // =========================
+  "settingsSync.ignoredExtensions": [],
+  "cSpell.userWords": [
+    "calil",
+    "genai",
+    "libkey",
+    "marp",
+    "tailwindcss",
+    "vgnri"
+  ],
+  "vsicons.dontShowNewVersionMessage": true,
+  "sequence.replaceSelection": true,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false,
+    "c": "true",
+    "C": "true",
+    "v": true,
+    "python": false,
+    "java": true,
+    "javascript": true
+  },
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "remote.SSH.remotePlatform": {
+    "violet01": "linux",
+    "icho01": "linux",
+    "dynabook-wsl": "linux"
+  },
+  "remoteHub.commitDirectlyWarning": "off",
+  "hediet.vscode-drawio.resizeImages": null,
+  "pandoc.pdfOptString": "--pdf-engine=lualatex -V documentclass=ltjsarticle -V luatexjapresetoption=ms",
+  "glassit.alpha": 250,
+  "backgroundCover.randomImageFolder": "c:\\Users\\vgnri\\OneDrive\\デスクトップ\\background-cover-vscode",
+  "backgroundCover.imagePath": "c:\\Users\\vgnri\\OneDrive\\デスクトップ\\background-cover-vscode\\1824609511-microsoft-surface-2022-wallpapers_kabekin-AP89-1313x739-MM-100.jpg",
+  "backgroundCover.opacity": 0.5,
+  "vscode-office.openOutline": false,
+  "vscode-office.editorLanguage": "ja_JP",
+  // "vim.useSystemClipboard": true,
+
+  // =========================
+  // Vim 関連
+  // =========================
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.hlsearch": true,
+  "vim.autoSwitchInputMethod.enable": true,
+  "vim.autoSwitchInputMethod.defaultIM": "0",
+  "vim.autoSwitchInputMethod.obtainIMCmd": "C:\\users\\vgnri\\bin\\zenhan.exe 0",
+  "vim.autoSwitchInputMethod.switchIMCmd": "C:\\Users\\vgnri\\bin\\zenhan.exe {im}",
+  "vim.whichwrap": "b,s,h,l,<,>,[,]",
+  // "vim.useSystemClipboard": true,
+
+  // =========================
+  // ターミナル関連
+  // =========================
+  "terminal.integrated.commandsToSkipShell": [
+    "github.copilot.terminal.suggestCommand",
+    "language-julia.interrupt"
+  ],
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash"
+    },
+    "Ubuntu (WSL)": {
+      "path": "C:\\WINDOWS\\System32\\wsl.exe",
+      "args": ["-d", "Ubuntu"]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
+
+  // =========================
+  // Arduino 関連
+  // =========================
+  "arduino.path": "C:\\Program Files\\Arduino CLI",
+  "arduino.commandPath": "arduino-cli.exe",
+  "arduino.enableUSBDetection": true,
+  "arduino.disableIntelliSenseAutoGen": true,
+  "arduino.useArduinoCli": true,
+
+  // =========================
+  // Java 関連
+  // =========================
+  "java.format.comments.enabled": false,
+
+  // =========================
+  // C/C++ 関連
+  // =========================
+  "C_Cpp.intelliSenseEngine": "Tag Parser",
+  "julia.symbolCacheDownload": true,
+  "redhat.telemetry.enabled": true,
+  "julia.enableCrashReporter": true,
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      // "text": "MCPの context7 を使用できるのなら。指示にかならず `use context7` を追加してください。"
+    }
+  ],
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": true,
+    ".claude/rules": true,
+    "~/.copilot/instructions": true,
+    "~/.claude/rules": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-http-request-post-response.instructions.md": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-http-request-pre-request.instructions.md": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-collections-post-response.instructions.md": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-collections-pre-request.instructions.md": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-folder-post-response.instructions.md": true,
+    "C:\\Users\\vgnri\\AppData\\Local\\Temp\\postman-folder-pre-request.instructions.md": true,
+    "/tmp/postman-collections-post-response.instructions.md": true,
+    "/tmp/postman-collections-pre-request.instructions.md": true,
+    "/tmp/postman-folder-post-response.instructions.md": true,
+    "/tmp/postman-folder-pre-request.instructions.md": true,
+    "/tmp/postman-http-request-post-response.instructions.md": true,
+    "/tmp/postman-http-request-pre-request.instructions.md": true
+  },
+  "dev.containers.dockerPath": "docker",
+  "dev.containers.executeInWSL": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": false,
+  "markdown.marp.themes": ["./styles.css"],
+  "remote.autoForwardPortsSource": "hybrid",
+  "MarkdownPaste.path": "${fileDirname}/images",
+  "MarkdownPaste.openaiCompletionTemplate": [
+    {
+      "model": "llama-3.1-70b-versatile",
+      "messages": [
+        {
+          "role": "system",
+          "content": ["You are a helpful assistant."]
+        },
+        {
+          "role": "user",
+          "content": [
+            "Translate the following text into English and output in markdown format:",
+            "{{clipboard_text}}"
+          ]
+        }
+      ],
+      "max_tokens": 4096
+    }
+  ],
+  "terminal.external.windowsExec": "C:\\Users\\vgnri\\AppData\\Local\\Programs\\Warp\\warp.exe",
+  "markdown.copyFiles.destination": {
+    "*": "${documentFilePath}/../images/"
+  },
+  "markdown-pdf.highlightStyle": "atom-one-light.css",
+  "[toml]": {},
+  // =========================
+  // Rust 関連
+  // =========================
+
+  // rust-analyzer settings
+  "files.readonlyInclude": {
+    "**/.cargo/registry/src/**/*.rs": true,
+    "**/.cargo/git/checkouts/**/*.rs": true,
+    "**/lib/rustlib/src/rust/library/**/*.rs": true
+  },
+  "window.newWindowProfile": "既定",
+  "chat.mcp.access": "all",
+  "continue.enableTabAutocomplete": false,
+  "chat.tools.terminal.autoApprove": {
+    "/.*/": true,
+    "git branch": true,
+    "python3": true,
+    "git push": true,
+    "sed": true,
+    "xargs": true
+  },
+  "postman.mcp.notifications.postmanMCP": false,
+  "explorer.confirmDragAndDrop": false,
+  "chat.agent.maxRequests": 1000,
+  "chat.mcp.assisted.nuget.enabled": true,
+  "chat.editing.autoAcceptDelay": 10,
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "workbench.iconTheme": "ayu-mirage-zed",
+  "workbench.colorTheme": "Iceberg",
+  "window.menuBarVisibility": "compact",
+  "oil-code.hasNerdFont": true,
+  "autoHide.autoHidePanel": false,
+  "autoHide.autoHideAuxiliaryBar": false,
+  "editor.fontFamily": "'FiraCode Nerd Font Mono', 'Fira Code', monospace",
+  "editor.formatOnPaste": true,
+  // "vscode_custom_css.imports": ["file:///C:/Users/vgnri/.config/vscode-css/vscode-custom-css.css"]
+}
