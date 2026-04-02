@@ -98,6 +98,27 @@
                         ]
                     },
                     {
+                        "description": "Ctrl+QでCmd+W",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "q",
+                                    "modifiers": {
+                                        "mandatory": ["control"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "w",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "英数キーをモディファイア化 (単押しで英数)",
                         "manipulators": [
                             {
@@ -745,7 +766,11 @@
                                 "to": [
                                     {
                                         "key_code": "w",
-                                        "modifiers": ["command"]
+                                        "modifiers": [
+                                            "control",
+                                            "option",
+                                            "command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -1054,7 +1079,9 @@
                                     "key_code": "b",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "open -a 'Bitwarden'" }],
+                                "to": [
+                                    { "shell_command": "open -a 'Bitwarden'" }
+                                ],
                                 "type": "basic"
                             },
                             {
@@ -1069,7 +1096,9 @@
                                     "key_code": "c",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "open -a 'Calendar'" }],
+                                "to": [
+                                    { "shell_command": "open -a 'Calendar'" }
+                                ],
                                 "type": "basic"
                             },
                             {
@@ -1085,7 +1114,9 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
-                                    { "shell_command": "open -b com.vivaldi.Vivaldi" }
+                                    {
+                                        "shell_command": "open -b com.vivaldi.Vivaldi"
+                                    }
                                 ],
                                 "type": "basic"
                             }
