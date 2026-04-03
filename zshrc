@@ -142,3 +142,29 @@ function cdg() {
         echo "🚀 Jumped to: $(pwd)"
     fi
 }
+
+# ==========================================
+# CLI Cockpit Setup (tmux + btm)
+# ==========================================
+function cockpit() {
+    # 'cockpit' という名前のtmuxセッションが既に存在するかチェック
+    tmux has-session -t cockpit 2>/dev/null
+
+    # 存在しない場合（$? != 0）は新規作成してレイアウトを構築
+    if [ $? != 0 ]; then
+        # 新規セッションを作成（-dでバックグラウンド起動）
+        tmux new-session -d -s cockpit
+        
+        # 左ペイン（ペイン0）で bottom (btm) を起動
+        tmux send-keys -t cockpit:0 'btm' C-m
+        
+        # 画面を左右に分割（右にペイン1を作成、幅は全体の45%とする）
+        tmux split-window -h -t cockpit:0 -p 45
+        
+        # 右ペイン（ペイン1）にウェルカムメッセージを表示（モチベーション用）
+        tmux send-keys -t cockpit:1 'echo "HPC Cockpit Online. Ready for execution."' C-m
+    fi
+
+    # 構築済み、または既存のセッションにアタッチして画面に表示
+    tmux attach-session -t cockpit
+}
