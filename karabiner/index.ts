@@ -155,8 +155,9 @@ writeToProfile(
             map("q", "optionalAny")
                 .to("escape")
                 .condition(ifVar("eisuu_pressed", 1)),
+            // Mac標準のCmd+Spaceを発火させ、Raycastを起動する
             map("spacebar", "optionalAny")
-                .to("return_or_enter")
+                .to("spacebar", "command")
                 .condition(ifVar("eisuu_pressed", 1)),
 
             // 【選択】「eisuu + d」の挙動
