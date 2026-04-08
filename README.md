@@ -16,9 +16,10 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 
 ### 管理対象ファイル
 
-- `zshrc`: Zshのメイン設定ファイル。(`~/.zshrc` へリンク)
-- `Brewfile`: (予定) HomebrewによるMacアプリ・CLIツールの一括管理リスト。
-- `karabiner.json`: (予定) Karabiner-Elementsのキーバインド設定。
+- `zshrc`: Zsh のメイン設定ファイル。(`~/.zshrc` へリンク)
+- `Brewfile`: (予定) Homebrew による Mac アプリ・CLI ツールの一括管理リスト。
+- `karabiner/index.ts`: Karabiner-Elements のキーバインド設定。TypeScript ベースで管理され、ビルドにより `~/.config/karabiner/karabiner.json` に出力されます。（macOS のみ）
+    - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
 
 ## 🛠 新端末でのセットアップ手順 (Setup Guide)
 
@@ -49,7 +50,49 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 source ~/.zshrc
 ```
 
-### 3. Gitのグローバル設定（ノイズ排除）
+### 3. 📱 macOS 固有のセットアップ
+
+#### 3.1 Karabiner-Elements のセットアップ
+
+Karabiner-Elements は macOS 専用のキーバインド設定ツールであり、TypeScript ベースの IaC (Infrastructure as Code) で完全管理されています。
+
+**前提条件**：Homebrew と mise が必要です。
+
+```bash
+# Karabiner-Elements 本体と mise のインストール
+brew install --cask karabiner-elements
+brew install mise  # 未導入の場合
+```
+
+**環境構築**：
+
+```bash
+# karabiner ディレクトリへ移動
+cd ~/dotfiles/karabiner
+
+# mise を使って、このディレクトリ専用の Node.js (LTS版) を導入
+mise use node@lts
+
+# 依存パッケージのローカルインストール
+npm install
+```
+
+**設定の反映**：
+
+```bash
+# index.ts をコンパイルし、設定ファイルを生成・適用
+npm run build
+```
+
+実行した瞬間に `~/.config/karabiner/karabiner.json` が自動更新され、Karabiner-Elements のデーモンが自動的に再読み込みします。
+
+**⚠️ 重要なルール**：
+
+- **GUI操作は禁止**：Karabiner-Elements アプリ上で「Add predefined rule」などによるルール追加は、次回ビルド時にすべて上書きされます。
+- **設定変更は `index.ts` のみ**：自動生成される `karabiner.json` は出力結果に過ぎず、直接編集は厳禁です。
+- **`tsx` 採用理由**：ESM (ECMAScript Modules) 対応が必要なため、`tsx` を採用しています。
+
+### 4. Gitのグローバル設定（ノイズ排除）
 
 Mac特有のゴミファイル（`.DS_Store` 等）がGitに混入するのを防ぐため、グローバルな `.gitignore` を適用します。
 
@@ -63,11 +106,31 @@ git config --global core.excludesfile ~/.gitignore_global
 
 ## ⚠️ 運用上の注意点 (Caveats)
 
+### 共通事項
+
 1. **シンボリックリンクの破壊に注意**
-   - `code ~/.zshrc` や `echo "..." >> ~/.zshrc` による編集・追記は安全（リンク先のターゲットが編集される）。
-   - `cp new_file ~/.zshrc` や、一部のコマンド（`sed -i` など）は、リンクの「土管」自体を破壊し、ただの独立したファイルに置き換わってしまうため**厳禁**。
-   - **ベストプラクティス:** 設定を変更する際は、`cd ~/dotfiles` で実体のディレクトリに移動し、そこから編集・Gitコミットを行うこと。
+    - `code ~/.zshrc` や `echo "..." >> ~/.zshrc` による編集・追記は安全（リンク先のターゲットが編集される）。
+    - `cp new_file ~/.zshrc` や、一部のコマンド（`sed -i` など）は、リンクの「土管」自体を破壊し、ただの独立したファイルに置き換わってしまうため**厳禁**。
+    - **ベストプラクティス:** 設定を変更する際は、`cd ~/dotfiles` で実体のディレクトリに移動し、そこから編集・Gitコミットを行うこと。
 
 2. **環境依存のシークレット情報について**
-   - APIキーや、そのPCでしか使わない特殊な設定（ノイズ）は、この `zshrc` には書かないこと。
-   - 代わりに `~/.zshrc.local` というファイルを作成し、そこに記述する。（`zshrc` が自動で読み込む設計になっているため、GitHubにシークレットが漏洩するのを防げる）
+    - APIキーや、そのPCでしか使わない特殊な設定（ノイズ）は、この `zshrc` には書かないこと。
+    - 代わりに `~/.zshrc.local` というファイルを作成し、そこに記述する。（`zshrc` が自動で読み込む設計になっているため、GitHubにシークレットが漏洩するのを防げる）
+
+### macOS 固有: Karabiner-Elements の運用ルール
+
+1. **GUI操作の禁止**
+    - Karabiner-Elements アプリ上の `Complex Modifications` タブから「Add predefined rule」等を使用してルールを追加しないでください。
+    - 次回の `npm run build` 実行時にすべて上書き（削除）されます。
+
+2. **生成された `karabiner.json` は触らない、Git に入れない**
+    - 自動生成される `karabiner.json` はビルドの「出力結果」に過ぎません。
+    - 直接編集は厳禁であり、ノイズになるため dotfiles の Git 管理からも除外しています（`.gitignore` 記載済み）。
+
+3. **設定変更方法**
+    - **すべての変更は `index.ts` で行う**。編集・追記後に `npm run build` を実行するだけです。
+    - ルール追加時は `assets/complex_modifications` のリンク状態も確認してください（ユーザーメモリ参照）。
+
+4. **実行環境に `tsx` を採用している理由**
+    - `karabiner.ts` は ESM (ECMAScript Modules) を使用しており、従来の `ts-node` では `require is not defined` などの致命的エラーが発生します。
+    - `tsx` は設定不要で ESM/CJS の混在をよしなに解決するため、本環境で採用しています。
