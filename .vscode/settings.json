@@ -17,4 +17,5 @@
     "prettier.tabWidth": 4,
     "json.format.tabSize": 4,
     "jsonc.format.tabSize": 4,
+    "cSpell.words": ["frontmost"],
 }

@@ -10,26 +10,21 @@ import {
 writeToProfile(
     {
         name: "Default profile",
-        karabinerJsonPath: new URL("./karabiner.json", import.meta.url)
-            .pathname,
     },
     [
         // =====================================================================
-        // [JA] 日本語入力のカスタマイズ
+        // [APP_VIVALDI] Vivaldi専用マッピング
         // =====================================================================
         rule(
-            "【JA】日本語入力時: セミコロンで促音(っ)、コロンで長音(ー)",
+            "【Vivaldi】英数+W で ウィンドウパネル開閉 (Ctrl+Opt+Cmd+W)",
         ).manipulators([
-            // USキーボードのコロンの位置を想定
-            map("quote")
-                .to("hyphen")
-                .condition(ifInputSource({ language: "ja" })),
-            // セミコロンを「x, t, u」の3ストロークに変換
-            map("semicolon")
-                .to("x")
-                .to("t")
-                .to("u")
-                .condition(ifInputSource({ language: "ja" })),
+            // Vivaldiがアクティブな時のみ発火させる安全設計
+            map("w", "optionalAny")
+                .to("w", ["left_control", "left_option", "left_command"])
+                .condition(
+                    ifVar("eisuu_pressed", 1),
+                    ifApp("^com\\.vivaldi\\.Vivaldi$"),
+                ),
         ]),
 
         // =====================================================================
@@ -77,30 +72,29 @@ writeToProfile(
         ]),
 
         // =====================================================================
-        // [WINDOW] タブ・ウィンドウ操作 (グローバル)
-        // =====================================================================
-        rule("【WINDOW】タブを閉じる (Ctrl+Q)").manipulators([
-            // Mac標準のCtrl+W(単語削除)を汚さず、左手のみでタブ(Cmd+W)を閉じる
-            map("q", "left_control").to("w", "command"),
-        ]),
-
-        rule(
-            "【WINDOW】Option + HJKL (Mac標準のウィンドウ/スペース操作へマッピング)",
-        ).manipulators([
-            map("j", "left_option").to("m", "command"), // 最小化 (Cmd+M)
-            map("k", "left_option").to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F)
-            map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
-            map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
-        ]),
-
-        // =====================================================================
         // [EDIT] 英数コンビネーション (移動・編集)
+        // ※ 優先度を高くするため、WINDOW設定より必ず「上」に配置します
         // =====================================================================
         rule("【EDIT】英数レイヤー (カーソル移動・編集)").manipulators([
             // -------------------------------------------------------------
             // 1. 【例外ルール】 修飾キー(control等)を伴う特殊移動
             // ※Karabinerは上から評価するため、Anyより先に複合ルールを書く必要があります。
             // -------------------------------------------------------------
+
+            // Winの「Alt+↑/↓ (行の入れ替え等)」を、Macの「Option+↑/↓」に翻訳
+            // VSCode等での選択行の上下移動や、テキストエディタでの段落ジャンプとして機能します
+            map("h", "left_option", "any")
+                .to("left_arrow", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("l", "left_option", "any")
+                .to("right_arrow", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("j", "left_option", "any")
+                .to("down_arrow", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("k", "left_option", "any")
+                .to("up_arrow", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
 
             // Winの「Ctrl+←/→ (単語移動)」を、Macの「Option+←/→」に翻訳
             // (optionalAnyをつけることで、eisuu + control + shift + H で「単語選択」になる)
@@ -112,7 +106,7 @@ writeToProfile(
                 .condition(ifVar("eisuu_pressed", 1)),
             map("j", "left_control", "any")
                 .to("down_arrow", "left_option")
-                .condition(ifVar("eisuu_pressed", 1)), // Option+Downは段落移動
+                .condition(ifVar("eisuu_pressed", 1)),
             map("k", "left_control", "any")
                 .to("up_arrow", "left_option")
                 .condition(ifVar("eisuu_pressed", 1)),
@@ -172,16 +166,58 @@ writeToProfile(
                 .to("right_arrow", ["command", "shift"])
                 .condition(ifVar("eisuu_pressed", 1)),
 
-            // Cmdショートカットの模倣
-            map("p", "optionalAny")
-                .to("p", "command")
-                .condition(ifVar("eisuu_pressed", 1)),
+            // -------------------------------------------------------------
+            // 3. 【Cmdショートカットの模倣】 (Macの主要Cmdショートカットを英数起点で発火)
+            // ※ s, d, f, q, w は別機能のため除外済み
+            // -------------------------------------------------------------
+            map("z", "optionalAny")
+                .to("z", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Undo
+            map("x", "optionalAny")
+                .to("x", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Cut
             map("c", "optionalAny")
                 .to("c", "command")
-                .condition(ifVar("eisuu_pressed", 1)),
+                .condition(ifVar("eisuu_pressed", 1)), // Copy
             map("v", "optionalAny")
                 .to("v", "command")
-                .condition(ifVar("eisuu_pressed", 1)),
+                .condition(ifVar("eisuu_pressed", 1)), // Paste
+            map("n", "optionalAny")
+                .to("n", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // New
+            map("a", "optionalAny")
+                .to("a", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Select All
+            map("e", "optionalAny")
+                .to("e", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Vivaldi Quick Command等
+            map("r", "optionalAny")
+                .to("r", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Reload
+            map("t", "optionalAny")
+                .to("t", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // New Tab
+            map("p", "optionalAny")
+                .to("p", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Print / Palette
+        ]),
+
+        // =====================================================================
+        // [WINDOW] タブ・ウィンドウ操作 (グローバル)
+        // ※ 英数レイヤーの「下」に配置することで、英数非押下時のみ発火させます
+        // =====================================================================
+        rule("【WINDOW】タブを閉じる (Ctrl+Q)").manipulators([
+            // Mac標準のCtrl+W(単語削除)を汚さず、左手のみでタブ(Cmd+W)を閉じる
+            map("q", "left_control").to("w", "command"),
+        ]),
+
+        rule(
+            "【WINDOW】Option + HJKL (Mac標準のウィンドウ/スペース操作へマッピング)",
+        ).manipulators([
+            map("j", "left_option").to("m", "command"), // 最小化 (Cmd+M)
+            map("k", "left_option").to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F)
+            map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
+            map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
         ]),
 
         // =====================================================================
@@ -232,13 +268,33 @@ writeToProfile(
                 .toApp("Calendar")
                 .condition(ifVar("kana_pressed", 1)),
 
+            // Vivaldi PWA版 Notionの絶対パス起動
+            map("n", "optionalAny")
+                .to$(
+                    `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'`,
+                )
+                .condition(ifVar("kana_pressed", 1)),
+
             // Vivaldiは特殊構造のためBundle IDで強制起動
             map("v", "optionalAny")
                 .to$(`open -b com.vivaldi.Vivaldi`)
                 .condition(ifVar("kana_pressed", 1)),
+        ]),
 
-            // (nは空になっていたため無効化。必要に応じて追記してください)
-            // map("n", "optionalAny").toApp("Notion").condition(ifVar("kana_pressed", 1)),
+        // =====================================================================
+        // [AZIK] 日本語入力時カスタム (長音・促音・頻出単語)
+        // =====================================================================
+        rule("【AZIK】セミコロンで促音(っ)、コロンで長音(ー)").manipulators([
+            // USキーボードのコロンの位置を想定
+            map("quote")
+                .to("hyphen")
+                .condition(ifInputSource({ language: "ja" })),
+            // セミコロンを「x, t, u」の3ストロークに変換
+            map("semicolon")
+                .to("x")
+                .to("t")
+                .to("u")
+                .condition(ifInputSource({ language: "ja" })),
         ]),
     ],
 );
