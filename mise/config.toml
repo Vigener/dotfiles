@@ -1,5 +1,6 @@
 [tools]
 node = "lts"
+python = "3.12"
 rust = "stable"
 
 [tasks.copy-fonts]
@@ -28,4 +29,26 @@ fi
 cp "$TEMPLATE_PATH" "$FILENAME"
 echo "✓ $FILENAME を作成しました"
 ls -lh "$FILENAME"
+'''
+
+[tasks.reload-karabiner]
+description = "Karabiner設定を再生成して反映（dotfiles/karabiner で npm run build を実行）"
+run = '''
+#!/bin/bash
+set -euo pipefail
+
+DOTFILES_DIR="$(ghq root)/github.com/Vigener/dotfiles"
+KARABINER_DIR="$DOTFILES_DIR/karabiner"
+
+if [ ! -d "$KARABINER_DIR" ]; then
+    echo "エラー: karabiner ディレクトリが見つかりません"
+    echo "パス: $KARABINER_DIR"
+    exit 1
+fi
+
+cd "$KARABINER_DIR"
+npm run build
+
+echo "✓ Karabiner設定を再生成しました"
+echo "  出力先: ~/.config/karabiner/karabiner.json"
 '''

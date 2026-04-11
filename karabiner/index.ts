@@ -119,6 +119,11 @@ writeToProfile(
                 .to("down_arrow", "command")
                 .condition(ifVar("eisuu_pressed", 1)),
 
+            // Mac標準のOption+Deleteで「直前の単語を削除」
+            map("o", "left_control", "any")
+                .to("delete_or_backspace", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
+
             // -------------------------------------------------------------
             // 2. 【基本ルール】 通常の移動と操作 (optionalAny適用)
             // -------------------------------------------------------------
@@ -201,6 +206,23 @@ writeToProfile(
             map("p", "optionalAny")
                 .to("p", "command")
                 .condition(ifVar("eisuu_pressed", 1)), // Print / Palette
+            map("slash", "optionalAny")
+                .to("slash", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Toggle Comment
+
+            // スクリーンショット系 (保存あり / クリップボードのみ)
+            map("4", ["left_control", "left_shift"], "any")
+                .to("4", ["left_command", "left_shift", "left_control"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("4", "left_shift", "any")
+                .to("4", ["left_command", "left_shift"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("3", ["left_control", "left_shift"], "any")
+                .to("3", ["left_command", "left_shift", "left_control"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("3", "left_shift", "any")
+                .to("3", ["left_command", "left_shift"])
+                .condition(ifVar("eisuu_pressed", 1)),
         ]),
 
         // =====================================================================
@@ -253,9 +275,9 @@ writeToProfile(
             map("k", "optionalAny")
                 .toApp("Karabiner-Elements")
                 .condition(ifVar("kana_pressed", 1)),
-            map("t", "optionalAny")
-                .toApp("Terminal")
-                .condition(ifVar("kana_pressed", 1)),
+            // map("t", "optionalAny")
+            //     .toApp("Terminal")
+            //     .condition(ifVar("kana_pressed", 1)),
             map("p", "optionalAny")
                 .toApp("Warp")
                 .condition(ifVar("kana_pressed", 1)),

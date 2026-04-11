@@ -80,8 +80,11 @@ npm install
 **設定の反映**：
 
 ```bash
-# index.ts をコンパイルし、設定ファイルを生成・適用
-npm run build
+# 推奨: どのディレクトリからでも Karabiner 設定を再生成
+mise run reload-karabiner
+
+# （従来どおり karabiner 配下で直接実行する場合）
+cd ~/dotfiles/karabiner && npm run build
 ```
 
 実行した瞬間に `~/.config/karabiner/karabiner.json` が自動更新され、Karabiner-Elements のデーモンが自動的に再読み込みします。
@@ -128,7 +131,7 @@ git config --global core.excludesfile ~/.gitignore_global
     - 直接編集は厳禁であり、ノイズになるため dotfiles の Git 管理からも除外しています（`.gitignore` 記載済み）。
 
 3. **設定変更方法**
-    - **すべての変更は `index.ts` で行う**。編集・追記後に `npm run build` を実行するだけです。
+    - **すべての変更は `index.ts` で行う**。編集・追記後に `mise run reload-karabiner`（または `cd ~/dotfiles/karabiner && npm run build`）を実行するだけです。
     - ルール追加時は `assets/complex_modifications` のリンク状態も確認してください（ユーザーメモリ参照）。
 
 4. **実行環境に `tsx` を採用している理由**
