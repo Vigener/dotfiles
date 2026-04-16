@@ -115,11 +115,20 @@ writeToProfile(
             map("l", "left_control", "any")
                 .to("right_arrow", "left_option")
                 .condition(ifVar("eisuu_pressed", 1)),
+            // 高速スクロール: 1アクションで5行ずつ上下移動
             map("j", "left_control", "any")
-                .to("down_arrow", "left_option")
+                .to("down_arrow")
+                .to("down_arrow")
+                .to("down_arrow")
+                .to("down_arrow")
+                .to("down_arrow")
                 .condition(ifVar("eisuu_pressed", 1)),
             map("k", "left_control", "any")
-                .to("up_arrow", "left_option")
+                .to("up_arrow")
+                .to("up_arrow")
+                .to("up_arrow")
+                .to("up_arrow")
+                .to("up_arrow")
                 .condition(ifVar("eisuu_pressed", 1)),
 
             // Winの「Ctrl+Home/End (文頭・文末)」を、Macの「Cmd+↑/↓」に翻訳
@@ -298,14 +307,18 @@ writeToProfile(
             map("b", "optionalAny")
                 .toApp("Bitwarden")
                 .condition(ifVar("kana_pressed", 1)),
-            map("c", "optionalAny")
-                .toApp("Calendar")
-                .condition(ifVar("kana_pressed", 1)),
 
-            // Vivaldi PWA版 Notionの絶対パス起動
+            // Vivaldi PWA
+            //  Notionの絶対パス起動
             map("n", "optionalAny")
                 .to$(
                     `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'`,
+                )
+                .condition(ifVar("kana_pressed", 1)),
+            // GoogleCalendarの絶対パス起動
+            map("c", "optionalAny")
+                .to$(
+                    `open '/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app'`,
                 )
                 .condition(ifVar("kana_pressed", 1)),
 
