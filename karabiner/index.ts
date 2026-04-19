@@ -309,16 +309,22 @@ writeToProfile(
                 .condition(ifVar("kana_pressed", 1)),
 
             // Vivaldi PWA
-            //  Notionの絶対パス起動
+            //  Notion(PWA in Vivaldi)の絶対パス起動
             map("n", "optionalAny")
                 .to$(
                     `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'`,
                 )
                 .condition(ifVar("kana_pressed", 1)),
-            // GoogleCalendarの絶対パス起動
+            // GoogleCalendar(PWA in Vivaldi)の絶対パス起動
             map("c", "optionalAny")
                 .to$(
                     `open '/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app'`,
+                )
+                .condition(ifVar("kana_pressed", 1)),
+            // Gemini(PWA in Vivaldi)の絶対パス起動
+            map("g", "optionalAny")
+                .to$(
+                    `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Google Gemini.app'`,
                 )
                 .condition(ifVar("kana_pressed", 1)),
 
