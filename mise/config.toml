@@ -52,3 +52,63 @@ npm run build
 echo "✓ Karabiner設定を再生成しました"
 echo "  出力先: ~/.config/karabiner/karabiner.json"
 '''
+
+[tasks.init-typst]
+description = "Initialize Typst report scaffold from report.md only when report.typ does not exist"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -f report.typ ]]; then
+	echo "ℹ️ report.typ already exists. Skip conversion to avoid overwriting manual edits."
+	exit 0
+fi
+
+if [[ ! -f report.md ]]; then
+	echo "❌ report.md not found. Nothing to convert." >&2
+	exit 1
+fi
+
+if ! command -v pandoc >/dev/null 2>&1; then
+	echo "❌ pandoc is required for init-typst. Install pandoc and retry." >&2
+	exit 1
+fi
+
+mkdir -p .typst
+
+if ! command -v ghq >/dev/null 2>&1; then
+	echo "❌ ghq is required to locate template source. Install ghq or copy template manually." >&2
+	exit 1
+fi
+
+template_src="$(ghq root)/github.com/Vigener/dotfiles/typst/template.typ"
+if [[ ! -f "$template_src" ]]; then
+	echo "❌ template source not found: $template_src" >&2
+	exit 1
+fi
+cp "$template_src" .typst/template.typ
+
+tmp_body=".tmp_report_body.typ"
+pandoc report.md -o "$tmp_body"
+
+cat > report.typ <<'EOF'
+#import ".typst/template.typ": report
+
+// 任意の追加import例
+// #import "/assets/5-2/mpi_collective_tables.typ": collective_tables
+
+// true: 先頭に目次を表示, false: 非表示
+#let show_toc = true
+
+#show: report.with(
+	title: "高性能並行プログラミング (主専攻実験K-9) 進捗ログ",
+	show-toc: show_toc,
+)
+
+EOF
+
+cat "$tmp_body" >> report.typ
+rm -f "$tmp_body"
+
+echo "✅ Generated report.typ and .typst/template.typ"
+"""
