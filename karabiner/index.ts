@@ -259,8 +259,8 @@ writeToProfile(
         ).manipulators([
             map("j", "left_option").to("m", "command"), // 最小化 (Cmd+M)
             map("k", "left_option").to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F)
-            map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
-            map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
+            // map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
+            // map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
         ]),
 
         // =====================================================================
