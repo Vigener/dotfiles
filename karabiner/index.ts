@@ -55,6 +55,9 @@ writeToProfile(
         // [SYS] コア・モディファイア設定
         // =====================================================================
         rule("【SYS】英数/かなキーをモディファイア化").manipulators([
+            // CapsLockを左Optionとして利用
+            map("caps_lock", "optionalAny").to("left_option"),
+
             // optionalAnyをつけることで、Shift等を押しながらでもフラグが立つようにする
             map("japanese_eisuu", "optionalAny")
                 .to({ set_variable: { name: "eisuu_pressed", value: 1 } })
@@ -144,6 +147,39 @@ writeToProfile(
                 .to("delete_or_backspace", "left_option")
                 .condition(ifVar("eisuu_pressed", 1)),
 
+            // VSCode: 英数+Control+B でセカンダリサイドバー開閉
+            map("b", "left_control", "any")
+                .to("b", ["left_command", "left_option"])
+                .condition(ifVar("eisuu_pressed", 1)),
+
+            // Mac標準のOption+ForwardDeleteで「次の単語を削除」
+            map("open_bracket", "left_control", "any")
+                .to("delete_forward", "left_option")
+                .condition(ifVar("eisuu_pressed", 1)),
+
+            // 英数+; を Enter に変換 (修飾キー付きも保持)
+            map("semicolon", ["shift", "control", "option"])
+                .to("return_or_enter", ["shift", "control", "option"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", ["shift", "control"])
+                .to("return_or_enter", ["shift", "control"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", ["shift", "option"])
+                .to("return_or_enter", ["shift", "option"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", ["control", "option"])
+                .to("return_or_enter", ["control", "option"])
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", "shift")
+                .to("return_or_enter", "shift")
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", "control")
+                .to("return_or_enter", "control")
+                .condition(ifVar("eisuu_pressed", 1)),
+            map("semicolon", "option")
+                .to("return_or_enter", "option")
+                .condition(ifVar("eisuu_pressed", 1)),
+
             // -------------------------------------------------------------
             // 2. 【基本ルール】 通常の移動と操作 (optionalAny適用)
             // -------------------------------------------------------------
@@ -226,6 +262,9 @@ writeToProfile(
             map("p", "optionalAny")
                 .to("p", "command")
                 .condition(ifVar("eisuu_pressed", 1)), // Print / Palette
+            map("b", "optionalAny")
+                .to("b", "command")
+                .condition(ifVar("eisuu_pressed", 1)), // Toggle Primary Sidebar
             map("slash", "optionalAny")
                 .to("slash", "command")
                 .condition(ifVar("eisuu_pressed", 1)), // Toggle Comment
@@ -254,15 +293,59 @@ writeToProfile(
             map("q", "left_control").to("w", "command"),
         ]),
 
-        // rule(
-        //     "【WINDOW】Option + HJKL (Mac標準のウィンドウ/スペース操作へマッピング)",
-        // ).manipulators([
-        //     // map("j", "left_option").to("m", "command"), // 最小化 (Cmd+M)
-        //     // map("k", "left_option").to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F)
-        //     // map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
-        //     // map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
-        // ]),
+        rule(
+            "【WINDOW】Option + HJKL (Mac標準のウィンドウ/スペース操作へマッピング)",
+        ).manipulators([
+            map("j", "left_option").to("h", "command"), // Mac非表示
+            map("k", ["left_option", "shift"]).to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F) ただし、これだけRaycastのMaximizeとの兼ね合いでShiftも必要とする
+            map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
+            map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
+        ]),
 
+        // RaycastのWindows Management用テンプレート
+        // 注意: ここに書いたショートカットは、RaycastのWindows Managementのショートカットと完全に一致させる必要があります。
+        rule("【WINDOW】Raycast Windows Management (template)").manipulators([
+            // Option+, でウィンドウを左半分に配置(Cmd+Opt+Control+←)
+            // (他での役割が出るまで)英数+,でも発火するようにする
+            map("comma", "option").to("left_arrow", [
+                "left_command",
+                "left_option",
+                "left_control",
+            ]),
+            map("comma", "optionalAny")
+                .to("left_arrow", [
+                    "left_command",
+                    "left_option",
+                    "left_control",
+                ])
+                .condition(ifVar("eisuu_pressed", 1)),
+            // Option+. でウィンドウを右半分に配置(Cmd+Opt+Control+→)
+            // (他での役割が出るまで)英数+.でも発火するようにする
+            map("period", "option").to("right_arrow", [
+                "left_command",
+                "left_option",
+                "left_control",
+            ]),
+            map("period", "optionalAny")
+                .to("right_arrow", [
+                    "left_command",
+                    "left_option",
+                    "left_control",
+                ])
+                .condition(ifVar("eisuu_pressed", 1)),
+            // Option+kでウィンドウを最大化(Cmd+Opt+Control+F)
+            map("k", "left_option").to("f", [
+                "left_command",
+                "left_option",
+                "left_control",
+            ]),
+            // Option+nでNext Displayへ移動(Cmd+Opt+Control+n)
+            map("n", "option").to("n", [
+                "left_command",
+                "left_option",
+                "left_control",
+            ]),
+        ]),
         // =====================================================================
         // [APP] かなコンビネーション (メディア操作・アプリ起動)
         // =====================================================================
@@ -324,7 +407,7 @@ writeToProfile(
             // Gemini(PWA in Vivaldi)の絶対パス起動
             map("g", "optionalAny")
                 .to$(
-                    `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Google Gemini.app'`,
+                    `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app'`,
                 )
                 .condition(ifVar("kana_pressed", 1)),
 
