@@ -232,6 +232,10 @@ on-mode-changed = []
 [[on-window-detected]]
 if.app-id = 'com.apple.systempreferences'
 run = 'layout floating'
+# メールアプリ
+[[on-window-detected]]
+if.app-id = 'com.apple.mail'
+run = 'layout floating'
 # 電卓アプリ
 [[on-window-detected]]
 if.app-id = 'com.apple.Calculator'
@@ -244,6 +248,14 @@ run = 'layout floating'
 [[on-window-detected]]
 if.app-id = 'com.tinyspeck.slackmacgap'
 run = 'layout floating'
+# Bitwarden
+[[on-window-detected]]
+if.app-id = 'com.bitwarden.desktop'
+run = 'layout floating'
+# Warp
+[[on-window-detected]]
+if.app-name-regex-substring = 'Warp'
+run = 'layout floating'
 # Google Calendar (Vivaldi PWA) 
 [[on-window-detected]]
 if.app-name-regex-substring = 'GoogleCalendar'
@@ -252,3 +264,10 @@ run = 'layout floating'
 [[on-window-detected]]
 if.app-name-regex-substring = 'Gemini'
 run = 'layout floating'
+
+# ==========================================
+# Workspace to Monitor Force Assignment
+# ==========================================
+[workspace-to-monitor-force-assignment]
+1 = 'main'        # ワークスペース1は絶対にメインモニター（Mac本体）で開く
+2 = 'secondary'   # ワークスペース2は絶対にサブモニター（VA27UCPS）で開く
