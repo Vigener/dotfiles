@@ -168,3 +168,6 @@ function cockpit() {
     # 構築済み、または既存のセッションにアタッチして画面に表示
     tmux attach-session -t cockpit
 }
+
+# 8. direnv Integration (direnvの初期化)
+eval "$(direnv hook zsh)"
