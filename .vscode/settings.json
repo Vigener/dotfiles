@@ -18,4 +18,7 @@
     "json.format.tabSize": 4,
     "jsonc.format.tabSize": 4,
     "cSpell.words": ["frontmost"],
+    "chat.tools.terminal.autoApprove": {
+        "npm run build": true,
+    },
 }
