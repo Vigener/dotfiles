@@ -15,12 +15,16 @@ writeToProfile(
         // =====================================================================
         // [APP_VIVALDI] Vivaldi専用マッピング
         // =====================================================================
-        rule(
-            "【Vivaldi】英数+W で ウィンドウパネル開閉 (Ctrl+Opt+Cmd+W)",
-        ).manipulators([
+        rule("【Vivaldi】英数+W/G で専用ショートカット起動").manipulators([
             // Vivaldiがアクティブな時のみ発火させる安全設計
             map("w", "optionalAny")
                 .to("w", ["left_control", "left_option", "left_command"])
+                .condition(
+                    ifVar("eisuu_pressed", 1),
+                    ifApp("^com\\.vivaldi\\.Vivaldi$"),
+                ),
+            map("g", "optionalAny")
+                .to("g", ["left_control", "left_option", "left_command"])
                 .condition(
                     ifVar("eisuu_pressed", 1),
                     ifApp("^com\\.vivaldi\\.Vivaldi$"),
