@@ -9,12 +9,12 @@
 
 - 「Zoomのアプリ起動(kana+Z)」と「Finderのアプリ起動(kana+F)」導入
 - 「PowerPointのアプリ起動」の導入検討
-  - 今現在、Windows時代の習慣で、`kana+P`にWarpが割り当てられているが、以前検討していた、`kana+Enter`にWarpを移動すれば、頭文字の`P`が覚えやすいPowerPointの起動を割り当てられるため、検討中
-  - 検討案２: Warpをおとなしく`kana+W`に移動して、`kana+P`をPowerPointに割り当てる
-    - w開始のアプリが増えたら、そのときまた考える。
+    - 今現在、Windows時代の習慣で、`kana+P`にWarpが割り当てられているが、以前検討していた、`kana+Enter`にWarpを移動すれば、頭文字の`P`が覚えやすいPowerPointの起動を割り当てられるため、検討中
+    - 検討案２: Warpをおとなしく`kana+W`に移動して、`kana+P`をPowerPointに割り当てる
+        - w開始のアプリが増えたら、そのときまた考える。
 - MacBook Air内臓キーボードと、HHKB Studioの`Cmd`, `Opt`が逆問題を解決する。
-  - おそらく、内蔵キーボードに合わせる方が自然な気がする。
-  - ただし、それに伴い、Raycastと組み合わせたOptionキー支点のウィンドウ管理ショートカットが打ちづらくなるので、再検討をする。
+    - おそらく、内蔵キーボードに合わせる方が自然な気がする。
+    - ただし、それに伴い、Raycastと組み合わせたOptionキー支点のウィンドウ管理ショートカットが打ちづらくなるので、再検討をする。
 
 ### Raycast Windows Managementとの組み合わせの検討
 
@@ -23,18 +23,18 @@
 - そのため、Optionキーを支点としたウィンドウ管理ショートカットは、未割り当てのものは、英数キーにも同様の機能を与えているが、正直、使えるキーと使えないキーがあるのは、認知負荷が高いので、別のキーに割り当て直すべきだと感じる。
 - Optionキーを起点としたウィンドウ管理は、AeroSpaceの名残の部分があると感じており、このAeroSpace用のハイバーキーを別のものにしてしまうというのもありだと思う。
 - 今現在考えているのは、今までWindows時代も、一切割り当ててこなかったので、少し押し慣れてないないが、右Commandキーをウィンドウ管理の支点とすることがかなりアリなのではと考えている。
-  - 理由としては、アプリ起動がかなキーに紐づいて右手操作であるため、ウィンドウ管理も右手で完結させる方が自然な気がすること。
-  - また、Cmdキーを使う際に、僕は、全て左Cmdキーで完結しており、右Cmdキーはあまり使わないため、右Cmdキーをウィンドウ管理の支点にすることは、特に支障がないと感じること。
+    - 理由としては、アプリ起動がかなキーに紐づいて右手操作であるため、ウィンドウ管理も右手で完結させる方が自然な気がすること。
+    - また、Cmdキーを使う際に、僕は、全て左Cmdキーで完結しており、右Cmdキーはあまり使わないため、右Cmdキーをウィンドウ管理の支点にすることは、特に支障がないと感じること。
 - 次に、案としてあるのは、かなキーの役割をさらに増やし、かなキーを支点としたウィンドウ管理ショートカットを割り当てること。
-  - 具体的には、アルファベットはアプリ起動で使われることが多いため、["," ".", "/", "\"]などを考えている。
-    - 左半分配置: `kana+,`
-    - 右半分配置: `kana+.`
-    - ほぼ最大化: `kana+/`
-      - 完全最大化: `kana+shift+/`
-    - Next Displayへ移動: `kana+\`
-    - 非表示: `kana+right_command`
-  - この利点は、アプリ（ウィンドウ）操作が全て、かなキー支点になること。また、ウィンドウ操作が右手で完結すること。
-  - 記号は今後も、アプリ起動で使うことはあまりないと感じるため、割り当ての自由度や今後増やしたいウィンドウ操作に対してもある程度は余裕があること。
+    - 具体的には、アルファベットはアプリ起動で使われることが多いため、["," ".", "/", "\"]などを考えている。
+        - 左半分配置: `kana+,`
+        - 右半分配置: `kana+.`
+        - ほぼ最大化: `kana+/`
+            - 完全最大化: `kana+shift+/`
+        - Next Displayへ移動: `kana+\`
+        - 非表示: `kana+right_command`
+    - この利点は、アプリ（ウィンドウ）操作が全て、かなキー支点になること。また、ウィンドウ操作が右手で完結すること。
+    - 記号は今後も、アプリ起動で使うことはあまりないと感じるため、割り当ての自由度や今後増やしたいウィンドウ操作に対してもある程度は余裕があること。
 
 ## マッピング表
 
@@ -162,9 +162,12 @@
 | M + optionalAny | kana_pressed = 1 | Open: Visual Studio Code                                                    |               |
 | S + optionalAny | kana_pressed = 1 | Open: Slack                                                                 |               |
 | K + optionalAny | kana_pressed = 1 | Open: Karabiner-Elements                                                    |               |
-| P + optionalAny | kana_pressed = 1 | Open: Warp                                                                  |               |
+| W + optionalAny | kana_pressed = 1 | Open: Warp                                                                  |               |
 | E + optionalAny | kana_pressed = 1 | Open: Mail                                                                  |               |
 | B + optionalAny | kana_pressed = 1 | Open: Bitwarden                                                             |               |
+| F + optionalAny | kana_pressed = 1 | Open: Finder                                                                |               |
+| P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint                                                  |               |
+| Z + optionalAny | kana_pressed = 1 | Open: zoom.us                                                               |               |
 | N + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'         | Vivaldi PWA   |
 | C + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app' | Vivaldi PWA   |
 | G + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app'         | Vivaldi PWA   |

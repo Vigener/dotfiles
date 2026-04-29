@@ -385,7 +385,7 @@ writeToProfile(
             // map("t", "optionalAny")
             //     .toApp("Terminal")
             //     .condition(ifVar("kana_pressed", 1)),
-            map("p", "optionalAny")
+            map("w", "optionalAny")
                 .toApp("Warp")
                 .condition(ifVar("kana_pressed", 1)),
             map("e", "optionalAny")
@@ -393,6 +393,15 @@ writeToProfile(
                 .condition(ifVar("kana_pressed", 1)),
             map("b", "optionalAny")
                 .toApp("Bitwarden")
+                .condition(ifVar("kana_pressed", 1)),
+            map("f", "optionalAny")
+                .toApp("Finder")
+                .condition(ifVar("kana_pressed", 1)),
+            map("p", "optionalAny") // powerpoint
+                .toApp("Microsoft PowerPoint")
+                .condition(ifVar("kana_pressed", 1)),
+            map("z", "optionalAny") // zoom
+                .toApp("zoom.us")
                 .condition(ifVar("kana_pressed", 1)),
 
             // Vivaldi PWA
