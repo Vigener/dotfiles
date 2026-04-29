@@ -7,34 +7,9 @@
 
 ## 検討中の点
 
-- 「Zoomのアプリ起動(kana+Z)」と「Finderのアプリ起動(kana+F)」導入
-- 「PowerPointのアプリ起動」の導入検討
-    - 今現在、Windows時代の習慣で、`kana+P`にWarpが割り当てられているが、以前検討していた、`kana+Enter`にWarpを移動すれば、頭文字の`P`が覚えやすいPowerPointの起動を割り当てられるため、検討中
-    - 検討案２: Warpをおとなしく`kana+W`に移動して、`kana+P`をPowerPointに割り当てる
-        - w開始のアプリが増えたら、そのときまた考える。
 - MacBook Air内臓キーボードと、HHKB Studioの`Cmd`, `Opt`が逆問題を解決する。
     - おそらく、内蔵キーボードに合わせる方が自然な気がする。
-    - ただし、それに伴い、Raycastと組み合わせたOptionキー支点のウィンドウ管理ショートカットが打ちづらくなるので、再検討をする。
-
-### Raycast Windows Managementとの組み合わせの検討
-
-- JISキーボードユーザーとしての意見として、まず基本的に、内蔵キーボードに合わせると仮定した場合に、
-- [CapsLock, left_option, left_command, 英数, Space, かな, right_command, (right_option), fn]の並びの中で、打ちやすいと感じるのは、[left_command, 英数, Space, かな, right_command]のあたりで、Optionキーはやや遠いと感じる。
-- そのため、Optionキーを支点としたウィンドウ管理ショートカットは、未割り当てのものは、英数キーにも同様の機能を与えているが、正直、使えるキーと使えないキーがあるのは、認知負荷が高いので、別のキーに割り当て直すべきだと感じる。
-- Optionキーを起点としたウィンドウ管理は、AeroSpaceの名残の部分があると感じており、このAeroSpace用のハイバーキーを別のものにしてしまうというのもありだと思う。
-- 今現在考えているのは、今までWindows時代も、一切割り当ててこなかったので、少し押し慣れてないないが、右Commandキーをウィンドウ管理の支点とすることがかなりアリなのではと考えている。
-    - 理由としては、アプリ起動がかなキーに紐づいて右手操作であるため、ウィンドウ管理も右手で完結させる方が自然な気がすること。
-    - また、Cmdキーを使う際に、僕は、全て左Cmdキーで完結しており、右Cmdキーはあまり使わないため、右Cmdキーをウィンドウ管理の支点にすることは、特に支障がないと感じること。
-- 次に、案としてあるのは、かなキーの役割をさらに増やし、かなキーを支点としたウィンドウ管理ショートカットを割り当てること。
-    - 具体的には、アルファベットはアプリ起動で使われることが多いため、["," ".", "/", "\"]などを考えている。
-        - 左半分配置: `kana+,`
-        - 右半分配置: `kana+.`
-        - ほぼ最大化: `kana+/`
-            - 完全最大化: `kana+shift+/`
-        - Next Displayへ移動: `kana+\`
-        - 非表示: `kana+right_command`
-    - この利点は、アプリ（ウィンドウ）操作が全て、かなキー支点になること。また、ウィンドウ操作が右手で完結すること。
-    - 記号は今後も、アプリ起動で使うことはあまりないと感じるため、割り当ての自由度や今後増やしたいウィンドウ操作に対してもある程度は余裕があること。
+    - ただし、デバイス毎に設定を分けることで、両立できると考えられるため、実装検討中。
 
 ## マッピング表
 
@@ -42,9 +17,10 @@
 
 ### APP_VIVALDI
 
-| ルール                                    | 入力            | 条件                                             | 出力           | 備考        |
-| ----------------------------------------- | --------------- | ------------------------------------------------ | -------------- | ----------- |
-| 【Vivaldi】英数+W で ウィンドウパネル開閉 | w + optionalAny | eisuu_pressed = 1 かつ App = com.vivaldi.Vivaldi | Ctrl+Opt+Cmd+W | Vivaldi専用 |
+| ルール                                        | 入力            | 条件                                             | 出力           | 備考        |
+| --------------------------------------------- | --------------- | ------------------------------------------------ | -------------- | ----------- |
+| 【Vivaldi】英数+W/G で 専用ショートカット起動 | w + optionalAny | eisuu_pressed = 1 かつ App = com.vivaldi.Vivaldi | Ctrl+Opt+Cmd+W | Vivaldi専用 |
+| 【Vivaldi】英数+W/G で 専用ショートカット起動 | g + optionalAny | eisuu_pressed = 1 かつ App = com.vivaldi.Vivaldi | Ctrl+Opt+Cmd+G | Vivaldi専用 |
 
 ### APP_WARP
 
@@ -125,35 +101,50 @@
 
 ### WINDOW（グローバル）
 
-| ルール                          | 入力        | 条件 | 出力       | 備考           |
-| ------------------------------- | ----------- | ---- | ---------- | -------------- |
-| 【WINDOW】タブを閉じる (Ctrl+Q) | Ctrl+Q      | なし | Cmd+W      | グローバル     |
-| 【WINDOW】Option + HJKL         | Opt+J       | なし | Cmd+H      | Mac非表示      |
-| 【WINDOW】Option + HJKL         | Opt+Shift+K | なし | Ctrl+Cmd+F | フルスクリーン |
-| 【WINDOW】Option + HJKL         | Opt+H       | なし | Ctrl+Left  | 左スペースへ   |
-| 【WINDOW】Option + HJKL         | Opt+L       | なし | Ctrl+Right | 右スペースへ   |
+| ルール                          | 入力   | 条件 | 出力  | 備考       |
+| ------------------------------- | ------ | ---- | ----- | ---------- |
+| 【WINDOW】タブを閉じる (Ctrl+Q) | Ctrl+Q | なし | Cmd+W | グローバル |
 
-### WINDOW（Raycast Windows Management）
+### WINDOW（かなレイヤー）
 
-| 入力            | 条件              | 出力               | 想定アクション             |
-| --------------- | ----------------- | ------------------ | -------------------------- |
-| Opt+,           | なし              | Cmd+Opt+Ctrl+Left  | 左半分配置                 |
-| , + optionalAny | eisuu_pressed = 1 | Cmd+Opt+Ctrl+Left  | 左半分配置（英数レイヤー） |
-| Opt+.           | なし              | Cmd+Opt+Ctrl+Right | 右半分配置                 |
-| . + optionalAny | eisuu_pressed = 1 | Cmd+Opt+Ctrl+Right | 右半分配置（英数レイヤー） |
-| Opt+K           | なし              | Cmd+Opt+Ctrl+F     | 最大化                     |
-| Opt+N           | なし              | Cmd+Opt+Ctrl+N     | Next Displayへ移動         |
+#### Spaces・ウィンドウ状態操作
+
+| 入力            | 条件             | 出力       | 想定アクション |
+| --------------- | ---------------- | ---------- | -------------- |
+| H + optionalAny | kana_pressed = 1 | Ctrl+Left  | 左のスペース   |
+| L + optionalAny | kana_pressed = 1 | Ctrl+Right | 右のスペース   |
+| J + optionalAny | kana_pressed = 1 | Cmd+H      | 隠す           |
+| K + optionalAny | kana_pressed = 1 | Ctrl+Cmd+F | フルスクリーン |
+
+#### Raycast Windows Management (かなレイヤー)
+
+| 入力                  | 条件             | 出力               | 想定アクション     |
+| --------------------- | ---------------- | ------------------ | ------------------ |
+| , + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+Left  | 左半分配置         |
+| . + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+Right | 右半分配置         |
+| / + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+F     | ほぼ最大化         |
+| Shift+/ + optionalAny | kana_pressed = 1 | Cmd+Ctrl+F         | 完全最大化         |
+| international1        | kana_pressed = 1 | Cmd+Opt+Ctrl+N     | Next Displayへ移動 |
+
+### WINDOW（Raycast Windows Management - グローバル）
+
+| 入力  | 条件 | 出力               | 想定アクション                   |
+| ----- | ---- | ------------------ | -------------------------------- |
+| Opt+, | なし | Cmd+Opt+Ctrl+Left  | 左半分配置（グローバル）         |
+| Opt+. | なし | Cmd+Opt+Ctrl+Right | 右半分配置（グローバル）         |
+| Opt+K | なし | Cmd+Opt+Ctrl+F     | 最大化（グローバル）             |
+| Opt+N | なし | Cmd+Opt+Ctrl+N     | Next Displayへ移動（グローバル） |
 
 ### APP（かなレイヤー）
 
 #### メディア操作
 
-| 入力            | 条件             | 出力        | 備考         |
-| --------------- | ---------------- | ----------- | ------------ |
-| H + optionalAny | kana_pressed = 1 | Play/Pause  | メディア再生 |
-| U + optionalAny | kana_pressed = 1 | Volume Up   | 音量アップ   |
-| I + optionalAny | kana_pressed = 1 | Volume Down | 音量ダウン   |
-| Y + optionalAny | kana_pressed = 1 | Mute        | ミュート     |
+| 入力                | 条件             | 出力        | 備考         |
+| ------------------- | ---------------- | ----------- | ------------ |
+| Space + optionalAny | kana_pressed = 1 | Play/Pause  | メディア再生 |
+| U + optionalAny     | kana_pressed = 1 | Volume Up   | 音量アップ   |
+| I + optionalAny     | kana_pressed = 1 | Volume Down | 音量ダウン   |
+| Y + optionalAny     | kana_pressed = 1 | Mute        | ミュート     |
 
 #### アプリ起動
 
@@ -161,7 +152,6 @@
 | --------------- | ---------------- | --------------------------------------------------------------------------- | ------------- |
 | M + optionalAny | kana_pressed = 1 | Open: Visual Studio Code                                                    |               |
 | S + optionalAny | kana_pressed = 1 | Open: Slack                                                                 |               |
-| K + optionalAny | kana_pressed = 1 | Open: Karabiner-Elements                                                    |               |
 | W + optionalAny | kana_pressed = 1 | Open: Warp                                                                  |               |
 | E + optionalAny | kana_pressed = 1 | Open: Mail                                                                  |               |
 | B + optionalAny | kana_pressed = 1 | Open: Bitwarden                                                             |               |

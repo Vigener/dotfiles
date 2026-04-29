@@ -297,13 +297,54 @@ writeToProfile(
             map("q", "left_control").to("w", "command"),
         ]),
 
+        // =====================================================================
+        // [WINDOW] かなレイヤー (ウィンドウマネジメント・スペース移動)
+        // =====================================================================
         rule(
-            "【WINDOW】Option + HJKL (Mac標準のウィンドウ/スペース操作へマッピング)",
+            "【WINDOW】かなレイヤー (Raycast & Mac標準ウィンドウ操作)",
         ).manipulators([
-            map("j", "left_option").to("h", "command"), // Mac非表示
-            map("k", ["left_option", "shift"]).to("f", ["control", "command"]), // フルスクリーン (Ctrl+Cmd+F) ただし、これだけRaycastのMaximizeとの兼ね合いでShiftも必要とする
-            map("h", "left_option").to("left_arrow", "control"), // 左のスペースへ移動 (Ctrl+←)
-            map("l", "left_option").to("right_arrow", "control"), // 右のスペースへ移動 (Ctrl+→)
+            // -------...---------
+            // 1. デスクトップ空間（Spaces）とウィンドウ状態の操作
+            // -------...---------
+            map("h", "optionalAny")
+                .to("left_arrow", "control")
+                .condition(ifVar("kana_pressed", 1)), // 左のスペース
+            map("l", "optionalAny")
+                .to("right_arrow", "control")
+                .condition(ifVar("kana_pressed", 1)), // 右のスペース
+            map("j", "optionalAny")
+                .to("h", "command")
+                .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
+            map("k", "optionalAny")
+                .to("f", ["control", "command"])
+                .condition(ifVar("kana_pressed", 1)), // フルスクリーン
+            map("k", ["left_shift"])
+                .to("f", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+
+            // -------...---------
+            // 2. 画面内でのウィンドウリサイズ (Raycast連携: Ctrl+Opt+Cmd)
+            // -------...---------
+            // 左半分
+            map("comma", "optionalAny")
+                .to("left_arrow", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+            // 右半分
+            map("period", "optionalAny")
+                .to("right_arrow", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+            // ほぼ最大化(Cmd+Opt+Control+F)
+            map("slash", "optionalAny")
+                .to("f", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+            // 完全最大化 (Shift追加)(Cmd+Control+F)
+            map("slash", ["left_shift"])
+                .to("f", ["left_control", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+            // Next Display (backslash)(Cmd+Opt+Control+n)
+            map("international1", "optionalAny")
+                .to("n", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
         ]),
 
         // RaycastのWindows Management用テンプレート
@@ -357,7 +398,7 @@ writeToProfile(
             // -------------------------------------------------------------
             // メディア操作
             // -------------------------------------------------------------
-            map("h", "optionalAny")
+            map("spacebar", "optionalAny")
                 .to("play_or_pause")
                 .condition(ifVar("kana_pressed", 1)),
             map("u", "optionalAny")
@@ -378,9 +419,6 @@ writeToProfile(
                 .condition(ifVar("kana_pressed", 1)),
             map("s", "optionalAny")
                 .toApp("Slack")
-                .condition(ifVar("kana_pressed", 1)),
-            map("k", "optionalAny")
-                .toApp("Karabiner-Elements")
                 .condition(ifVar("kana_pressed", 1)),
             // map("t", "optionalAny")
             //     .toApp("Terminal")
