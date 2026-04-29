@@ -86,7 +86,9 @@ writeToProfile(
         ).manipulators([
             // 素押しはクリップボード経由で literal な backslash を貼り付ける
             // Shift+ろ(アンダーバー)はこのルールにマッチしないため、既定動作を維持する
-            map("international1").to("international3", "left_option"),
+            map("international1")
+                .to("international3", "left_option")
+                .condition(ifVar("kana_pressed", 1).unless()),
         ]),
 
         // =====================================================================
@@ -327,11 +329,19 @@ writeToProfile(
             // -------...---------
             // 左半分
             map("comma", "optionalAny")
-                .to("left_arrow", ["left_control", "left_option", "left_command"])
+                .to("left_arrow", [
+                    "left_control",
+                    "left_option",
+                    "left_command",
+                ])
                 .condition(ifVar("kana_pressed", 1)),
             // 右半分
             map("period", "optionalAny")
-                .to("right_arrow", ["left_control", "left_option", "left_command"])
+                .to("right_arrow", [
+                    "left_control",
+                    "left_option",
+                    "left_command",
+                ])
                 .condition(ifVar("kana_pressed", 1)),
             // ほぼ最大化(Cmd+Opt+Control+F)
             map("slash", "optionalAny")
