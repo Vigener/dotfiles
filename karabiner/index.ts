@@ -320,7 +320,7 @@ writeToProfile(
             map("k", "optionalAny")
                 .to("f", ["control", "command"])
                 .condition(ifVar("kana_pressed", 1)), // フルスクリーン
-            map("k", ["left_shift"])
+            map("k", ["shift"])
                 .to("f", ["left_control", "left_option", "left_command"])
                 .condition(ifVar("kana_pressed", 1)),
 
@@ -354,6 +354,18 @@ writeToProfile(
             // Next Display (backslash)(Cmd+Opt+Control+n)
             map("international1", "optionalAny")
                 .to("n", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+            // Reasonable Size (Cmd+Opt+Control+r)
+            map(";", "optionalAny")
+                .to("r", ["left_control", "left_option", "left_command"])
+                .condition(ifVar("kana_pressed", 1)),
+
+            // -------...---------
+            // 3. アプリ自体の切り替え(RaycastのSwitch Windowsと同じショートカットを想定)
+            // -------...---------
+            //現在は、`Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」で発火させる
+            map("right_command", "optionalAny")
+                .to("tab", ["left_command", "left_option"])
                 .condition(ifVar("kana_pressed", 1)),
         ]),
 
@@ -443,7 +455,7 @@ writeToProfile(
                 .toApp("Bitwarden")
                 .condition(ifVar("kana_pressed", 1)),
             map("f", "optionalAny")
-                .toApp("Finder")
+                .to$(`open -a Finder`)
                 .condition(ifVar("kana_pressed", 1)),
             map("p", "optionalAny") // powerpoint
                 .toApp("Microsoft PowerPoint")
