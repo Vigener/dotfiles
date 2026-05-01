@@ -1,8 +1,26 @@
+# MISEの設定ファイル
+
+# 言語やツールのバージョン指定
 [tools]
 node = "lts"
 python = "3.12"
 rust = "stable"
 
+# タスク定義
+[tasks."typst:setup"]
+description = "Typst環境のセットアップ"
+run = """
+mkdir -p .typst
+ln -sf ~/dotfiles/typst/.typst/template.typ .typst/template.typ
+cp -n ~/dotfiles/typst/report.typ ./report.typ
+cp -n ~/dotfiles/typst/sample_tables.typ ./sample_tables.typ
+"""
+
+[tasks."typst:sync"]
+description = "Typstテンプレートのシンボリックリンクを再同期"
+run = "ln -sf ~/dotfiles/typst/.typst/template.typ .typst/template.typ"
+
+# ↓削除検討↓
 [tasks.copy-fonts]
 description = "フォントをカレントにコピー"
 run = "cp -r ~/dotfiles/fonts ."
