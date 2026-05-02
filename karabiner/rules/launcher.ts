@@ -32,17 +32,20 @@ export const launcherRules = [
     // map("b", "optionalAny")
     //   .toApp("Bitwarden")
     //   .condition(ifVar("kana_pressed", 1)),
+    map("b", "optionalAny") // safari(ブラウザのB)
+      .toApp("Safari")
+      .condition(ifVar("kana_pressed", 1)),
     map("f", "optionalAny")
       .to$(`open -a Finder`)
       .condition(ifVar("kana_pressed", 1)),
     map("p", "optionalAny") // powerpoint
       .toApp("Microsoft PowerPoint")
       .condition(ifVar("kana_pressed", 1)),
-    map("z", "optionalAny") // zoom
-      .toApp("zoom.us")
-      .condition(ifVar("kana_pressed", 1)),
-    map("b", "optionalAny") // safari(ブラウザのB)
-      .toApp("Safari")
+    // map("z", "optionalAny") // zoom
+    //   .toApp("zoom.us")
+    //   .condition(ifVar("kana_pressed", 1)),
+    map("z", "optionalAny") // zed
+      .toApp("Zed")
       .condition(ifVar("kana_pressed", 1)),
 
     // Vivaldi PWA
