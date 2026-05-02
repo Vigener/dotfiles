@@ -29,9 +29,9 @@ export const launcherRules = [
     //     .condition(ifVar("kana_pressed", 1)),
     map("w", "optionalAny").toApp("Warp").condition(ifVar("kana_pressed", 1)),
     map("e", "optionalAny").toApp("Mail").condition(ifVar("kana_pressed", 1)),
-    map("b", "optionalAny")
-      .toApp("Bitwarden")
-      .condition(ifVar("kana_pressed", 1)),
+    // map("b", "optionalAny")
+    //   .toApp("Bitwarden")
+    //   .condition(ifVar("kana_pressed", 1)),
     map("f", "optionalAny")
       .to$(`open -a Finder`)
       .condition(ifVar("kana_pressed", 1)),
@@ -40,6 +40,9 @@ export const launcherRules = [
       .condition(ifVar("kana_pressed", 1)),
     map("z", "optionalAny") // zoom
       .toApp("zoom.us")
+      .condition(ifVar("kana_pressed", 1)),
+    map("b", "optionalAny") // safari(ブラウザのB)
+      .toApp("Safari")
       .condition(ifVar("kana_pressed", 1)),
 
     // Vivaldi PWA
