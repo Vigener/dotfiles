@@ -1,4 +1,3 @@
-tap "nikitabobko/tap"
 brew "bottom"
 brew "fzf"
 brew "gh"
