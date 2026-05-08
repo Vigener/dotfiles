@@ -42,4 +42,14 @@ export const appRules = [
       .to("right_arrow")
       .condition(ifApp("^dev\\.warp\\.Warp-Stable$")),
   ]),
+
+  // =====================================================================
+  // [APP_PREVIEW] Preview専用マッピング
+  // =====================================================================
+  // rule("【Preview】j/k を上下矢印にマッピング").manipulators([
+  //   map("j").to("down_arrow").condition(ifApp("^com\\.apple\\.Preview$")),
+  //   map("k").to("up_arrow").condition(ifApp("^com\\.apple\\.Preview$")),
+  //   map("h").to("left_arrow").condition(ifApp("^com\\.apple\\.Preview$")),
+  //   map("l").to("right_arrow").condition(ifApp("^com\\.apple\\.Preview$")),
+  // ]),
 ];
