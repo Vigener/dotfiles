@@ -1,4 +1,4 @@
-import { ifVar, map, rule } from "karabiner.ts";
+import { ifVar, ifApp, map, rule } from "karabiner.ts";
 
 export const launcherRules = [
   // =====================================================================
@@ -38,15 +38,33 @@ export const launcherRules = [
     map("f", "optionalAny")
       .to$(`open -a Finder`)
       .condition(ifVar("kana_pressed", 1)),
-    map("p", "optionalAny") // powerpoint
-      .toApp("Microsoft PowerPoint")
-      .condition(ifVar("kana_pressed", 1)),
+    // map("p", "optionalAny") // powerpoint
+    //   .toApp("Microsoft PowerPoint")
+    //   .condition(ifVar("kana_pressed", 1)),
     // map("z", "optionalAny") // zoom
     //   .toApp("zoom.us")
     //   .condition(ifVar("kana_pressed", 1)),
     map("z", "optionalAny") // zed
       .toApp("Zed")
       .condition(ifVar("kana_pressed", 1)),
+
+    // 複数ウィンドウ系
+
+    // ① パワポがすでに最前面（アクティブ）の場合：次のウィンドウへ切り替え
+    map("p", "optionalAny")
+      .to("open_bracket", "left_command") // 「次のウィンドウを操作対象にする」
+      .condition(
+        ifVar("kana_pressed", 1),
+        ifApp("^com\\.microsoft\\.Powerpoint$"),
+      ), // アプリのバンドルID
+
+    // ② パワポが最前面ではない場合：パワポを起動・アクティブ化
+    map("p", "optionalAny")
+      .toApp("Microsoft PowerPoint")
+      .condition(
+        ifVar("kana_pressed", 1),
+        ifApp("^com\\.microsoft\\.Powerpoint$").unless(),
+      ),
 
     // Vivaldi PWA
     //  Notion(PWA in Vivaldi)の絶対パス起動

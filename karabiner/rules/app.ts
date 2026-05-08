@@ -12,6 +12,11 @@ export const appRules = [
     map("g", "optionalAny")
       .to("g", ["left_control", "left_option", "left_command"])
       .condition(ifVar("eisuu_pressed", 1), ifApp("^com\\.vivaldi\\.Vivaldi$")),
+    map("t", ["left_control", "left_shift"]).to("t", [
+      "left_command",
+      "left_shift",
+    ]),
+    map("t", ["left_control"]).to("t", ["left_command"]),
   ]),
 
   // =====================================================================

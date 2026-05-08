@@ -112,7 +112,7 @@ fi
 function ghq_fzf_cd() {
     # ghqで管理しているリポジトリ一覧を取得し、fzfで絞り込み（プレビュー付き）
     local selected_repo=$(ghq list | fzf --prompt="Git Repo > " --preview="ls -lah $(ghq root)/{}")
-    
+
     # リポジトリが選択された場合のみcdコマンドを実行
     if [ -n "$selected_repo" ]; then
         BUFFER="cd $(ghq root)/${selected_repo}"
@@ -134,7 +134,7 @@ bindkey '^]' ghq_fzf_cd
 function cdg() {
     # ghqで管理しているリポジトリ一覧を取得し、fzfで絞り込み
     local selected_repo=$(ghq list | fzf --prompt="Git Repo > " --preview="ls -lah $(ghq root)/{}")
-    
+
     # リポジトリが選択された場合のみcdコマンドを実行
     if [ -n "$selected_repo" ]; then
         cd "$(ghq root)/${selected_repo}"
@@ -154,13 +154,13 @@ function cockpit() {
     if [ $? != 0 ]; then
         # 新規セッションを作成（-dでバックグラウンド起動）
         tmux new-session -d -s cockpit
-        
+
         # 左ペイン（ペイン0）で bottom (btm) を起動
         tmux send-keys -t cockpit:0 'btm' C-m
-        
+
         # 画面を左右に分割（右にペイン1を作成、幅は全体の45%とする）
         tmux split-window -h -t cockpit:0 -p 45
-        
+
         # 右ペイン（ペイン1）にウェルカムメッセージを表示（モチベーション用）
         tmux send-keys -t cockpit:1 'echo "HPC Cockpit Online. Ready for execution."' C-m
     fi
@@ -171,3 +171,15 @@ function cockpit() {
 
 # 8. direnv Integration (direnvの初期化)
 eval "$(direnv hook zsh)"
+
+function vibe-add() {
+  if [ "$#" -ne 2 ]; then
+    echo "Usage: vibe-add <from> <to>"
+    echo "Example: vibe-add カラビナ Karabiner-Elements"
+    return 1
+  fi
+
+  local vocab_file="$HOME/.config/vibe-dictator/vocabulary.json"
+  jq --arg f "$1" --arg t "$2" '.preferred_terms += [{"from": $f, "to": $t}]' "$vocab_file" > "${vocab_file}.tmp" && mv "${vocab_file}.tmp" "$vocab_file"
+  echo "✅ 辞書に追加しました: $1 -> $2"
+}
