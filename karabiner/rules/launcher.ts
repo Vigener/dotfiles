@@ -43,6 +43,9 @@ export const launcherRules = [
       .to$(`open -a Finder`)
       .condition(ifVar("kana_pressed", 1)),
 
+    // [N] Notion
+    map("n", "optionalAny").toApp("Notion").condition(ifVar("kana_pressed", 1)),
+
     // [Z] Zed (軽量エディタ)
     map("z", "optionalAny").toApp("Zed").condition(ifVar("kana_pressed", 1)),
 
@@ -81,12 +84,6 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // PWA (Vivaldi内) 絶対パス起動系
     // -------------------------------------------------------------
-    // [N] Notion (PWA)
-    map("n", "optionalAny")
-      .to$(
-        `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'`,
-      )
-      .condition(ifVar("kana_pressed", 1)),
     // [C] Calendar (GoogleCalendar PWA)
     map("c", "optionalAny")
       .to$(
