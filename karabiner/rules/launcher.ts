@@ -1,4 +1,28 @@
-import { ifVar, ifApp, map, rule } from "karabiner.ts";
+import { ifVar, ifApp, map, rule, FromKeyParam } from "karabiner.ts";
+
+// =====================================================================
+// 🛠️ ヘルパー関数1: 通常アプリのトグル (Karabinerネイティブ監視)
+// =====================================================================
+function toggleApp(key: FromKeyParam, appName: string, bundleId: string) {
+  return [
+    map(key, "optionalAny")
+      .to("h", "command")
+      .condition(ifVar("kana_pressed", 1), ifApp(bundleId)),
+    map(key, "optionalAny").toApp(appName).condition(ifVar("kana_pressed", 1)),
+  ];
+}
+
+// =====================================================================
+// 🛠️ ヘルパー関数2: PWA用トグル (AppleScriptを利用した究極の抜け道)
+// =====================================================================
+function togglePwa(key: FromKeyParam, processName: string, appPath: string) {
+  // macOSのシステムに直接「最前面か？」を問い合わせ、隠すか起動するかを判断するスクリプト
+  const script = `osascript -e 'tell application "System Events"' -e 'if frontmost of process "${processName}" then' -e 'set visible of process "${processName}" to false' -e 'else' -e 'tell application "${appPath}" to activate' -e 'end if' -e 'end tell'`;
+
+  return [
+    map(key, "optionalAny").to$(script).condition(ifVar("kana_pressed", 1)),
+  ];
+}
 
 export const launcherRules = [
   // =====================================================================
@@ -18,49 +42,46 @@ export const launcherRules = [
     map("y", "optionalAny").to("mute").condition(ifVar("kana_pressed", 1)),
 
     // -------------------------------------------------------------
-    // アプリ起動 (最大27枠の厳選レイヤー: 役割/Roleベース)
+    // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
-    // [M] Code (VSCode) / Main editor
-    map("m", "optionalAny")
-      .toApp("Visual Studio Code")
-      .condition(ifVar("kana_pressed", 1)),
-    // [S] Slack
-    map("s", "optionalAny").toApp("Slack").condition(ifVar("kana_pressed", 1)),
-    // [T] Terminal (標準)
-    map("t", "optionalAny")
-      .toApp("Terminal")
-      .condition(ifVar("kana_pressed", 1)),
-    // [W] Warp (次世代ターミナル)
-    map("w", "optionalAny").toApp("Warp").condition(ifVar("kana_pressed", 1)),
-    // [E] Email (Mail)
-    map("e", "optionalAny").toApp("Mail").condition(ifVar("kana_pressed", 1)),
-
-    // [B] Browser (Safari) - Bitwardenから移行済み
-    map("b", "optionalAny").toApp("Safari").condition(ifVar("kana_pressed", 1)),
-
-    // [F] Finder
-    map("f", "optionalAny")
-      .to$(`open -a Finder`)
-      .condition(ifVar("kana_pressed", 1)),
-
-    // [N] Notion
-    map("n", "optionalAny").toApp("Notion").condition(ifVar("kana_pressed", 1)),
-
-    // [Z] Zed (軽量エディタ)
-    map("z", "optionalAny").toApp("Zed").condition(ifVar("kana_pressed", 1)),
+    ...toggleApp("m", "Visual Studio Code", "^com\\.microsoft\\.VSCode$"),
+    ...toggleApp("s", "Slack", "^com\\.tinyspeck\\.slackmacgap$"),
+    ...toggleApp("t", "Terminal", "^com\\.apple\\.Terminal$"),
+    ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
+    ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
+    ...toggleApp("b", "Safari", "^com\\.apple\\.Safari$"),
+    ...toggleApp("n", "Notion", "^notion\\.id$"), // (※もしNotionもPWAなら下のtogglePwaに移動してください)
+    ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
+    ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"), // ← Vivaldi本体もトグル化！
+    ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
 
     // -------------------------------------------------------------
-    // 複数ウィンドウ切替 ＆ 起動系
+    // アプリ起動 (PWA: AppleScriptトグル式)
+    // -------------------------------------------------------------
+    // [C] Calendar (GoogleCalendar PWA)
+    ...togglePwa(
+      "c",
+      "GoogleCalendar", // アクティビティモニタ等で表示されるプロセス名
+      "/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app",
+    ),
+
+    // [G] Gemini (PWA)
+    ...togglePwa(
+      "g",
+      "Gemini", // アクティビティモニタ等で表示されるプロセス名
+      "/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app",
+    ),
+
+    // -------------------------------------------------------------
+    // アプリ起動 (ドキュメント系: サイクル式)
     // -------------------------------------------------------------
     // 【P】 Presentation (PowerPoint)
-    // ① パワポがすでに最前面の場合：次のウィンドウへ切り替え
     map("p", "optionalAny")
-      .to("open_bracket", "left_command") // Cmd + [ : 次のウィンドウ
+      .to("open_bracket", "left_command")
       .condition(
         ifVar("kana_pressed", 1),
         ifApp("^com\\.microsoft\\.Powerpoint$"),
       ),
-    // ② パワポが最前面ではない場合：起動・アクティブ化
     map("p", "optionalAny")
       .toApp("Microsoft PowerPoint")
       .condition(
@@ -68,38 +89,15 @@ export const launcherRules = [
         ifApp("^com\\.microsoft\\.Powerpoint$").unless(),
       ),
 
-    // 【R】 Read / Reference (Preview) ※新規追加
-    // ① プレビューがすでに最前面の場合：次のウィンドウへ切り替え
+    // 【R】 Read / Reference (Preview)
     map("r", "optionalAny")
       .to("open_bracket", "left_command")
       .condition(ifVar("kana_pressed", 1), ifApp("^com\\.apple\\.Preview$")),
-    // ② プレビューが最前面ではない場合：起動・アクティブ化
     map("r", "optionalAny")
       .toApp("Preview")
       .condition(
         ifVar("kana_pressed", 1),
         ifApp("^com\\.apple\\.Preview$").unless(),
       ),
-
-    // -------------------------------------------------------------
-    // PWA (Vivaldi内) 絶対パス起動系
-    // -------------------------------------------------------------
-    // [C] Calendar (GoogleCalendar PWA)
-    map("c", "optionalAny")
-      .to$(
-        `open '/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app'`,
-      )
-      .condition(ifVar("kana_pressed", 1)),
-    // [G] Gemini (PWA)
-    map("g", "optionalAny")
-      .to$(
-        `open '/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app'`,
-      )
-      .condition(ifVar("kana_pressed", 1)),
-
-    // [V] Vivaldi (メインブラウザ - Bundle ID起動)
-    map("v", "optionalAny")
-      .to$(`open -b com.vivaldi.Vivaldi`)
-      .condition(ifVar("kana_pressed", 1)),
   ]),
 ];
