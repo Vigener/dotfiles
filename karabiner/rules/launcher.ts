@@ -52,18 +52,22 @@ export const launcherRules = [
     ...toggleApp("b", "Safari", "^com\\.apple\\.Safari$"),
     ...toggleApp("n", "Notion", "^notion\\.id$"), // (※もしNotionもPWAなら下のtogglePwaに移動してください)
     ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
-    ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"), // ← Vivaldi本体もトグル化！
+    ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
+    // ...toggleApp("c", "Chrome", "^com\\.google\\.chrome$"),
+    map("c", "optionalAny")
+      .to("k", ["left_command", "left_control"])
+      .condition(ifVar("kana_pressed", 1)),
 
     // -------------------------------------------------------------
     // アプリ起動 (PWA: AppleScriptトグル式)
     // -------------------------------------------------------------
-    // [C] Calendar (GoogleCalendar PWA)
-    ...togglePwa(
-      "c",
-      "GoogleCalendar", // アクティビティモニタ等で表示されるプロセス名
-      "/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app",
-    ),
+    // // [C] Calendar (GoogleCalendar PWA)
+    // ...togglePwa(
+    //   "c",
+    //   "GoogleCalendar", // アクティビティモニタ等で表示されるプロセス名
+    //   "/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app",
+    // ),
 
     // [G] Gemini (PWA)
     ...togglePwa(
