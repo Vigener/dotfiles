@@ -9,3 +9,6 @@
 # Node.js dependencies
 node_modules/
 npm-debug.log*
+
+# Vibe Dictator vocabulary
+vocabulary.json
