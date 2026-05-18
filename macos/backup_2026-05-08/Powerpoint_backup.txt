@@ -1,0 +1,58 @@
+{
+    ACID = "";
+    AppExitGraceful = 0;
+    "BootActivity-LastBootVersion" = "16.107.26032814";
+    CUITeachingUIManagerUsageDictionaryKey =     {
+        AccCheckerStatusBarTeachingCallout = 2;
+        AutoSaveFirstSavePPT = 2;
+        AutoSaveToggleOnPPT = 2;
+    };
+    ChangeInstallLanguageState = 1;
+    CrashActionServiceUrlKey = "https://officeci.azurewebsites.net/api/";
+    CulturePreviousPreferredEditing = "ja-JP";
+    DocsUILastNavigatedFileLocationKey = "https://o365tsukuba-my.sharepoint.com/personal/s2310970_u_tsukuba_ac_jp/Documents/";
+    DocsUILastNavigatedSelectionPathKey =     (
+        "https://o365tsukuba-my.sharepoint.com/personal/s2310970_u_tsukuba_ac_jp/Documents"
+    );
+    DocsUILastOpenNavTargetType = DocsUIRootNavTarget;
+    DocsUILastOpenRootURI = "https://o365tsukuba-my.sharepoint.com/personal/s2310970_u_tsukuba_ac_jp/Documents/";
+    DocsUILastOpenServiceType = 2;
+    DocsUIMruHasMarkedFutureAccessTokensForPinnedState = 1;
+    DocsUIPersonalSectionDisplayID = 0;
+    LoginKeychainEmpty = 1;
+    MsoLoggingDidRemoveOldLogs = 1;
+    NSAutoFillHeuristicControllerEnabled = 0;
+    "NSBrowser ColumnWidths DocsUI/OpenBrowse" =     (
+        203
+    );
+    NSNavPanelExpandedSizeForOpenMode = "{965, 448}";
+    NSOSPLastRootDirectory = {length = 780, bytes = 0x626f6f6b 0c030000 00000510 40000000 ... 04000000 00000000 };
+    "NSSplitView Subview Frames DocsUI/OpenSplit" =     (
+        "0.000000, 0.000000, 328.000000, 0.000000, NO, NO",
+        "329.000000, 0.000000, 386.000000, 0.000000, NO, NO"
+    );
+    NSUserKeyEquivalents =     {
+        "\\U6570\\U5f0f" = "^$-";
+    };
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/Users/mikoto/Documents/Presentations/weekly-report/20260422/slide.pptx" = "0 23 1470 900 0 0 1470 923 ";
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/Users/mikoto/Documents/Presentations/weekly-report/20260428/slide.pptx" = "0 23 1470 900 0 0 1470 923 ";
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/personal/s2310970_u_tsukuba_ac_jp/Documents/ArchMTG_20260428_igarashi.pptx" = "1 -4 1470 923 0 0 1470 923 ";
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/personal/s2310970_u_tsukuba_ac_jp/Documents/Chapter1_igarashi.pptx" = "120 53 1470 900 0 0 1710 1073 ";
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/personal/s2310970_u_tsukuba_ac_jp/Documents/lab/b4_m1_lecture/Chapter1_igarashi.pptx" = "735 0 735 923 0 0 1470 923 ";
+    "NSWindow Frame CUIDocumentShellWindowFrameNameURL/personal/s2310970_u_tsukuba_ac_jp/Documents/lab/b4_m1_lecture/Chapter1_igarashi_outline.pptx" = "447 0 856 923 0 0 1470 923 ";
+    "NSWindow Frame FileUIWindowFrameAutoSaveName" = "140 409 1176 831 0 0 2560 1410 ";
+    OSLocale = "ja_JP";
+    OSVersion = "26.4.1";
+    OUIShouldEstablishWhatsNewBaseline = 1;
+    SKPurchaseIntentUpdatesLastChecked = "799910713.423784";
+    SessionId = "FB5EB34A-F201-4635-A6B1-167573EFD63C";
+    SessionLongBuildNumber = 26032814;
+    SessionTelemetryVersion = "16.107.328.3";
+    SessionVersion = "16.107.3";
+    TemplateDownload = 1;
+    cloudUpsellSavedSelectedLocation = "https://o365tsukuba-my.sharepoint.com/personal/s2310970_u_tsukuba_ac_jp/Documents";
+    kAppBootTimeForUAE = "2026-05-08 05:25:13 +0000";
+    kLastKnownSessionDuration = "8563.796412";
+    kOUIRibbonDefaultCollapse = 0;
+    kSubUIAppCompletedFirstRunSetup1507 = 1;
+}
