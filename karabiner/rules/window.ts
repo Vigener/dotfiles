@@ -1,4 +1,13 @@
-import { ifVar, map, rule } from "karabiner.ts";
+import { ifVar, ifApp, map, rule } from "karabiner.ts";
+
+// =====================================================================
+// 🛡️ 条件定義: RaycastのSwitch Windowsモード中であること
+// =====================================================================
+// Raycastが前面にある時のみ発火させることで、変数が残り続けた際の暴発を完全に防ぐ
+const ifRaycastMode = [
+  ifVar("raycast_window_mode", 1),
+  ifApp("^com\\.raycast\\.macos$"),
+];
 
 export const windowRules = [
   // =====================================================================
@@ -63,17 +72,60 @@ export const windowRules = [
         .condition(ifVar("kana_pressed", 1)),
 
       // -------...---------
-      // 3. アプリ自体の切り替え(RaycastのSwitch Windowsと同じショートカットを想定)
+      // 3. アプリ自体の切り替え(RaycastのSwitch Windows連携)
       // -------...---------
-      //現在は、`Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」で発火させる
+      // `Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」で発火させる
+      // 同時にRaycast操作用の変数を1(ON)にする
       map("right_command", "optionalAny")
         .to("tab", ["left_command", "left_option"])
+        .toVar("raycast_window_mode", 1)
         .condition(ifVar("kana_pressed", 1)),
+
+      // ======= Raycast Switch Windows モード中の Vim風キーバインド =======
+      // ※ 修飾キーなしの単押しのみ許可し、予期せぬ暴発を防ぐ
+      map("j")
+        .to("down_arrow")
+        .condition(...ifRaycastMode),
+      map("k")
+        .to("up_arrow")
+        .condition(...ifRaycastMode),
+
+      // アクションメニューの展開 (Space で Cmd+K を代行)
+      map("spacebar")
+        .to("k", "left_command")
+        .condition(...ifRaycastMode),
+
+      // ウィンドウアクションの単押しショートカット化
+      map("m")
+        .to("m", "left_command")
+        .condition(...ifRaycastMode), // 最小化
+      map("f")
+        .to("f", "left_command")
+        .condition(...ifRaycastMode), // フルスクリーン
+      map("w")
+        .to("w", ["left_command", "left_shift"])
+        .condition(...ifRaycastMode), // 閉じる
+      map("h")
+        .to("h", "left_command")
+        .condition(...ifRaycastMode), // 隠す
+
+      // ======= モードの解除 =======
+      // 選択決定、またはキャンセル時にフラグをリセットし、本来のキーを送信する
+      map("return_or_enter", "optionalAny")
+        .to("return_or_enter")
+        .toVar("raycast_window_mode", 0)
+        .condition(...ifRaycastMode),
+
+      map("escape", "optionalAny")
+        .to("escape")
+        .toVar("raycast_window_mode", 0)
+        .condition(...ifRaycastMode),
     ],
   ),
 
-  // RaycastのWindows Management用テンプレート
-  // 注意: ここに書いたショートカットは、RaycastのWindows Managementのショートカットと完全に一致させる必要があります。
+  // =====================================================================
+  // 【WINDOW】Raycast Windows Management (template)
+  // =====================================================================
   rule("【WINDOW】Raycast Windows Management (template)").manipulators([
     // Option+, でウィンドウを左半分に配置(Cmd+Opt+Control+←)
     // (他での役割が出るまで)英数+,でも発火するようにする

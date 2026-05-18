@@ -1,4 +1,4 @@
-import { ifVar, ifApp, map, rule, FromKeyParam } from "karabiner.ts";
+import { ifVar, ifApp, map, rule, FromKeyParam, toSetVar } from "karabiner.ts";
 
 // =====================================================================
 // 🛠️ ヘルパー関数1: 通常アプリのトグル (Karabinerネイティブ監視)
@@ -16,7 +16,6 @@ function toggleApp(key: FromKeyParam, appName: string, bundleId: string) {
 // 🛠️ ヘルパー関数2: PWA用トグル (AppleScriptを利用した究極の抜け道)
 // =====================================================================
 function togglePwa(key: FromKeyParam, processName: string, appPath: string) {
-  // macOSのシステムに直接「最前面か？」を問い合わせ、隠すか起動するかを判断するスクリプト
   const script = `osascript -e 'tell application "System Events"' -e 'if frontmost of process "${processName}" then' -e 'set visible of process "${processName}" to false' -e 'else' -e 'tell application "${appPath}" to activate' -e 'end if' -e 'end tell'`;
 
   return [
@@ -50,36 +49,45 @@ export const launcherRules = [
     ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
     ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
     ...toggleApp("b", "Safari", "^com\\.apple\\.Safari$"),
-    ...toggleApp("n", "Notion", "^notion\\.id$"), // (※もしNotionもPWAなら下のtogglePwaに移動してください)
+    ...toggleApp("n", "Notion", "^notion\\.id$"),
     ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
-    // ...toggleApp("c", "Chrome", "^com\\.google\\.chrome$"),
+
+    // -------------------------------------------------------------
+    // 📅 Notion Calendar (ダブルタップ機構)
+    // -------------------------------------------------------------
+    // 【2回目タップ】 500ms以内に再度 c が押されたら Cmd+1 を送信しウィンドウ展開
+    map("c", "optionalAny")
+      .to("1", "left_command")
+      .toVar("notion_cal_tapped", 0) // フラグを即座にリセット
+      .condition(ifVar("kana_pressed", 1), ifVar("notion_cal_tapped", 1)),
+
+    // 【1回目タップ】 常駐バーを開く(Cmd+Ctrl+K) + フラグを1にし、500ms後に0に戻す
     map("c", "optionalAny")
       .to("k", ["left_command", "left_control"])
-      .condition(ifVar("kana_pressed", 1)),
+      .toVar("notion_cal_tapped", 1)
+      .toDelayedAction(
+        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
+        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
+      )
+      .condition(
+        ifVar("kana_pressed", 1),
+        ifVar("notion_cal_tapped", 0), // まだタップされていない場合のみ発火
+      ),
 
     // -------------------------------------------------------------
     // アプリ起動 (PWA: AppleScriptトグル式)
     // -------------------------------------------------------------
-    // // [C] Calendar (GoogleCalendar PWA)
-    // ...togglePwa(
-    //   "c",
-    //   "GoogleCalendar", // アクティビティモニタ等で表示されるプロセス名
-    //   "/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app",
-    // ),
-
-    // [G] Gemini (PWA)
     ...togglePwa(
       "g",
-      "Gemini", // アクティビティモニタ等で表示されるプロセス名
+      "Gemini",
       "/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app",
     ),
 
     // -------------------------------------------------------------
     // アプリ起動 (ドキュメント系: サイクル式)
     // -------------------------------------------------------------
-    // 【P】 Presentation (PowerPoint)
     map("p", "optionalAny")
       .to("open_bracket", "left_command")
       .condition(
@@ -93,7 +101,6 @@ export const launcherRules = [
         ifApp("^com\\.microsoft\\.Powerpoint$").unless(),
       ),
 
-    // 【R】 Read / Reference (Preview)
     map("r", "optionalAny")
       .to("open_bracket", "left_command")
       .condition(ifVar("kana_pressed", 1), ifApp("^com\\.apple\\.Preview$")),
