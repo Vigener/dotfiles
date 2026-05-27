@@ -48,7 +48,7 @@ export const launcherRules = [
     ...toggleApp("t", "Terminal", "^com\\.apple\\.Terminal$"),
     ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
     ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
-    ...toggleApp("b", "Safari", "^com\\.apple\\.Safari$"),
+    ...toggleApp("b", "Google Chrome", "^com\\.google\\.Chrome$"),
     ...toggleApp("n", "Notion", "^notion\\.id$"),
     ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),

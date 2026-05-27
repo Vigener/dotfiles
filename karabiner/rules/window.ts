@@ -1,4 +1,4 @@
-import { ifVar, ifApp, map, rule } from "karabiner.ts";
+import { ifApp, ifVar, map, rule } from "karabiner.ts";
 
 // =====================================================================
 // 🛡️ 条件定義: RaycastのSwitch Windowsモード中であること
@@ -66,10 +66,14 @@ export const windowRules = [
       map("international1", "optionalAny")
         .to("n", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
-      // Reasonable Size (Cmd+Opt+Control+r)
-      map(";", "optionalAny")
-        .to("r", ["left_control", "left_option", "left_command"])
+      // Mission Control (Ctrl+Up)
+      map("semicolon", "optionalAny")
+        .to("up_arrow", "control")
         .condition(ifVar("kana_pressed", 1)),
+      // Reasonable Size (Cmd+Opt+Control+r)
+      // map(";", "optionalAny")
+      //   .to("r", ["left_control", "left_option", "left_command"])
+      //   .condition(ifVar("kana_pressed", 1)),
 
       // -------...---------
       // 3. アプリ自体の切り替え(RaycastのSwitch Windows連携)
@@ -154,6 +158,6 @@ export const windowRules = [
       "left_control",
     ]),
     // Option+nでNext Displayへ移動(Cmd+Opt+Control+n)
-    map("n", "option").to("n", ["left_command", "left_option", "left_control"]),
+    // map("n", "option").to("n", ["left_command", "left_option", "left_control"]),
   ]),
 ];

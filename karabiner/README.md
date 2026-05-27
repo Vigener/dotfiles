@@ -8,8 +8,8 @@
 ## 検討中の点
 
 - MacBook Air内臓キーボードと、HHKB Studioの`Cmd`, `Opt`が逆問題を解決する。
-    - おそらく、内蔵キーボードに合わせる方が自然な気がする。
-    - ただし、デバイス毎に設定を分けることで、両立できると考えられるため、実装検討中。
+  - おそらく、内蔵キーボードに合わせる方が自然な気がする。
+  - ただし、デバイス毎に設定を分けることで、両立できると考えられるため、実装検討中。
 
 ## マッピング表
 
@@ -124,6 +124,8 @@
 | . + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+Right | 右半分配置         |
 | / + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+F     | ほぼ最大化         |
 | Shift+/ + optionalAny | kana_pressed = 1 | Cmd+Ctrl+F         | 完全最大化         |
+| ; + optionalAny       | kana_pressed = 1 | Ctrl+Up            | Mission Control    |
+| : + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+R     | Reasonable Size    |
 | international1        | kana_pressed = 1 | Cmd+Opt+Ctrl+N     | Next Displayへ移動 |
 
 ### WINDOW（Raycast Windows Management - グローバル）
