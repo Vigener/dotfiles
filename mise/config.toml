@@ -3,6 +3,7 @@
 # 言語やツールのバージョン指定
 [tools]
 node = "lts"
+npm = "latest"
 python = "3.12"
 rust = "stable"
 
