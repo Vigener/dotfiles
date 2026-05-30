@@ -79,11 +79,7 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // アプリ起動 (PWA: AppleScriptトグル式)
     // -------------------------------------------------------------
-    ...togglePwa(
-      "g",
-      "Gemini",
-      "/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app",
-    ),
+    ...togglePwa("g", "Gemini", "/Applications/Gemini.app"),
 
     // -------------------------------------------------------------
     // アプリ起動 (ドキュメント系: サイクル式)

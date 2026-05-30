@@ -66,6 +66,10 @@ export const windowRules = [
       map("international1", "optionalAny")
         .to("n", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
+      // Switch Display Preset (Raycast Display Placer: Cmd+Opt+Ctrl+Shift+d)
+      map("d", "optionalAny")
+        .to("d", ["left_control", "left_option", "left_command", "left_shift"])
+        .condition(ifVar("kana_pressed", 1)),
       // Mission Control (Ctrl+Up)
       map("semicolon", "optionalAny")
         .to("up_arrow", "control")
