@@ -53,6 +53,7 @@ export const launcherRules = [
     ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
+    ...toggleApp("g", "Gemini", "^com\\.google\\.GeminiMacOS$"),
 
     // -------------------------------------------------------------
     // 📅 Notion Calendar (ダブルタップ機構)
@@ -77,9 +78,8 @@ export const launcherRules = [
       ),
 
     // -------------------------------------------------------------
-    // アプリ起動 (PWA: AppleScriptトグル式)
+    // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
-    ...togglePwa("g", "Gemini", "/Applications/Gemini.app"),
 
     // -------------------------------------------------------------
     // アプリ起動 (ドキュメント系: サイクル式)

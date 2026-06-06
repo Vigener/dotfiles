@@ -162,7 +162,7 @@
 | Z + optionalAny | kana_pressed = 1 | Open: zoom.us                                                               |               |
 | N + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/Notion.app'         | Vivaldi PWA   |
 | C + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/GoogleCalendar.app' | Vivaldi PWA   |
-| G + optionalAny | kana_pressed = 1 | open '/Users/mikoto/Applications/Vivaldi Apps.localized/Gemini.app'         | Vivaldi PWA   |
+| G + optionalAny | kana_pressed = 1 | Open: Gemini (com.google.GeminiMacOS)                                      |               |
 | V + optionalAny | kana_pressed = 1 | open -b com.vivaldi.Vivaldi                                                 | Bundle ID起動 |
 
 ### AZIK（日本語入力）
