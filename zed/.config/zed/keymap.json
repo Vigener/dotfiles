@@ -1,0 +1,43 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle",
+      "ctrl-shift-e": "project_panel::ToggleFocus",
+      "ctrl-shift-c": "workspace::FocusCenterPane",
+      "ctrl-shift-r": "workspace::ToggleRightDock",
+    },
+  },
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      // "j k": "vim::NormalBefore"
+    },
+  },
+  {
+    "context": "Editor",
+    "unbind": {
+      "ctrl-shift-e": [
+        "editor::SelectToEndOfLine",
+        {
+          "stop_at_soft_wraps": true,
+        },
+      ],
+    },
+  },
+  {
+    "context": "AgentPanel",
+    "bindings": {
+      "ctrl-shift-e": "project_panel::ToggleFocus",
+      "ctrl-shift-c": "workspace::FocusCenterPane",
+      "ctrl-shift-r": "workspace::ToggleRightDock",
+    },
+  },
+]
