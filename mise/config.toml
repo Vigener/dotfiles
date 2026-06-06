@@ -6,6 +6,7 @@ node = "lts"
 npm = "latest"
 python = "3.12"
 rust = "stable"
+uv = "latest"
 
 # タスク定義
 [tasks."typst:setup"]
