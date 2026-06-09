@@ -53,7 +53,7 @@ export const launcherRules = [
     ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
-    ...toggleApp("g", "Gemini", "^com\\.google\\.GeminiMacOS$"),
+    // ...toggleApp("g", "Gemini", "^com\\.google\\.GeminiMacOS$"),
 
     // -------------------------------------------------------------
     // 📅 Notion Calendar (ダブルタップ機構)
