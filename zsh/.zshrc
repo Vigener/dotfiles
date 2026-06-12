@@ -183,3 +183,4 @@ function vibe-add() {
   jq --arg f "$1" --arg t "$2" '.preferred_terms += [{"from": $f, "to": $t}]' "$vocab_file" > "${vocab_file}.tmp" && mv "${vocab_file}.tmp" "$vocab_file"
   echo "✅ 辞書に追加しました: $1 -> $2"
 }
+export PATH=$HOME/local/bin:$PATH

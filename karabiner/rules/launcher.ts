@@ -23,6 +23,35 @@ function togglePwa(key: FromKeyParam, processName: string, appPath: string) {
   ];
 }
 
+// =====================================================================
+// 🛠️ ヘルパー関数3: キー送信付きアプリトグル (ラグ回避シークエンス内包)
+// =====================================================================
+function toggleAppWithKey(
+  key: FromKeyParam,
+  appName: string,
+  bundleId: string,
+  strokeKey: string,
+  modifiers: string[],
+) {
+  // AppleScriptを用いて、アプリを起動/前面化し、100ms待機してからショートカットを送信
+  // M4 Macの処理速度であれば 100ms のディレイで確実にコンテキストスイッチが完了する
+  const modStr = modifiers.map((m) => `${m} down`).join(", ");
+  const cleanBundleId = bundleId.replace(/^\^|\$$/g, "").replace(/\\/g, "");
+  const shellCommand = `open -b ${cleanBundleId} && osascript -e 'delay 0.1' -e 'tell application "System Events" to keystroke "${strokeKey}" using {${modStr}}'`;
+
+  return [
+    // ① 対象アプリがすでにアクティブ（最前面）なら、Cmd+1 でGeminiタブへジャンプ
+    map(key, "optionalAny")
+      .to("1", "command")
+      .condition(ifVar("kana_pressed", 1), ifApp(bundleId)),
+
+    // ② アクティブでないなら、シェルコマンドでラグ回避しつつ起動＋キー送信
+    map(key, "optionalAny")
+      .to$(shellCommand)
+      .condition(ifVar("kana_pressed", 1)),
+  ];
+}
+
 export const launcherRules = [
   // =====================================================================
   // [APP] かなコンビネーション (メディア操作・アプリ起動)
@@ -43,17 +72,20 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
-    ...toggleApp("m", "Visual Studio Code", "^com\\.microsoft\\.VSCode$"),
+    ...toggleApp("m", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("s", "Slack", "^com\\.tinyspeck\\.slackmacgap$"),
     ...toggleApp("t", "Terminal", "^com\\.apple\\.Terminal$"),
     ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
     ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
     ...toggleApp("b", "Google Chrome", "^com\\.google\\.Chrome$"),
-    ...toggleApp("n", "Notion", "^notion\\.id$"),
-    ...toggleApp("z", "Zed", "^dev\\.zed\\.Zed$"),
-    ...toggleApp("v", "Vivaldi", "^com\\.vivaldi\\.Vivaldi$"),
+    ...toggleApp("n", "Zen Browser", "^app\\.zen-browser\\.zen$"),
+    ...toggleApp("v", "Visual Studio Code", "^com\\.microsoft\\.VSCode$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
-    // ...toggleApp("g", "Gemini", "^com\\.google\\.GeminiMacOS$"),
+
+    // 🚀 Gキー: Zen Browserを呼び出し、100ms待機後に Cmd+1 (Geminiピン留めタブ) を送信
+    ...toggleAppWithKey("g", "Zen Browser", "^app\\.zen-browser\\.zen$", "1", [
+      "command",
+    ]),
 
     // -------------------------------------------------------------
     // 📅 Notion Calendar (ダブルタップ機構)

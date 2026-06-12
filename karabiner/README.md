@@ -152,16 +152,16 @@
 
 | 入力            | 条件             | 出力                                                                                  | 備考                |
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
-| M + optionalAny | kana_pressed = 1 | Open: Visual Studio Code (トグル)                                                     |                     |
+| M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
 | S + optionalAny | kana_pressed = 1 | Open: Slack (トグル)                                                                  |                     |
 | T + optionalAny | kana_pressed = 1 | Open: Terminal (トグル)                                                               |                     |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
 | B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          |                     |
-| N + optionalAny | kana_pressed = 1 | Open: Notion (トグル)                                                                 |                     |
-| Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                    |                     |
-| V + optionalAny | kana_pressed = 1 | Open: Vivaldi (トグル)                                                                |                     |
+| N + optionalAny | kana_pressed = 1 | Open: Zen Browser (トグル)                                                             | 思考ハブ            |
+| V + optionalAny | kana_pressed = 1 | Open: Visual Studio Code (トグル)                                                      |                     |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
+| G + optionalAny | kana_pressed = 1 | Open: Zen Browser + Cmd+1 (常時Geminiタブへ)                                          | Geminiタブへジャンプ |
 | P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint (サイクル)                                                 | 起動中は Cmd+[     |
 | R + optionalAny | kana_pressed = 1 | Open: Preview (サイクル)                                                              | 起動中は Cmd+[     |
 | C + optionalAny | kana_pressed = 1 | Open: Notion Calendar (ダブルタップ)                                                  | Cmd+Ctrl+K → Cmd+1 |
