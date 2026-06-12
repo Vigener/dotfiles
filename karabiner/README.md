@@ -158,7 +158,7 @@
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
 | B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          |                     |
-| N + optionalAny | kana_pressed = 1 | Open: Zen Browser (トグル)                                                             | 思考ハブ            |
+| N + optionalAny | kana_pressed = 1 | Open: Zen Browser / Cmd+2 (アクティブ時)                                               | 思考ハブ (Tab 2)    |
 | V + optionalAny | kana_pressed = 1 | Open: Visual Studio Code (トグル)                                                      |                     |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
 | G + optionalAny | kana_pressed = 1 | Open: Zen Browser + Cmd+1 (常時Geminiタブへ)                                          | Geminiタブへジャンプ |

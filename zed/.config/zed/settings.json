@@ -11,11 +11,18 @@
   "outline_panel": {},
   "collaboration_panel": {},
   "agent": {
+    "tool_permissions": {
+      "tools": {
+        "create_directory": {
+          "default": "allow"
+        }
+      }
+    },
     "default_profile": "write",
     "default_model": {
       "effort": "high",
       "provider": "deepseek",
-      "model": "deepseek-v4-pro",
+      "model": "deepseek-v4-flash",
       "enable_thinking": true,
     },
     "dock": "right",

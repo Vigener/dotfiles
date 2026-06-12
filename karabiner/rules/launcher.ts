@@ -78,7 +78,11 @@ export const launcherRules = [
     ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
     ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
     ...toggleApp("b", "Google Chrome", "^com\\.google\\.Chrome$"),
-    ...toggleApp("n", "Zen Browser", "^app\\.zen-browser\\.zen$"),
+    // 🧠 Nキー: Zen Browser (アクティブ時はCmd+2、非アクティブ時は起動)
+    map("n", "optionalAny")
+      .to("2", "command")
+      .condition(ifVar("kana_pressed", 1), ifApp("^app\\.zen-browser\\.zen$")),
+    map("n", "optionalAny").toApp("Zen").condition(ifVar("kana_pressed", 1)),
     ...toggleApp("v", "Visual Studio Code", "^com\\.microsoft\\.VSCode$"),
     ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
 
