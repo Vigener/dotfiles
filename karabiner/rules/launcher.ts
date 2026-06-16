@@ -72,10 +72,10 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
+    ...toggleApp("a", "Antigravity", "^com\\.google\\.antigravity$"),
     ...toggleApp("m", "Zed", "^dev\\.zed\\.Zed$"),
     ...toggleApp("s", "Slack", "^com\\.tinyspeck\\.slackmacgap$"),
-    ...toggleApp("t", "Terminal", "^com\\.apple\\.Terminal$"),
-    ...toggleApp("w", "Warp", "^dev\\.warp\\.Warp-Stable$"),
+    ...toggleApp("t", "Warp", "^dev\\.warp\\.Warp-Stable$"),
     ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
     ...toggleApp("b", "Google Chrome", "^com\\.google\\.Chrome$"),
     // 🧠 Nキー: Zen Browser (アクティブ時はCmd+2、非アクティブ時は起動)

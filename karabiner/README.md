@@ -152,10 +152,10 @@
 
 | 入力            | 条件             | 出力                                                                                  | 備考                |
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
+| A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
 | M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
 | S + optionalAny | kana_pressed = 1 | Open: Slack (トグル)                                                                  |                     |
-| T + optionalAny | kana_pressed = 1 | Open: Terminal (トグル)                                                               |                     |
-| W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
+| T + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
 | B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          |                     |
 | N + optionalAny | kana_pressed = 1 | Open: Zen Browser / Cmd+2 (アクティブ時)                                               | 思考ハブ (Tab 2)    |
