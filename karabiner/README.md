@@ -152,6 +152,7 @@
 
 | 入力            | 条件             | 出力                                                                                  | 備考                |
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
+| O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
 | A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
 | M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
 | Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
