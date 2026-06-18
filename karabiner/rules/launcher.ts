@@ -1,13 +1,46 @@
 import { ifVar, ifApp, map, rule, FromKeyParam, toSetVar } from "karabiner.ts";
 
 // =====================================================================
+// 📖 アプリレジストリ: appName -> bundleId のペア一覧
+//    - toggleApp() の第3引数を省略するために使用
+//    - 一軍から外れたアプリもここに残しておくことで、再利用時にIDを再調査不要
+// =====================================================================
+const APP_REGISTRY: Record<string, string> = {
+  // --- ブラウザ ---
+  "Dia":                  "^company\\.thebrowser\\.dia$",
+  "Google Chrome":        "^com\\.google\\.Chrome$",
+  "Zen":                  "^app\\.zen-browser\\.zen$",
+  // --- 開発ツール ---
+  "Antigravity":          "^com\\.google\\.antigravity$",
+  "Zed":                  "^dev\\.zed\\.Zed$",
+  "Visual Studio Code":   "^com\\.microsoft\\.VSCode$",
+  "Warp":                 "^dev\\.warp\\.Warp-Stable$",
+  // --- コミュニケーション ---
+  "Slack":                "^com\\.tinyspeck\\.slackmacgap$",
+  "Mail":                 "^com\\.apple\\.mail$",
+  // --- システム ---
+  "Finder":               "^com\\.apple\\.finder$",
+  // --- ドキュメント ---
+  "Microsoft PowerPoint": "^com\\.microsoft\\.Powerpoint$",
+  "Preview":              "^com\\.apple\\.Preview$",
+};
+
+/** アプリ名からバンドルIDを取得する。見つからない場合はエラーをスロー */
+function bundleId(appName: string): string {
+  const id = APP_REGISTRY[appName];
+  if (!id) throw new Error(`Bundle ID not found for app: "${appName}"`);
+  return id;
+}
+
+// =====================================================================
 // 🛠️ ヘルパー関数1: 通常アプリのトグル (Karabinerネイティブ監視)
 // =====================================================================
-function toggleApp(key: FromKeyParam, appName: string, bundleId: string) {
+function toggleApp(key: FromKeyParam, appName: string) {
+  const id = bundleId(appName);
   return [
     map(key, "optionalAny")
       .to("h", "command")
-      .condition(ifVar("kana_pressed", 1), ifApp(bundleId)),
+      .condition(ifVar("kana_pressed", 1), ifApp(id)),
     map(key, "optionalAny").toApp(appName).condition(ifVar("kana_pressed", 1)),
   ];
 }
@@ -25,25 +58,27 @@ function togglePwa(key: FromKeyParam, processName: string, appPath: string) {
 
 // =====================================================================
 // 🛠️ ヘルパー関数3: キー送信付きアプリトグル (ラグ回避シークエンス内包)
+//    - アクティブ時は Cmd+[tabKey] でピン留めタブへジャンプ
+//    - 非アクティブ時はシェルコマンドでラグ回避しつつ起動＋キー送信
 // =====================================================================
 function toggleAppWithKey(
   key: FromKeyParam,
   appName: string,
-  bundleId: string,
-  strokeKey: string,
+  tabKey: string,
   modifiers: string[],
 ) {
   // AppleScriptを用いて、アプリを起動/前面化し、100ms待機してからショートカットを送信
   // M4 Macの処理速度であれば 100ms のディレイで確実にコンテキストスイッチが完了する
+  const id = bundleId(appName);
   const modStr = modifiers.map((m) => `${m} down`).join(", ");
-  const cleanBundleId = bundleId.replace(/^\^|\$$/g, "").replace(/\\/g, "");
-  const shellCommand = `open -b ${cleanBundleId} && osascript -e 'delay 0.1' -e 'tell application "System Events" to keystroke "${strokeKey}" using {${modStr}}'`;
+  const cleanBundleId = id.replace(/^\^|\$$/g, "").replace(/\\/g, "");
+  const shellCommand = `open -b ${cleanBundleId} && osascript -e 'delay 0.1' -e 'tell application "System Events" to keystroke "${tabKey}" using {${modStr}}'`;
 
   return [
-    // ① 対象アプリがすでにアクティブ（最前面）なら、Cmd+1 でGeminiタブへジャンプ
+    // ① 対象アプリがすでにアクティブ（最前面）なら、Cmd+[tabKey] でタブへジャンプ
     map(key, "optionalAny")
-      .to("1", "command")
-      .condition(ifVar("kana_pressed", 1), ifApp(bundleId)),
+      .to(tabKey, "command")
+      .condition(ifVar("kana_pressed", 1), ifApp(id)),
 
     // ② アクティブでないなら、シェルコマンドでラグ回避しつつ起動＋キー送信
     map(key, "optionalAny")
@@ -51,6 +86,15 @@ function toggleAppWithKey(
       .condition(ifVar("kana_pressed", 1)),
   ];
 }
+
+// =====================================================================
+// 🌐 現在のメインブラウザ設定
+//    ブラウザ変更時はここだけを書き換える
+// =====================================================================
+const MAIN_BROWSER = "Dia";
+// タブ配置: Cmd+2 で思考ハブ (N キー用)、Cmd+1 で Antigravity タブ (G キー用)
+const BROWSER_HUB_TAB    = "2"; // かな+N: 思考ハブタブ
+const BROWSER_AGENT_TAB  = "1"; // かな+G: Antigravityタブ
 
 export const launcherRules = [
   // =====================================================================
@@ -72,24 +116,21 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
-    ...toggleApp("a", "Antigravity", "^com\\.google\\.antigravity$"),
-    ...toggleApp("m", "Zed", "^dev\\.zed\\.Zed$"),
-    ...toggleApp("s", "Slack", "^com\\.tinyspeck\\.slackmacgap$"),
-    ...toggleApp("t", "Warp", "^dev\\.warp\\.Warp-Stable$"),
-    ...toggleApp("e", "Mail", "^com\\.apple\\.mail$"),
-    ...toggleApp("b", "Google Chrome", "^com\\.google\\.Chrome$"),
-    // 🧠 Nキー: Zen Browser (アクティブ時はCmd+2、非アクティブ時は起動)
-    map("n", "optionalAny")
-      .to("2", "command")
-      .condition(ifVar("kana_pressed", 1), ifApp("^app\\.zen-browser\\.zen$")),
-    map("n", "optionalAny").toApp("Zen").condition(ifVar("kana_pressed", 1)),
-    ...toggleApp("v", "Visual Studio Code", "^com\\.microsoft\\.VSCode$"),
-    ...toggleApp("f", "Finder", "^com\\.apple\\.finder$"),
+    ...toggleApp("a", "Antigravity"),
+    ...toggleApp("m", "Zed"),
+    ...toggleApp("s", "Slack"),
+    ...toggleApp("t", "Warp"),
+    ...toggleApp("e", "Mail"),
+    ...toggleApp("b", "Google Chrome"),
 
-    // 🚀 Gキー: Zen Browserを呼び出し、100ms待機後に Cmd+1 (Geminiピン留めタブ) を送信
-    ...toggleAppWithKey("g", "Zen Browser", "^app\\.zen-browser\\.zen$", "1", [
-      "command",
-    ]),
+    // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
+    ...toggleAppWithKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),
+
+    ...toggleApp("v", "Visual Studio Code"),
+    ...toggleApp("f", "Finder"),
+
+    // 🚀 Gキー: メインブラウザを呼び出し、Cmd+[BROWSER_AGENT_TAB] でタブへジャンプ
+    ...toggleAppWithKey("g", MAIN_BROWSER, BROWSER_AGENT_TAB, ["command"]),
 
     // -------------------------------------------------------------
     // 📅 Notion Calendar (ダブルタップ機構)
@@ -114,33 +155,29 @@ export const launcherRules = [
       ),
 
     // -------------------------------------------------------------
-    // アプリ起動 (ネイティブアプリ: トグル式)
-    // -------------------------------------------------------------
-
-    // -------------------------------------------------------------
     // アプリ起動 (ドキュメント系: サイクル式)
     // -------------------------------------------------------------
     map("p", "optionalAny")
       .to("open_bracket", "left_command")
       .condition(
         ifVar("kana_pressed", 1),
-        ifApp("^com\\.microsoft\\.Powerpoint$"),
+        ifApp(bundleId("Microsoft PowerPoint")),
       ),
     map("p", "optionalAny")
       .toApp("Microsoft PowerPoint")
       .condition(
         ifVar("kana_pressed", 1),
-        ifApp("^com\\.microsoft\\.Powerpoint$").unless(),
+        ifApp(bundleId("Microsoft PowerPoint")).unless(),
       ),
 
     map("r", "optionalAny")
       .to("open_bracket", "left_command")
-      .condition(ifVar("kana_pressed", 1), ifApp("^com\\.apple\\.Preview$")),
+      .condition(ifVar("kana_pressed", 1), ifApp(bundleId("Preview"))),
     map("r", "optionalAny")
       .toApp("Preview")
       .condition(
         ifVar("kana_pressed", 1),
-        ifApp("^com\\.apple\\.Preview$").unless(),
+        ifApp(bundleId("Preview")).unless(),
       ),
   ]),
 ];
