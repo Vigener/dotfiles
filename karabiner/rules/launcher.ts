@@ -90,6 +90,25 @@ function toggleAppWithKey(
 }
 
 // =====================================================================
+// 🛠️ ヘルパー関数4: アプリがアクティブならキー送信、非アクティブならただ起動
+// =====================================================================
+function toggleAppOrSendKey(
+  key: FromKeyParam,
+  appName: string,
+  keyToSend: string,
+  modifiers: string[],
+) {
+  const id = bundleId(appName);
+  return [
+    map(key, "optionalAny")
+      // @ts-expect-error - keyToSend is a dynamic string but valid as a key code
+      .to(keyToSend, modifiers)
+      .condition(ifVar("kana_pressed", 1), ifApp(id)),
+    map(key, "optionalAny").toApp(appName).condition(ifVar("kana_pressed", 1)),
+  ];
+}
+
+// =====================================================================
 // 🌐 現在のメインブラウザ設定
 //    ブラウザ変更時はここだけを書き換える
 // =====================================================================
@@ -128,7 +147,7 @@ export const launcherRules = [
     ...toggleApp("b", "Google Chrome"),
 
     // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
-    ...toggleAppWithKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),
+    ...toggleAppOrSendKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),
 
     ...toggleApp("v", "Visual Studio Code"),
     ...toggleApp("f", "Finder"),
