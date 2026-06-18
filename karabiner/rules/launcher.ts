@@ -23,6 +23,7 @@ const APP_REGISTRY: Record<string, string> = {
   // --- ドキュメント ---
   "Microsoft PowerPoint": "^com\\.microsoft\\.Powerpoint$",
   Preview: "^com\\.apple\\.Preview$",
+  Obsidian: "^md\\.obsidian$",
 };
 
 /** アプリ名からバンドルIDを取得する。見つからない場合はエラーをスロー */
@@ -117,6 +118,7 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
+    ...toggleApp("o", "Obsidian"),
     ...toggleApp("a", "Antigravity"),
     ...toggleApp("m", "Zed"),
     ...toggleApp("z", "Zed"),
