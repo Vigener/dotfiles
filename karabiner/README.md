@@ -154,6 +154,7 @@
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
 | M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
+| Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
 | S + optionalAny | kana_pressed = 1 | Open: Slack (トグル)                                                                  |                     |
 | T + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
