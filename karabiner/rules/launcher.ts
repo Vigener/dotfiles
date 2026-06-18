@@ -7,22 +7,22 @@ import { ifVar, ifApp, map, rule, FromKeyParam, toSetVar } from "karabiner.ts";
 // =====================================================================
 const APP_REGISTRY: Record<string, string> = {
   // --- ブラウザ ---
-  "Dia":                  "^company\\.thebrowser\\.dia$",
-  "Google Chrome":        "^com\\.google\\.Chrome$",
-  "Zen":                  "^app\\.zen-browser\\.zen$",
+  Dia: "^company\\.thebrowser\\.dia$",
+  "Google Chrome": "^com\\.google\\.Chrome$",
+  Zen: "^app\\.zen-browser\\.zen$",
   // --- 開発ツール ---
-  "Antigravity":          "^com\\.google\\.antigravity$",
-  "Zed":                  "^dev\\.zed\\.Zed$",
-  "Visual Studio Code":   "^com\\.microsoft\\.VSCode$",
-  "Warp":                 "^dev\\.warp\\.Warp-Stable$",
+  Antigravity: "^com\\.google\\.antigravity$",
+  Zed: "^dev\\.zed\\.Zed$",
+  "Visual Studio Code": "^com\\.microsoft\\.VSCode$",
+  Warp: "^dev\\.warp\\.Warp-Stable$",
   // --- コミュニケーション ---
-  "Slack":                "^com\\.tinyspeck\\.slackmacgap$",
-  "Mail":                 "^com\\.apple\\.mail$",
+  Slack: "^com\\.tinyspeck\\.slackmacgap$",
+  Mail: "^com\\.apple\\.mail$",
   // --- システム ---
-  "Finder":               "^com\\.apple\\.finder$",
+  Finder: "^com\\.apple\\.finder$",
   // --- ドキュメント ---
   "Microsoft PowerPoint": "^com\\.microsoft\\.Powerpoint$",
-  "Preview":              "^com\\.apple\\.Preview$",
+  Preview: "^com\\.apple\\.Preview$",
 };
 
 /** アプリ名からバンドルIDを取得する。見つからない場合はエラーをスロー */
@@ -77,6 +77,7 @@ function toggleAppWithKey(
   return [
     // ① 対象アプリがすでにアクティブ（最前面）なら、Cmd+[tabKey] でタブへジャンプ
     map(key, "optionalAny")
+      // @ts-expect-error - tabKey is a dynamic string but valid as a key code
       .to(tabKey, "command")
       .condition(ifVar("kana_pressed", 1), ifApp(id)),
 
@@ -93,8 +94,8 @@ function toggleAppWithKey(
 // =====================================================================
 const MAIN_BROWSER = "Dia";
 // タブ配置: Cmd+2 で思考ハブ (N キー用)、Cmd+1 で Antigravity タブ (G キー用)
-const BROWSER_HUB_TAB    = "2"; // かな+N: 思考ハブタブ
-const BROWSER_AGENT_TAB  = "1"; // かな+G: Antigravityタブ
+const BROWSER_HUB_TAB = "2"; // かな+N: 思考ハブタブ
+const BROWSER_AGENT_TAB = "1"; // かな+G: Antigravityタブ
 
 export const launcherRules = [
   // =====================================================================
@@ -118,6 +119,7 @@ export const launcherRules = [
     // -------------------------------------------------------------
     ...toggleApp("a", "Antigravity"),
     ...toggleApp("m", "Zed"),
+    ...toggleApp("z", "Zed"),
     ...toggleApp("s", "Slack"),
     ...toggleApp("t", "Warp"),
     ...toggleApp("e", "Mail"),
@@ -175,9 +177,6 @@ export const launcherRules = [
       .condition(ifVar("kana_pressed", 1), ifApp(bundleId("Preview"))),
     map("r", "optionalAny")
       .toApp("Preview")
-      .condition(
-        ifVar("kana_pressed", 1),
-        ifApp(bundleId("Preview")).unless(),
-      ),
+      .condition(ifVar("kana_pressed", 1), ifApp(bundleId("Preview")).unless()),
   ]),
 ];
