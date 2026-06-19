@@ -142,6 +142,7 @@ export const launcherRules = [
     ...toggleApp("m", "Zed"),
     ...toggleApp("z", "Zed"),
     ...toggleApp("s", "Slack"),
+    ...toggleApp("w", "Warp"),
     ...toggleApp("t", "Warp"),
     ...toggleApp("e", "Mail"),
     ...toggleApp("b", "Google Chrome"),
