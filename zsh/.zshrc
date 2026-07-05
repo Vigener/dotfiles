@@ -202,3 +202,13 @@ tm() {
     tmux new-session -A -s "$1"
   fi
 }
+
+tmk() {
+  local session
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0 --prompt="Kill Session> ")
+  
+  if [ -n "$session" ]; then
+    tmux kill-session -t "$session"
+    echo "💀 Killed session: $session"
+  fi
+}
