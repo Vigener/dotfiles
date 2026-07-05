@@ -188,3 +188,17 @@ function vibe-add() {
   echo "✅ 辞書に追加しました: $1 -> $2"
 }
 export PATH=$HOME/local/bin:$PATH
+
+# zoxide
+eval "$(zoxide init zsh)"
+
+# ==========================================
+# tmux wrapper
+# ==========================================
+tm() {
+  if [ -z "$1" ]; then
+    tmux new-session -A -s default
+  else
+    tmux new-session -A -s "$1"
+  fi
+}
