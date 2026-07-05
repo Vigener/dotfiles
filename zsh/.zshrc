@@ -212,3 +212,5 @@ tmk() {
     echo "💀 Killed session: $session"
   fi
 }
+
+alias tml='tmux ls'
