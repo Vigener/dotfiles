@@ -3,16 +3,12 @@
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# 1. OS Detection & Homebrew Setup (OS自動判定とBrewのパス設定)
+# 1. OS Detection & Local Config Load (環境別設定の読み込み)
 # ------------------------------------------------------------------------------
 if [[ "$(uname)" == "Darwin" ]]; then
-    # macOS (Apple Silicon)
-    export HOMEBREW_PREFIX="/opt/homebrew"
+    [ -f ~/dotfiles/zsh/mac/mac.zsh ] && source ~/dotfiles/zsh/mac/mac.zsh
 elif [[ "$(uname)" == "Linux" ]]; then
-    # WSL / Linux
-    export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-    # WSL固有の設定
-    export BROWSER=wslview
+    [ -f ~/dotfiles/zsh/thinkpad/thinkpad.zsh ] && source ~/dotfiles/zsh/thinkpad/thinkpad.zsh
 fi
 
 # Homebrewの初期化 (1回だけ実行)
@@ -87,21 +83,7 @@ if command -v mise >/dev/null; then
     eval "$(mise activate zsh)"
 fi
 
-# ------------------------------------------------------------------------------
-# 6. SSH Agent Configuration (SSHエージェントの自動起動)
-# ------------------------------------------------------------------------------
-if [[ "$(uname)" == "Linux" ]]; then
-    # WSL/DevContainers用の手動エージェント起動
-    if [ -z "$SSH_AUTH_SOCK" ]; then
-        eval "$(ssh-agent -s)" > /dev/null
-        if [ -f ~/.ssh/id_ed25519_github_thinkpad ]; then
-            ssh-add ~/.ssh/id_ed25519_github_thinkpad 2>/dev/null
-        fi
-    fi
-else
-    # macOSの場合は、~/.ssh/config で UseKeychain yes を設定することを推奨
-    # (ここでは余計なバックグラウンドプロセスを起動させない)
-fi
+
 
 # ------------------------------------------------------------------------------
 # 7. Machine Specific Overrides (マシン固有のローカル設定読み込み)
@@ -217,30 +199,4 @@ tmk() {
 
 alias tml='tmux ls'
 
-# ==========================================
-# Remote Execution (SSH Wrappers)
-# ==========================================
-# 汎用リモート実行コマンド (e.g., on thinkpad docker ps)
-on() {
-  local target="$1"
-  shift
-  ssh -t "$target" "$@"
-}
 
-# Zellij への最速アクセス用プレフィックス関数
-th-zj() {
-  if [ -z "$1" ]; then
-    ssh -t thinkpad '/home/mikoto/.local/bin/zellij attach -c main'
-  else
-    ssh -t thinkpad "/home/mikoto/.local/bin/zellij attach -c '$1'"
-  fi
-}
-
-# herdr への最速アクセス用プレフィックス関数
-th-hd() {
-  if [ -z "$1" ]; then
-    ssh -t thinkpad '/home/mikoto/.local/bin/herdr'
-  else
-    ssh -t thinkpad "/home/mikoto/.local/bin/herdr session attach '$1'"
-  fi
-}
