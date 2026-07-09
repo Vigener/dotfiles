@@ -113,6 +113,7 @@ export const editRules = [
       .condition(ifVar("eisuu_pressed", 1)),
 
     // 行頭・行末 (Mac標準: Cmd+← / Cmd+→)
+    // 視覚的な折り返し行に対応するため、Emacsバインド(Ctrl+A/E)ではなくこちらを採用
     map("s", "optionalAny")
       .to("left_arrow", "command")
       .condition(ifVar("eisuu_pressed", 1)),
@@ -134,7 +135,7 @@ export const editRules = [
       .condition(ifVar("eisuu_pressed", 1)),
 
     // 【選択】「eisuu + d」の挙動
-    // 行全体を選択する挙動(行頭移動 -> Shift+Cmd+→)を再現
+    // 視覚的な折り返し行に対応するため、Cmd+← -> Shift+Cmd+→ (行頭移動 -> 行末まで選択) を採用
     map("d", "optionalAny")
       .to("left_arrow", "command")
       .to("right_arrow", ["command", "shift"])
@@ -142,8 +143,11 @@ export const editRules = [
 
     // -------------------------------------------------------------
     // 3. 【Cmdショートカットの模倣】 (Macの主要Cmdショートカットを英数起点で発火)
-    // ※ s, d, f, q, w は別機能のため除外済み
+    // ※ s, d, f, q は別機能のため除外済み
     // -------------------------------------------------------------
+    map("w", "optionalAny")
+      .to("w", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Close Tab/Window
     map("z", "optionalAny")
       .to("z", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Undo
@@ -165,9 +169,15 @@ export const editRules = [
     map("e", "optionalAny")
       .to("e", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Vivaldi Quick Command等
+    map("g", "optionalAny")
+      .to("g", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Find Next等
     map("r", "optionalAny")
       .to("r", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Reload
+    map("t", "left_control", "any")
+      .to("t", ["left_command", "left_option"])
+      .condition(ifVar("eisuu_pressed", 1)), // New Tab in Group
     map("t", "optionalAny")
       .to("t", "command")
       .condition(ifVar("eisuu_pressed", 1)), // New Tab

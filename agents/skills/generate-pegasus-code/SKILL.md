@@ -23,6 +23,7 @@ Claude Sonnet 4.6 または Gemini 3.1 Pro または DeepSeek V4 Pro
   - OpenMPI: `module load openmpi/<バージョン>`
   - Intel MPI: `module load intmpi/<バージョン>`
 - **ジョブ管理システム**: NEC NQSV (`qsub`, `qstat`, `qdel`)。ディレクティブは `#PBS` を使用。
+  - **確認コマンド**: キュー状況の確認は `qstat -Q`。(`qstat -q` は引数エラーになる)。全ジョブ一覧は `qstat -a`（出力が空の場合はクラスタ全体にジョブがなく貸切状態を意味する）。
 
 ### 【コーディング・スクリプト作成ルール】
 

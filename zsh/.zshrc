@@ -41,6 +41,8 @@ setopt auto_cd
 
 source $ZSH/oh-my-zsh.sh
 
+# 大文字小文字を区別せずに補完する (cd de -> Desktop)
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # ------------------------------------------------------------------------------
 # 3. Environment Variables & Paths (環境変数とパス設定)
 # ------------------------------------------------------------------------------
@@ -214,3 +216,31 @@ tmk() {
 }
 
 alias tml='tmux ls'
+
+# ==========================================
+# Remote Execution (SSH Wrappers)
+# ==========================================
+# 汎用リモート実行コマンド (e.g., on thinkpad docker ps)
+on() {
+  local target="$1"
+  shift
+  ssh -t "$target" "$@"
+}
+
+# Zellij への最速アクセス用プレフィックス関数
+th-zj() {
+  if [ -z "$1" ]; then
+    ssh -t thinkpad '/home/mikoto/.local/bin/zellij attach -c main'
+  else
+    ssh -t thinkpad "/home/mikoto/.local/bin/zellij attach -c '$1'"
+  fi
+}
+
+# herdr への最速アクセス用プレフィックス関数
+th-hd() {
+  if [ -z "$1" ]; then
+    ssh -t thinkpad '/home/mikoto/.local/bin/herdr'
+  else
+    ssh -t thinkpad "/home/mikoto/.local/bin/herdr session attach '$1'"
+  fi
+}

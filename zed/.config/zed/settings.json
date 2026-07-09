@@ -7,11 +7,16 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "terminal": {
+    "option_as_meta": true,
+  },
+  "minimap": {
+    "show": "never",
+  },
   "agent_servers": {
-    "gemini": {
-      "default_mode": "autoEdit",
-      "type": "registry"
-    }
+    "opencode": {
+      "type": "registry",
+    },
   },
   "cli_default_open_behavior": "new_window",
   "outline_panel": {},
@@ -20,9 +25,9 @@
     "tool_permissions": {
       "tools": {
         "create_directory": {
-          "default": "allow"
-        }
-      }
+          "default": "allow",
+        },
+      },
     },
     "default_profile": "write",
     "default_model": {

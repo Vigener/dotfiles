@@ -1,0 +1,80 @@
+{
+  "exclusionRules": [
+    {
+      "passKeys": "f",
+      "pattern": "https?://www.youtube.com/*"
+    },
+    {
+      "passKeys": ">",
+      "pattern": "https?://www.youtube.com/*"
+    },
+    {
+      "passKeys": "<",
+      "pattern": "https?://www.youtube.com/*"
+    },
+    {
+      "passKeys": "f",
+      "pattern": "https?://abema.tv/*"
+    },
+    {
+      "passKeys": "d",
+      "pattern": "https?://www.youtube.com/*"
+    },
+    {
+      "passKeys": "s",
+      "pattern": "https?://www.youtube.com/*"
+    },
+    {
+      "passKeys": "d",
+      "pattern": "https?://www.amazon.co.jp/*"
+    },
+    {
+      "passKeys": "s",
+      "pattern": "https?://www.amazon.co.jp/*"
+    },
+    {
+      "passKeys": "All",
+      "pattern": "https?://connect.raspberrypi.com/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://typing.twi1.me/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://congenial-space-giggle-xx9x6g5vj6v2g97.github.dev/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://www.e-typing.ne.jp/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://sushida.net/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://hapitas.jp/*"
+    },
+    {
+      "passKeys": "",
+      "pattern": "https?://1000-day-anniversary.vercel.app/*"
+    },
+    {
+      "passKeys": "d",
+      "pattern": "https?://*"
+    },
+    {
+      "passKeys": "v",
+      "pattern": "https?://*"
+    },
+    {
+      "passKeys": "t",
+      "pattern": "https?://*"
+    }
+  ],
+  "keyMappings": "# Insert your preferred key mappings here.\nmap p removeTab",
+  "newTabDestination": "browserNewTabPage",
+  "settingsVersion": "2.4.2",
+  "userDefinedLinkHintCss": "#vimiumHintMarkerContainer div.internalVimiumHintMarker, #vimiumHintMarkerContainer div.vimiumHintMarker {\n  padding: 3px 4px;\n  background: #444;\n  border: none;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n\n#vimiumHintMarkerContainer div span {\n  color: #fff;\n  text-shadow: none;\n}\n\n#vimiumHintMarkerContainer div > .matchingCharacter {\n  opacity: 0.4;\n}\n\n#vimiumHintMarkerContainer div > .matchingCharacter ~ span {\n  color: hotpink;\n}\n\n#vomnibar {\n  background: #444;\n  border: none;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n  animation: show 200ms cubic-bezier(0, 0, 0.2, 1) forwards;\n}\n\n@keyframes show {\n  0% {\n    transform: translateY(50px);\n    opacity: 0;\n  }\n  100% {\n    transform: translateY(0);\n    opacity: 1;\n  }\n}\n\n#vomnibar .vomnibarSearchArea,\n#vomnibar input {\n  color: #fff;\n  background: transparent;\n  border: none;\n}\n\n#vomnibar .vomnibarSearchArea {\n  padding: 10px 30px;\n}\n\n#vomnibar input {\n  padding: 0;\n}\n\n#vomnibar ul {\n  padding: 0;\n  background: #444;\n  border-top: 1px solid #333;\n}\n\n#vomnibar li {\n  padding: 10px;\n  border-bottom: 1px solid #333;\n}\n\n#vomnibar li .vomnibarTopHalf,\n#vomnibar li .vomnibarBottomHalf {\n  padding: 3px 0;\n}\n\n#vomnibar li .vomnibarSource {\n  color: #aaa;\n}\n\n#vomnibar li em,\n#vomnibar li .vomnibarTitle {\n  color: #aaa;\n}\n\n#vomnibar li .vomnibarUrl {\n  color: #777;\n}\n\n#vomnibar li .vomnibarMatch {\n  color: hotpink;\n  font-weight: normal;\n}\n\n#vomnibar li .vomnibarTitle .vomnibarMatch {\n  color: hotpink;\n}\n\n#vomnibar li.vomnibarSelected {\n  background-color: #333;\n}\n\ndiv.vimiumHUD {\n  background: #444;\n  border: none;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n\ndiv.vimiumHUD span#hud-find-input,\ndiv.vimiumHUD .vimiumHUDSearchAreaInner {\n  color: #fff;\n}\n\ndiv.vimiumHUD .hud-find {\n  background-color: transparent;\n  border: none;\n}\n\ndiv.vimiumHUD .vimiumHUDSearchArea {\n  background-color: transparent;\n}"
+}

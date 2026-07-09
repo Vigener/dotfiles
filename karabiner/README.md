@@ -11,6 +11,13 @@
   - おそらく、内蔵キーボードに合わせる方が自然な気がする。
   - ただし、デバイス毎に設定を分けることで、両立できると考えられるため、実装検討中。
 
+## メモ（キー割り当ての決定経緯など）
+
+- **YouTube Music（ブラウザ5番目のタブ）を「かな＋8」にした理由**
+  - 音量系操作（U:アップ、I:ダウン、Y:ミュート）との近さと、音楽という絶対的サブタスク（バックグラウンド用）であることから、できればノールックで瞬間的に押したい作業であるため。
+  - ノー・ルックで押しやすいキーを考慮すると、右手の中指と薬指を自然と伸ばした先にある「8」と「0」が候補として残った。その上で、UとIの上にある「8」を採用した。
+  - 今後「かなキー＋数字」の割り当てが増える場合、基本的には「メインブラウザの先頭から何番目のタブにあるか」に数字キーを関連付けるのが無難。しかし、右手で押しづらい「1〜5」については、アルファベットキーに割り当てる方針とする（現に1〜4番目のタブはGemini, Hub, Slack, Calendarとしてアルファベットに割り当て済みであり、残り1つ程度であればアルファベットで賄えるはずであるため）。
+
 ## マッピング表
 
 対象: karabiner/index.ts の現行有効ルール（コメントアウト行は除外）
@@ -71,8 +78,9 @@
 | O + optionalAny     | eisuu_pressed = 1 | Backspace                 | 1文字削除   |
 | [ + optionalAny     | eisuu_pressed = 1 | Delete Forward            | 前方削除    |
 | Q + optionalAny     | eisuu_pressed = 1 | Escape                    | ESC         |
+| W + optionalAny     | eisuu_pressed = 1 | Cmd+W                     | タブを閉じる |
 | Space + optionalAny | eisuu_pressed = 1 | Cmd+Space                 | Raycast起動 |
-| D + optionalAny     | eisuu_pressed = 1 | Cmd+Left, Shift+Cmd+Right | 行選択      |
+| D + optionalAny     | eisuu_pressed = 1 | Cmd+Left -> Shift+Cmd+Right | 一行選択    |
 
 #### Cmdショートカット模倣
 
@@ -85,7 +93,9 @@
 | N + optionalAny | eisuu_pressed = 1 | Cmd+N | New             |
 | A + optionalAny | eisuu_pressed = 1 | Cmd+A | Select All      |
 | E + optionalAny | eisuu_pressed = 1 | Cmd+E | Quick Command等 |
+| G + optionalAny | eisuu_pressed = 1 | Cmd+G | Find Next等     |
 | R + optionalAny | eisuu_pressed = 1 | Cmd+R | Reload          |
+| Ctrl+T (+ any)  | eisuu_pressed = 1 | Cmd+Opt+T | New Tab in Group |
 | T + optionalAny | eisuu_pressed = 1 | Cmd+T | New Tab         |
 | P + optionalAny | eisuu_pressed = 1 | Cmd+P | Print / Palette |
 | / + optionalAny | eisuu_pressed = 1 | Cmd+/ | コメント切替    |
@@ -99,11 +109,7 @@
 | Ctrl+Shift+3 (+ any) | eisuu_pressed = 1 | Cmd+Shift+Ctrl+3 | 全画面キャプチャ（クリップボード） |
 | Shift+3 (+ any)      | eisuu_pressed = 1 | Cmd+Shift+3      | 全画面キャプチャ（保存）           |
 
-### WINDOW（グローバル）
 
-| ルール                          | 入力   | 条件 | 出力  | 備考       |
-| ------------------------------- | ------ | ---- | ----- | ---------- |
-| 【WINDOW】タブを閉じる (Ctrl+Q) | Ctrl+Q | なし | Cmd+W | グローバル |
 
 ### WINDOW（かなレイヤー）
 
@@ -156,7 +162,8 @@
 | A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
 | M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
 | Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
-| S + optionalAny | kana_pressed = 1 | Open: Slack (トグル)                                                                  |                     |
+| S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
+| W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | T + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
 | B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          |                     |
@@ -165,8 +172,8 @@
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
 | G + optionalAny | kana_pressed = 1 | Open: Zen Browser + Cmd+1 (常時Geminiタブへ)                                          | Geminiタブへジャンプ |
 | P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint (サイクル)                                                 | 起動中は Cmd+[     |
-| R + optionalAny | kana_pressed = 1 | Open: Preview (サイクル)                                                              | 起動中は Cmd+[     |
-| C + optionalAny | kana_pressed = 1 | Open: Notion Calendar (ダブルタップ)                                                  | Cmd+Ctrl+K → Cmd+1 |
+| C + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+4 (常時Calendarタブへ)                                                | Calendarタブへジャンプ |
+| 8 + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+5 (常時Musicタブへ)                                                   | YouTube Musicタブへジャンプ |
 
 ### AZIK（日本語入力）
 

@@ -15,6 +15,7 @@ const APP_REGISTRY: Record<string, string> = {
   Zed: "^dev\\.zed\\.Zed$",
   "Visual Studio Code": "^com\\.microsoft\\.VSCode$",
   Warp: "^dev\\.warp\\.Warp-Stable$",
+  Ghostty: "^com\\.mitchellh\\.ghostty$",
   // --- コミュニケーション ---
   Slack: "^com\\.tinyspeck\\.slackmacgap$",
   Mail: "^com\\.apple\\.mail$",
@@ -109,13 +110,42 @@ function toggleAppOrSendKey(
 }
 
 // =====================================================================
+// 🛠️ ヘルパー関数5: Notion Calendar呼び出し (ダブルタップ機構)
+// =====================================================================
+function openNotionCalendar(key: FromKeyParam) {
+  return [
+    // 【2回目タップ】 500ms以内に再度キーが押されたら Cmd+1 を送信しウィンドウ展開
+    map(key, "optionalAny")
+      .to("1", "left_command")
+      .toVar("notion_cal_tapped", 0) // フラグを即座にリセット
+      .condition(ifVar("kana_pressed", 1), ifVar("notion_cal_tapped", 1)),
+
+    // 【1回目タップ】 常駐バーを開く(Cmd+Ctrl+K) + フラグを1にし、500ms後に0に戻す
+    map(key, "optionalAny")
+      .to("k", ["left_command", "left_control"])
+      .toVar("notion_cal_tapped", 1)
+      .toDelayedAction(
+        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
+        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
+      )
+      .condition(
+        ifVar("kana_pressed", 1),
+        ifVar("notion_cal_tapped", 0), // まだタップされていない場合のみ発火
+      ),
+  ];
+}
+
+// =====================================================================
 // 🌐 現在のメインブラウザ設定
 //    ブラウザ変更時はここだけを書き換える
 // =====================================================================
 const MAIN_BROWSER = "Dia";
 // タブ配置: Cmd+2 で思考ハブ (N キー用)、Cmd+1 で Antigravity タブ (G キー用)
-const BROWSER_HUB_TAB = "2"; // かな+N: 思考ハブタブ
 const BROWSER_AGENT_TAB = "1"; // かな+G: Antigravityタブ
+const BROWSER_HUB_TAB = "2"; // かな+N: 思考ハブタブ
+const BROWSER_SLACK_TAB = "3"; // かな+S: Slackタブ
+const BROWSER_CALENDAR_TAB = "4"; // かな+C: カレンダータブ
+const BROWSER_MUSIC_TAB = "5"; // かな+8: YouTube Musicタブ
 
 export const launcherRules = [
   // =====================================================================
@@ -141,7 +171,8 @@ export const launcherRules = [
     ...toggleApp("a", "Antigravity"),
     ...toggleApp("m", "Zed"),
     ...toggleApp("z", "Zed"),
-    ...toggleApp("s", "Slack"),
+    // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
+    ...toggleAppWithKey("s", MAIN_BROWSER, BROWSER_SLACK_TAB, ["command"]),
     ...toggleApp("w", "Warp"),
     ...toggleApp("t", "Warp"),
     ...toggleApp("e", "Mail"),
@@ -156,27 +187,11 @@ export const launcherRules = [
     // 🚀 Gキー: メインブラウザを呼び出し、Cmd+[BROWSER_AGENT_TAB] でタブへジャンプ
     ...toggleAppWithKey("g", MAIN_BROWSER, BROWSER_AGENT_TAB, ["command"]),
 
-    // -------------------------------------------------------------
-    // 📅 Notion Calendar (ダブルタップ機構)
-    // -------------------------------------------------------------
-    // 【2回目タップ】 500ms以内に再度 c が押されたら Cmd+1 を送信しウィンドウ展開
-    map("c", "optionalAny")
-      .to("1", "left_command")
-      .toVar("notion_cal_tapped", 0) // フラグを即座にリセット
-      .condition(ifVar("kana_pressed", 1), ifVar("notion_cal_tapped", 1)),
+    // 🚀 Cキー: メインブラウザを呼び出し、Cmd+[BROWSER_CALENDAR_TAB] でタブへジャンプ
+    ...toggleAppWithKey("c", MAIN_BROWSER, BROWSER_CALENDAR_TAB, ["command"]),
 
-    // 【1回目タップ】 常駐バーを開く(Cmd+Ctrl+K) + フラグを1にし、500ms後に0に戻す
-    map("c", "optionalAny")
-      .to("k", ["left_command", "left_control"])
-      .toVar("notion_cal_tapped", 1)
-      .toDelayedAction(
-        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
-        [{ set_variable: { name: "notion_cal_tapped", value: 0 } }],
-      )
-      .condition(
-        ifVar("kana_pressed", 1),
-        ifVar("notion_cal_tapped", 0), // まだタップされていない場合のみ発火
-      ),
+    // 🎵 8キー: メインブラウザを呼び出し、Cmd+[BROWSER_MUSIC_TAB] でタブへジャンプ (YouTube Music)
+    ...toggleAppWithKey("8", MAIN_BROWSER, BROWSER_MUSIC_TAB, ["command"]),
 
     // -------------------------------------------------------------
     // アプリ起動 (ドキュメント系: サイクル式)
