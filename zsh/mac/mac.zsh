@@ -32,3 +32,6 @@ th-hd() {
     ssh -t thinkpad "/home/mikoto/.local/bin/herdr session attach '$1'"
   fi
 }
+
+# ローカルクライアントを使ったリモート接続
+alias hdr="herdr --remote thinkpad"
