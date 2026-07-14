@@ -12,3 +12,11 @@ npm-debug.log*
 
 # Vibe Dictator vocabulary
 vocabulary.json
+
+# Typst build outputs
+*.pdf
+
+# Logs and session files
+*.log
+session.json
+
