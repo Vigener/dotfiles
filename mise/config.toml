@@ -6,6 +6,7 @@ node = "lts"
 npm = "latest"
 python = "3.12"
 rust = "stable"
+typst = "0.15.0"
 uv = "latest"
 
 # タスク定義
