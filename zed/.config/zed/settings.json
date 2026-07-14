@@ -42,6 +42,8 @@
     "model_parameters": [],
   },
   "git_panel": {
+    "sort_by": "path",
+    "tree_view": false,
     "dock": "left",
   },
   "project_panel": {
