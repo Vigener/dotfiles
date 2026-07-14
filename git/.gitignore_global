@@ -2,6 +2,3 @@
 *.swp
 *.swo
 *~
-
-# Binary files - sync separately (not git-managed)
-*.pdf
