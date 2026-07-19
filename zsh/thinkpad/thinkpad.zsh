@@ -61,3 +61,19 @@ zjl() {
     zellij attach -c "$session"
   fi
 }
+
+# ==========================================
+# VSCode Remote Spot-Summoning Alias
+# ==========================================
+code() {
+    MAC_IP=$(echo $SSH_CLIENT | awk '{print $1}')
+    MAC_USER="mikoto"
+    if [ -z "$1" ]; then
+        TARGET_DIR=$(pwd)
+    else
+        TARGET_DIR=$(realpath "$1")
+    fi
+    # Execute 'code' command on Mac to open this remote directory
+    ssh -o StrictHostKeyChecking=no $MAC_USER@$MAC_IP "/usr/local/bin/code --folder-uri vscode-remote://ssh-remote+thinkpad$TARGET_DIR"
+}
+
