@@ -39,7 +39,10 @@
 
   // 数式番号はデフォルトで有効にし、必要な文書だけ無効化できるようにする
   set math.equation(numbering: "(1)")
-  
+
+  // 表のキャプションを常に上部に配置する
+  show figure.where(kind: table): set figure.caption(position: top)
+
   // 通常リンクは控えめな青 + 下線にして、提出文書でも浮きすぎない見た目にする
   show link: it => {
     underline(text(fill: rgb("#2f5ea8"))[#it])
