@@ -87,6 +87,7 @@
 | 入力            | 条件              | 出力  | 用途            |
 | --------------- | ----------------- | ----- | --------------- |
 | Z + optionalAny | eisuu_pressed = 1 | Cmd+Z | Undo            |
+| Y + optionalAny | eisuu_pressed = 1 | Cmd+Y | Redo / History  |
 | X + optionalAny | eisuu_pressed = 1 | Cmd+X | Cut             |
 | C + optionalAny | eisuu_pressed = 1 | Cmd+C | Copy            |
 | V + optionalAny | eisuu_pressed = 1 | Cmd+V | Paste           |

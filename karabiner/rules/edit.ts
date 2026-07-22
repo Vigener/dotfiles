@@ -151,6 +151,9 @@ export const editRules = [
     map("z", "optionalAny")
       .to("z", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Undo
+    map("y", "optionalAny")
+      .to("y", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Redo / History
     map("x", "optionalAny")
       .to("x", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Cut
