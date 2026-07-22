@@ -14,6 +14,9 @@
     "show": "never",
   },
   "agent_servers": {
+    "pi-acp": {
+      "type": "registry"
+    },
     "opencode": {
       "type": "registry",
     },
@@ -29,11 +32,15 @@
         },
       },
     },
-    "default_profile": "write",
+    "commit_message_model": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-flash"
+    },
+    "default_profile": "ask",
     "default_model": {
       "effort": "high",
       "provider": "deepseek",
-      "model": "deepseek-v4-pro",
+      "model": "deepseek-v4-flash",
       "enable_thinking": true,
     },
     "dock": "right",
