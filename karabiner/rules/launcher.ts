@@ -13,6 +13,7 @@ const APP_REGISTRY: Record<string, string> = {
   // --- 開発ツール ---
   Antigravity: "^com\\.google\\.antigravity$",
   Zed: "^dev\\.zed\\.Zed$",
+  Cursor: "^com\\.todesktop\\.230313mzl4w4u92$",
   "Visual Studio Code": "^com\\.microsoft\\.VSCode$",
   Warp: "^dev\\.warp\\.Warp-Stable$",
   Ghostty: "^com\\.mitchellh\\.ghostty$",
@@ -169,7 +170,7 @@ export const launcherRules = [
     // -------------------------------------------------------------
     ...toggleApp("o", "Obsidian"),
     ...toggleApp("a", "Antigravity"),
-    ...toggleApp("m", "Zed"),
+    ...toggleApp("m", "Cursor"),
     ...toggleApp("z", "Zed"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
     ...toggleAppWithKey("s", MAIN_BROWSER, BROWSER_SLACK_TAB, ["command"]),

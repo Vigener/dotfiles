@@ -161,8 +161,8 @@
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
 | A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
-| M + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
-| Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     | メインエディタ      |
+| M + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | メインエディタ      |
+| Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     |                     |
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | T + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
