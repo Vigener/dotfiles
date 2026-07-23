@@ -120,7 +120,7 @@
 | --------------- | ---------------- | ---------- | -------------- |
 | H + optionalAny | kana_pressed = 1 | Ctrl+Left  | 左のスペース   |
 | L + optionalAny | kana_pressed = 1 | Ctrl+Right | 右のスペース   |
-| J + optionalAny | kana_pressed = 1 | Cmd+H      | 隠す           |
+| J + optionalAny | kana_pressed = 1 | Cmd+M      | 最小化         |
 | K + optionalAny | kana_pressed = 1 | Ctrl+Cmd+F | フルスクリーン |
 
 #### Raycast Windows Management (かなレイヤー)
@@ -134,6 +134,13 @@
 | ; + optionalAny       | kana_pressed = 1 | Ctrl+Up            | Mission Control    |
 | : + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+R     | Reasonable Size    |
 | international1        | kana_pressed = 1 | Cmd+Opt+Ctrl+N     | Next Displayへ移動 |
+
+#### Raycast Switch Windows
+
+| 入力                       | 条件              | 出力         | 想定アクション        |
+| -------------------------- | ----------------- | ------------ | --------------------- |
+| Right Cmd + optionalAny    | kana_pressed = 1  | Cmd+Opt+Tab  | Switch Windows を開く |
+| Tab + optionalAny          | eisuu_pressed = 1 | Cmd+Opt+Tab  | 同上（キーボード差吸収） |
 
 ### WINDOW（Raycast Windows Management - グローバル）
 

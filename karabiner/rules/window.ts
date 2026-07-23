@@ -31,8 +31,8 @@ export const windowRules = [
         .to("right_arrow", "control")
         .condition(ifVar("kana_pressed", 1)), // 右のスペース
       map("j", "optionalAny")
-        .to("h", "command")
-        .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
+        .to("m", "command")
+        .condition(ifVar("kana_pressed", 1)), // 最小化 (Cmd+M)
       map("k", "optionalAny")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
@@ -79,12 +79,16 @@ export const windowRules = [
       // -------...---------
       // 3. アプリ自体の切り替え(RaycastのSwitch Windows連携)
       // -------...---------
-      // `Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」で発火させる
+      // `Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」および「英数+Tab」で発火させる
       // 同時にRaycast操作用の変数を1(ON)にする
       map("right_command", "optionalAny")
         .to("tab", ["left_command", "left_option"])
         .toVar("raycast_window_mode", 1)
         .condition(ifVar("kana_pressed", 1)),
+      map("tab", "optionalAny")
+        .to("tab", ["left_command", "left_option"])
+        .toVar("raycast_window_mode", 1)
+        .condition(ifVar("eisuu_pressed", 1)),
 
       // ======= Raycast Switch Windows モード中の Vim風キーバインド =======
       // ※ 修飾キーなしの単押しのみ許可し、予期せぬ暴発を防ぐ
