@@ -45,6 +45,7 @@
 | 【SYS】英数/かなキーをモディファイア化                | CapsLock + optionalAny       | なし | Left Option                                                       | CapsLockをOption化 |
 | 【SYS】英数/かなキーをモディファイア化                | japanese_eisuu + optionalAny | なし | 変数 eisuu_pressed=1（押下中）, keyupで0, 単押しで japanese_eisuu | 英数レイヤーフラグ |
 | 【SYS】英数/かなキーをモディファイア化                | japanese_kana + optionalAny  | なし | 変数 kana_pressed=1（押下中）, keyupで0, 単押しで japanese_kana   | かなレイヤーフラグ |
+| 【SYS】右Cmdを右Shiftに変換（かな押下中は除外）       | right_command + optionalAny  | kana_pressed ≠ 1 | Right Shift                                                | 腱鞘炎対策。かな+Right Cmd は従来どおり |
 | 【SYS】ろキー(international1)をバックスラッシュに変換 | international1               | なし | Option+international3                                             | JIS補正            |
 
 ### EDIT（英数レイヤー）

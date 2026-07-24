@@ -122,3 +122,20 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 - `かな+J`: `Cmd+M` → **`Cmd+H` に復帰**
 - 残すもの: `英数+Tab` / `かな+Right Cmd` → Raycast Switch Windows
 - 残さないもの: Cursor IDE/Agents の Karabiner 内分離トグル
+
+## 2026年7月24日: 英数+; → Enter と 右Cmd → 右Shift（腱鞘炎対策）
+
+### 背景
+右手小指の移動（Enter・右Shift）が多く、腱鞘炎気味。Windows 時代は AutoHotKey で類似対策をしていた。
+
+### 変更
+1. **`英数+;` → Enter（optionalAny）**  
+   全環境で効く小指負担軽減。修飾キー付きの冗長列挙は optionalAny 1本に整理。
+2. **`右Cmd` → `右Shift`（かな押下中は除外）**  
+   JIS で押しやすい Shift 代替。右Cmd を Cmd としてほぼ使っていない前提。  
+   `かな+Right Cmd`（Raycast Switch Windows）は `kana_pressed` 条件で維持。  
+   物理左右 Shift は残す。研究室 HHKB 中央キー Shift と「親指付近で Shift」のモデルを揃える試作。
+
+### 使い方の注意
+- 右Cmd+クリックは Shift+クリックになる。
+- 右Cmd 単体の Cmd 用途は消える。
