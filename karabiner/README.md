@@ -78,6 +78,7 @@
 | O + optionalAny     | eisuu_pressed = 1 | Backspace                 | 1文字削除   |
 | [ + optionalAny     | eisuu_pressed = 1 | Delete Forward            | 前方削除    |
 | Q + optionalAny     | eisuu_pressed = 1 | Escape                    | ESC         |
+| ; + optionalAny     | eisuu_pressed = 1 | Enter                     | Enter（小指負担軽減） |
 | W + optionalAny     | eisuu_pressed = 1 | Cmd+W                     | タブを閉じる |
 | Space + optionalAny | eisuu_pressed = 1 | Cmd+Space                 | Raycast起動 |
 | D + optionalAny     | eisuu_pressed = 1 | Cmd+Left -> Shift+Cmd+Right | 一行選択    |

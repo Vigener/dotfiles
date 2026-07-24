@@ -73,29 +73,6 @@ export const editRules = [
       .to("delete_forward", "left_option")
       .condition(ifVar("eisuu_pressed", 1)),
 
-    // 英数+; を Enter に変換 (修飾キー付きも保持)
-    map("semicolon", ["shift", "control", "option"])
-      .to("return_or_enter", ["shift", "control", "option"])
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", ["shift", "control"])
-      .to("return_or_enter", ["shift", "control"])
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", ["shift", "option"])
-      .to("return_or_enter", ["shift", "option"])
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", ["control", "option"])
-      .to("return_or_enter", ["control", "option"])
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", "shift")
-      .to("return_or_enter", "shift")
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", "control")
-      .to("return_or_enter", "control")
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("semicolon", "option")
-      .to("return_or_enter", "option")
-      .condition(ifVar("eisuu_pressed", 1)),
-
     // -------------------------------------------------------------
     // 2. 【基本ルール】 通常の移動と操作 (optionalAny適用)
     // -------------------------------------------------------------
@@ -129,6 +106,10 @@ export const editRules = [
       .to("delete_forward")
       .condition(ifVar("eisuu_pressed", 1)),
     map("q", "optionalAny").to("escape").condition(ifVar("eisuu_pressed", 1)),
+    // 英数+; → Enter（物理修飾キーは押したまま残るので Shift+Enter 等も可）
+    map("semicolon", "optionalAny")
+      .to("return_or_enter")
+      .condition(ifVar("eisuu_pressed", 1)),
     // Mac標準のCmd+Spaceを発火させ、Raycastを起動する
     map("spacebar", "optionalAny")
       .to("spacebar", "command")
