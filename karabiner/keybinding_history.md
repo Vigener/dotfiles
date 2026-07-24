@@ -70,3 +70,55 @@ Zellij のショートカットを変更する、または Zed のショート�
 - `英数+S`: `Ctrl+A` -> `Cmd+←`
 - `英数+F`: `Ctrl+E` -> `Cmd+→`
 - `英数+D` (一行選択): `Ctrl+A -> Shift+Ctrl+E` -> `Cmd+← -> Shift+Cmd+→`
+
+## 2026年7月23〜24日: Cursor IDE / Agents Window 区別と `かな+J`（Cmd+H vs Cmd+M）の検討
+
+### きっかけ
+Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存するようになった。当初は Karabiner の `かな+M`（Cursor トグル）を IDE / Agents で分けたい、という要望から調査を始めた。
+
+### 調査で分かったこと（同一アプリ内ウィンドウ）
+- IDE と Agents は同じ `Cursor.app`・同じ bundle ID。`ifApp` / `toApp` では区別できない。
+- Cmd+Tab もアプリ単位のため区別できない。ウィンドウ単位にするなら Raycast Switch Windows / AltTab 等が必要。
+- ウィンドウタイトル（Agents は概ね `Cursor Agents`）や CLI（`--classic` / `--chat`）+ AppleScript で理論上は分けられる。
+
+### 試して棄却したこと
+1. **`かな+A` = Agents / `かな+M` = IDE**（タイトルマッチ + CLI 起動のトグル）
+   - 実機では動かなかった。
+   - bundle ID 直起動に比べ CLI / AppleScript は遅く、満足感が落ちる。
+   - **結論:** 同一アプリ内のホットキー分離はメンテ対効果が合わない。`かな+M` は Cursor 一本に戻し、ウィンドウ切替はスイッチャーに任せる。
+2. **スイッチャー導線の追加**
+   - 既存: `かな+Right Cmd` → Raycast Switch Windows（`Cmd+Opt+Tab`）
+   - 追加: `英数+Tab` → 同上（キーボード差で Right Cmd が押しにくい場合の吸収）
+   - `かな+Tab` は一旦載せたが英数側へ移し、かな側は空けた（将来 Cmd+Tab＝アプリ単位を載せる案はあるが未採用）。
+
+### `かな+J`: Cmd+H（隠す）→ Cmd+M（最小化）→ 再 Cmd+H
+#### 問題意識
+- Cmd+H はアプリ単位で全ウィンドウが消える（Cursor の IDE+Agents、Dia+PiP がまとめて消える）。
+- ウィンドウ左上の黄色ボタン相当なら前面だけ退けられるのでは、という仮説。
+
+#### Cmd+M に切り替えた結果（2026-07-23）
+- ウィンドウ単位で退けられる利点はあった（最小化アニメは Dock 設定でほぼ気にならなくなった）。
+- 一方で **Cmd+M 後に次ウィンドウがアクティブ化されない**（黄色ボタンや Cmd+H とは異なる）。
+- その結果:
+  - 直前アプリへ自動復帰しない。
+  - 最小化直後もそのアプリが frontmost のままになり、`toggleApp`（例: `かな+T` = Warp）が「すでに前面」と誤認して 1 回目が空振りし、2 回押しが必要になる。
+
+#### 「最小化 + 次ウィンドウアクティブ化」案（未実装・見送り）
+- macOS に専用 API はなく、実体は次のいずれか:
+  1. Accessibility で黄色ボタン（`AXMinimizeButton`）を click する（OS の良い方の最小化に寄せる）。
+  2. Cmd+M 相当のあと、別ウィンドウ／別アプリを `frontmost` / `AXRaise` で明示前面化。
+- 後者 1. でも Karabiner → `osascript` 経由でおおよそ 100〜300ms 級のワンテンポが乗り、ネイティブ Cmd+H/M より遅い。
+- Electron での AX 成否も不安定になりうる（Agents 区別実験と同系統のリスク）。
+
+### 最終方針（2026-07-24）
+1. **`かな+J` は Cmd+H に戻し、アプリ単位で消える仕様を受け入れる。**
+2. 常用のウィンドウ操作は「消す」より「上に載せ替える／並べる」側を主とする。
+   - 配置: `かな+,` / `かな+.`（左右）
+   - 切替: `英数+Tab` / `かな+Right Cmd`（Raycast Switch Windows）
+3. `かな+J` の使用頻度は下げていく（稀に全ウィンドウが消えて驚く程度なら許容）。
+4. 黄色ボタン / 次フォーカス補完スクリプトは、投資対効果が見合わないため現時点では採用しない。
+
+### 変更内容（この決定に対応する実装）
+- `かな+J`: `Cmd+M` → **`Cmd+H` に復帰**
+- 残すもの: `英数+Tab` / `かな+Right Cmd` → Raycast Switch Windows
+- 残さないもの: Cursor IDE/Agents の Karabiner 内分離トグル

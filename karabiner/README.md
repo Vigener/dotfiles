@@ -120,7 +120,7 @@
 | --------------- | ---------------- | ---------- | -------------- |
 | H + optionalAny | kana_pressed = 1 | Ctrl+Left  | 左のスペース   |
 | L + optionalAny | kana_pressed = 1 | Ctrl+Right | 右のスペース   |
-| J + optionalAny | kana_pressed = 1 | Cmd+M      | 最小化         |
+| J + optionalAny | kana_pressed = 1 | Cmd+H      | 隠す           |
 | K + optionalAny | kana_pressed = 1 | Ctrl+Cmd+F | フルスクリーン |
 
 #### Raycast Windows Management (かなレイヤー)

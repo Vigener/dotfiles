@@ -31,8 +31,8 @@ export const windowRules = [
         .to("right_arrow", "control")
         .condition(ifVar("kana_pressed", 1)), // 右のスペース
       map("j", "optionalAny")
-        .to("m", "command")
-        .condition(ifVar("kana_pressed", 1)), // 最小化 (Cmd+M)
+        .to("h", "command")
+        .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
       map("k", "optionalAny")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
