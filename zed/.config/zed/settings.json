@@ -14,6 +14,9 @@
     "show": "never",
   },
   "agent_servers": {
+    "cursor": {
+      "type": "registry"
+    },
     "pi-acp": {
       "type": "registry"
     },
