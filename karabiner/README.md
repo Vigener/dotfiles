@@ -190,4 +190,4 @@
 | ルール                                         | 入力      | 条件                       | 出力    | 備考 |
 | ---------------------------------------------- | --------- | -------------------------- | ------- | ---- |
 | 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | quote     | Input Source language = ja | hyphen  | 長音 |
-| 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | semicolon | Input Source language = ja | x, t, u | 促音 |
+<!-- | 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | semicolon | Input Source language = ja | x, t, u | 促音（Google日本語入力競合のため無効化中） | -->

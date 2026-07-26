@@ -9,11 +9,12 @@ export const azikRules = [
     map("quote")
       .to("hyphen")
       .condition(ifInputSource({ language: "ja" })),
-    // セミコロンを「x, t, u」の3ストロークに変換
-    map("semicolon")
-      .to("x")
-      .to("t")
-      .to("u")
-      .condition(ifInputSource({ language: "ja" })),
+    // Google日本語入力のAZIKと競合するため、一旦コメントアウト
+    // // セミコロンを「x, t, u」の3ストロークに変換
+    // map("semicolon")
+    //   .to("x")
+    //   .to("t")
+    //   .to("u")
+    //   .condition(ifInputSource({ language: "ja" })),
   ]),
 ];
