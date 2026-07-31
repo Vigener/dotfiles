@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash '/home/mikoto/.cursor/herdr-agent-state.sh' session"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bash '/home/mikoto/.cursor/hooks/hpc-shell-gate.sh'",
+        "failClosed": true
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash '/home/mikoto/.cursor/hooks/on-stop-open-artifact.sh'"
+      }
+    ]
+  }
+}
