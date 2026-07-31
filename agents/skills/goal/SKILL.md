@@ -32,6 +32,8 @@ Antigravity 等の `/goal` に相当する薄い Cursor スキル。過剰なフ
 
 3. Success が曖昧なら作業を始めず、ユーザーに1問だけ確認する。
 4. 層判定: Goal 固定は Context。自動反復は Loop（Verifier 必須）。マルチエージェント分岐はまだ Graph と呼ばない。
+5. **締め（人間向け成果があるとき）**: HTML を保存し、スキル `open-artifact` で  
+   `[HTML → URL → ssh mac open]`（または `~/.cursor/open-on-stop.url` 経由の stop hook）。
 
 ## モデル
 
@@ -41,4 +43,6 @@ Antigravity 等の `/goal` に相当する薄い Cursor スキル。過剰なフ
 
 - HANDOFF テンプレ: `research-brain/inbox/HANDOFF_*.md`
 - Loop 最小定義: sandbox `docs/logs/goal_based_loop_min_2026-07-31.md`
+- Verifier smoke（Loop ではない）: sandbox `scripts/lane_a_verifier_smoke.sh`
 - 設定変更時: `update-agent-config`
+- 締め: `open-artifact`
