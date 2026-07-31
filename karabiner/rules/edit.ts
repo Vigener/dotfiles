@@ -68,6 +68,14 @@ export const editRules = [
       .to("b", ["left_command", "left_option"])
       .condition(ifVar("eisuu_pressed", 1)),
 
+    // 英数+Shift+Enter → Cmd+Shift+Enter（optionalAny より先に評価し、Raycast モードの Enter 解除と干渉しない）
+    map("return_or_enter", "left_shift", "any")
+      .to("return_or_enter", ["left_command", "left_shift"])
+      .condition(ifVar("eisuu_pressed", 1)),
+    map("return_or_enter", "right_shift", "any")
+      .to("return_or_enter", ["left_command", "left_shift"])
+      .condition(ifVar("eisuu_pressed", 1)),
+
     // Mac標準のOption+ForwardDeleteで「次の単語を削除」
     map("open_bracket", "left_control", "any")
       .to("delete_forward", "left_option")

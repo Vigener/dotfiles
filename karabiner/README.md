@@ -65,6 +65,7 @@
 | Ctrl+S (+ any) | eisuu_pressed = 1 | Cmd+Up        | 文頭へ              |
 | Ctrl+F (+ any) | eisuu_pressed = 1 | Cmd+Down      | 文末へ              |
 | Ctrl+O (+ any) | eisuu_pressed = 1 | Opt+Backspace | 単語削除            |
+| Shift+Enter (+ any) | eisuu_pressed = 1 | Cmd+Shift+Enter | 送信・確定系（小指負担軽減） |
 
 #### 基本移動・編集
 
