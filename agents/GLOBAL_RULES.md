@@ -20,3 +20,15 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
    - 成果物（レポートPDFや、概観用・提出物系のMarkdownファイル）は必ずプロジェクトルートに作成すること。
    - それらの中で参照する図表類（画像ファイル等）は、プロジェクトルートの `images/` ディレクトリに保存すること。
 </RULE[artifact_auto_sync]>
+
+<RULE[artifact_handoff_html]>
+# 成果物ハンドオフ（エージェント間 vs 人間レビュー）
+
+2026-07-31 取り決め。詳細手順はスキル `open-artifact` / `update-agent-config`。
+
+1. **エージェント間・中間成果**: Markdown / 構造化テキスト（差分・grep・機械可読を優先）。`inbox/`・`logs/`・作業ノート。
+2. **人間レビュー・保存版概念解説**: HTML（`wiki/`）。フォーマットガイド: `research-brain/.agents/references/wiki_formatting_guide.md`。
+3. **セッション終了時（best-effort）**: 人間向け HTML を更新したら `open-artifact` スキルに従い、MBA でブラウザを開く（`ssh mac 'open URL'`）。オフライン時の失敗は無視して URL をチャットに出す。
+4. **配信**: Thinkpad の `http-brain`（:8766）等。素の `python -m http.server` 禁止（`thinkpad-resident`）。
+5. **挙動設定の変更**: 必ず `update-agent-config` で層（Context / Harness / Loop / Graph A/B）を判定してから最小変更する。
+</RULE[artifact_handoff_html]>
