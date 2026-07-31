@@ -11,13 +11,16 @@ description: >-
 ## 標準フロー（Plan /goal の締めでも同じ）
 
 ```text
-1. 人間向け成果を HTML として wiki/ 等に保存
+1. 人間向け成果を HTML として保存
+   （トーン選択: スキル human-review-html → wiki/templates/human-review/ をコピー）
 2. Tailscale IP で URL を組み立てる
 3a. 今すぐ開く: ssh mac "open 'URL'"
 3b. セッション末に開く: URL を ~/.cursor/open-on-stop.url に書いて stop hook に任せる
 ```
 
 Cursor `stop` hook（`on-stop-open-artifact.sh`）は **3b のマーカーがあるときだけ**発火する。スキルとフックはセット。
+
+テンプレ案内: `http://<TS_IP>:8766/wiki/templates/human-review/INDEX.html`
 
 ## 前提
 
@@ -70,6 +73,7 @@ printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
 
 | スキル | 関係 |
 |---|---|
+| `human-review-html` | トーン別テンプレ選択・複製（`wiki/templates/human-review/`） |
 | `goal` | Goal 固定 → 作業 → **締めは本スキルで HTML open** |
 | `update-agent-config` | 挙動設定変更時の層判定 |
 | `adversarial-review` | HTML 化する前の品質ゲート（任意） |
