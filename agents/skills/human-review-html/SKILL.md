@@ -20,7 +20,7 @@ description: >-
 | **solo-deep** | `demo-solo-deep.html` | 自分用の腹落ち・概念整理 | 語りかけ可・図多め |
 | **meeting-wide** | `demo-meeting-wide.html` | 指導・ラボ MTG・Zoom 共有 | 語りかけなし・用語集・横長密度 |
 | **claim-lab** | `demo-claim-lab.html` | 論文前・Public 寄りの実験まとめ | 言ってよい/ダメ・再現・限界 |
-| **runbook** | `demo-runbook.html` | OTP/qsub 当日オペ | チェックリスト・短文 |
+| **runbook** | `demo-runbook.html` | OTP/qsub 当日オペ | チェックリスト・短文。`<pre>` コピーボタン＋`ul.check` は押せる（リロードで消える・保存なし） |
 | **scorecard** | `demo-scorecard.html` | 敵対レビュー結果の保存 | SCORE/Findings 固定 |
 
 案内ハブ: `INDEX.html`
@@ -40,6 +40,8 @@ description: >-
 - meeting / claim では「あなた」「僕」の語りかけを使わない。
 - solo では語りかけ可。Zoom 前提の過密レイアウトは避ける。
 - 紫グラデ単色・汎用ダッシュボード見た目に逃げない（既存デモの方向を踏襲）。
+- runbook の `ul.check > li` はテンプレ JS が本物の checkbox にする（**永続化しない**。リロードで未チェックに戻るでよい）。
+- スマホ／ntfy で開く成果物は **HTML のみ**（`.md` 直リンク禁止。`open-artifact` / `ntfy-notify` 参照）。
 
 ## 新しいテンプレを足すとき
 

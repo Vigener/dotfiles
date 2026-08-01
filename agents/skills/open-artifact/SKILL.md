@@ -28,6 +28,14 @@ Cursor `stop` hook（`on-stop-open-artifact.sh`）は **3b のマーカーがあ
 - 人間レビュー=HTML / エージェント間=Markdown
 - MBA オフライン時の失敗は無視して URL をチャットに出す
 
+## スマホ通知（ntfy）と Click URL
+
+任意で `~/bin/ntfy-notify "題" "本文" "$URL"` を併送してよい。
+
+**必須ルール: Click / スマホで開く URL は必ず `.html`。**  
+`.md` を http-brain で直開きすると `text/markdown`（charset なし）になり、Android で文字化け・極小表示になる。  
+`ntfy-notify` は `.md` の Click を拒否する。詳細: `wiki/ai-engineering/ntfy-phone-notify.md`
+
 ## 手順
 
 ### 1. パス → URL
@@ -68,6 +76,7 @@ printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
 
 - セッション失敗扱い / IP のドキュメント焼き付け / 素の `python -m http.server`
 - stop hook に重い agy/pi レビューを載せない（`adversarial-review` スキルを明示呼び出し）
+- **スマホ／ntfy の Click に `.md` を渡す**（必ず HTML 成果物の URL）
 
 ## 関連スキル
 
