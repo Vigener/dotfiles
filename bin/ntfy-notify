@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Send a phone push via ntfy. Usage:
+#   ntfy-notify "title" "body" [click-url]
+set -euo pipefail
+CFG="${NTFY_CONFIG_DIR:-$HOME/.config/ntfy}"
+TOPIC_FILE="$CFG/topic"
+SERVER_FILE="$CFG/server"
+TOPIC="${NTFY_TOPIC:-}"
+SERVER="${NTFY_SERVER:-}"
+[[ -z "$TOPIC" && -f "$TOPIC_FILE" ]] && TOPIC="$(tr -d '[:space:]' < "$TOPIC_FILE")"
+[[ -z "$SERVER" && -f "$SERVER_FILE" ]] && SERVER="$(tr -d '[:space:]' < "$SERVER_FILE")"
+SERVER="${SERVER:-https://ntfy.sh}"
+if [[ -z "$TOPIC" ]]; then
+  echo "ntfy-notify: missing topic. Put it in $TOPIC_FILE or set NTFY_TOPIC" >&2
+  exit 1
+fi
+TITLE="${1:-notify}"
+BODY="${2:-}"
+CLICK="${3:-}"
+# Phone Click URLs must be HTML. .md via http-brain is text/markdown (no charset)
+# and garbles / tiny-renders on Android.
+if [[ -n "$CLICK" ]]; then
+  case "$CLICK" in
+    *.md|*.md\#*|*.markdown|*.markdown\#*)
+      echo "ntfy-notify: refuse Click URL ending in .md — use .html for phone browsers" >&2
+      echo "  got: $CLICK" >&2
+      exit 2
+      ;;
+  esac
+fi
+args=(-sS -H "Title: ${TITLE}")
+[[ -n "$CLICK" ]] && args+=(-H "Click: ${CLICK}")
+args+=(-H "Tags: memo" -d "$BODY" "${SERVER}/${TOPIC}")
+exec curl "${args[@]}"
