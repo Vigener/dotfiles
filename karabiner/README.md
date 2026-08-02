@@ -66,8 +66,8 @@
 | Ctrl+F (+ any) | eisuu_pressed = 1 | Cmd+Down      | 文末へ              |
 | Ctrl+O (+ any) | eisuu_pressed = 1 | Opt+Backspace | 単語削除            |
 | Shift+Enter (+ any) | eisuu_pressed = 1 | Cmd+Shift+Enter | 送信・確定系（小指負担軽減） |
-| Ctrl+[ (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+[ | cmux 前ワークスペース等 |
-| Ctrl+] (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+] | cmux 次ワークスペース等 |
+| Ctrl+[ (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+[ | cmux 前ワークスペース等（JIS: close_bracket） |
+| Ctrl+] (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+] | cmux 次ワークスペース等（JIS: non_us_pound） |
 
 #### 基本移動・編集
 
@@ -105,8 +105,8 @@
 | P + optionalAny | eisuu_pressed = 1 | Cmd+P | Print / Palette |
 | B + optionalAny | eisuu_pressed = 1 | Cmd+B | Toggle Primary Sidebar |
 | U + optionalAny | eisuu_pressed = 1 | Cmd+U | Underline 等（Shift併用で Cmd+Shift+U） |
-| [ + optionalAny | eisuu_pressed = 1 | Cmd+[ | 戻る等（Ctrl併用で Cmd+Ctrl+[） |
-| ] + optionalAny | eisuu_pressed = 1 | Cmd+] | 進む等（Ctrl併用で Cmd+Ctrl+]） |
+| [ + optionalAny | eisuu_pressed = 1 | Cmd+[ | 戻る等（JIS key_code: close_bracket。Ctrl併用で Cmd+Ctrl+[） |
+| ] + optionalAny | eisuu_pressed = 1 | Cmd+] | 進む等（JIS key_code: non_us_pound。Ctrl併用で Cmd+Ctrl+]） |
 | / + optionalAny | eisuu_pressed = 1 | Cmd+/ | コメント切替    |
 
 #### スクリーンショット

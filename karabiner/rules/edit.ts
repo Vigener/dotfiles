@@ -76,12 +76,13 @@ export const editRules = [
       .to("return_or_enter", ["left_command", "left_shift"])
       .condition(ifVar("eisuu_pressed", 1)),
 
-    // 英数+Ctrl+[ / ] → Cmd+Ctrl+[ / ]（cmux ワークスペース切替。optionalAny より先に評価）
-    map("open_bracket", "left_control", "any")
-      .to("open_bracket", ["left_command", "left_control"])
-      .condition(ifVar("eisuu_pressed", 1)),
+    // 英数+Ctrl+[ / ] → Cmd+Ctrl+[ / ]
+    // JIS実機 (EventViewer): [ = close_bracket, ] = non_us_pound
     map("close_bracket", "left_control", "any")
       .to("close_bracket", ["left_command", "left_control"])
+      .condition(ifVar("eisuu_pressed", 1)),
+    map("non_us_pound", "left_control", "any")
+      .to("non_us_pound", ["left_command", "left_control"])
       .condition(ifVar("eisuu_pressed", 1)),
 
     // -------------------------------------------------------------
@@ -182,11 +183,12 @@ export const editRules = [
     map("u", "optionalAny")
       .to("u", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Underline / Cmd+U
-    map("open_bracket", "optionalAny")
-      .to("open_bracket", "command")
-      .condition(ifVar("eisuu_pressed", 1)), // Cmd+[（戻る等）
+    // JIS: [ = close_bracket, ] = non_us_pound（ANSI名とは一致しない）
     map("close_bracket", "optionalAny")
       .to("close_bracket", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Cmd+[（戻る等）
+    map("non_us_pound", "optionalAny")
+      .to("non_us_pound", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Cmd+]（進む等）
     map("slash", "optionalAny")
       .to("slash", "command")
