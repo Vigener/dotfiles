@@ -46,7 +46,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 export LANG=en_US.UTF-8
 
 # Cargo (Rust) / Local bin
-export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 
 # エディタのデフォルト設定
 export EDITOR='nvim'
@@ -198,3 +198,6 @@ tmk() {
 }
 
 alias tml='tmux ls'
+
+# Superset CLI
+export PATH="/home/mikoto/superset/bin:$PATH"
