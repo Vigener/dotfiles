@@ -102,6 +102,8 @@ onboarding = false
 # split_horizontal = "prefix+minus"
 # close_pane = "prefix+x"
 # zoom = "prefix+z"       # legacy alias: fullscreen
+# SSH/PTY では Cmd が届かないことが多い → Ctrl 系を正本に。手癖の Cmd+Shift+Enter は MBA の Karabiner でこれに変換する
+zoom = "ctrl+shift+enter"
 # resize_mode = "prefix+r"
 # toggle_sidebar = "prefix+b"
 
@@ -188,7 +190,7 @@ onboarding = false
 # accent = "cyan"
 
 # Background notification popup delivery
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 [ui.toast]
 # off = disable pop-up notifications
 # herdr = show in-app toasts
@@ -197,6 +199,7 @@ agent_panel_sort = "spaces"
 # delivery = "off"
 # delay_seconds = 1
 
+delivery = "terminal"
 [ui.toast.herdr]
 # position = "bottom-right"
 
@@ -217,6 +220,7 @@ agent_panel_sort = "spaces"
 # [ui.sound.agents]
 # droid = "off"
 
+enabled = true
 [session]
 # Resume supported AI-agent panes into their native conversation sessions after
 # a Herdr server restart. Requires official integrations that report session refs.
