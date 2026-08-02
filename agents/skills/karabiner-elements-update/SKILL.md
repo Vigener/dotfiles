@@ -1,7 +1,8 @@
 ---
 name: karabiner-elements-update
 description: >-
-  dotfilesのKarabiner-Elements設定（主にアプリ起動やキーマッピング等）を更新し、READMEを同期し、ビルドを実行して完了するスキル。
+  dotfilesのKarabiner-Elements設定（主にアプリ起動やキーマッピング等）を更新し、READMEを同期し、
+  git push したうえで MBA（ssh mac）側で git pull とビルドまで完了するスキル。
   「Karabinerに〇〇を追加して」「かなキー+Xを〇〇に割り当てて」「メインブラウザをXXに変更して」といった指示で発動する。
 ---
 
@@ -11,19 +12,26 @@ description: >-
 
 `dotfiles/karabiner/` 以下の Karabiner-Elements 構成を更新するための専用スキル。
 特に頻繁に変更される `launcher.ts` の構造を理解し、最小限のトークン消費で安全に設定を追加・変更する。
-更新後はビルドを実行し、人間向けの `README.md` を同期して作業を完了させる（Gitコミット・プッシュは行わない）。
+
+編集は ThinkPad / Mac mini などどこでもよいが、**Karabiner が動く本体は MBA** である。
+そのため作業完了条件は「ローカル編集だけ」ではなく、**リモートへ push → MBA で pull → MBA で `npm run build`** まで含む。
 
 ## 🎯 ワークフロー
 
 ### 1. 変更要件の確認とバンドルIDの特定
-追加・変更するアプリケーションのバンドルID（Bundle ID）が必要な場合は、以下のコマンドで特定する。
+
+追加・変更するアプリケーションのバンドルID（Bundle ID）が必要な場合は、**必ず MBA 上で確認する**（インストール有無・Stable/Nightly で ID が違うため）。
+
 ```bash
-osascript -e 'id of application "アプリ名"'
+ssh mac 'osascript -e "id of application \"アプリ名\""'
 # または
-find /Applications -maxdepth 3 -iname "*アプリ名*.app" | xargs ...
+ssh mac 'mdfind "kMDItemCFBundleIdentifier == *キーワード*" 2>/dev/null; ls /Applications | rg -i アプリ名'
 ```
 
+ソースや Web の推定 ID は仮置きに留め、MBA 実測と食い違う場合は実測値を正とする。
+
 ### 2. 設定ファイルの更新
+
 Karabiner の設定ファイル群は `dotfiles/karabiner/rules/` にある。
 
 #### 🗺 アーキテクチャ早見表
@@ -52,11 +60,23 @@ Karabiner の設定ファイル群は `dotfiles/karabiner/rules/` にある。
 設定を追加・変更・削除した場合は、必ず `dotfiles/karabiner/README.md` の「マッピング表」を同期する。
 対象の表（例: `### APP（かなレイヤー）` の `#### アプリ起動`）を見つけ、整合性がとれるようにマークダウンのテーブルを更新する。
 
-### 4. ビルドの実行と確認
-変更が終わったら、以下のディレクトリでビルドコマンドを実行し、エラーがないか（Profile が更新されるか）確認する。
+### 4. コミットとプッシュ
+変更を Conventional Commits でコミットし、リモートへプッシュする（詳細は `git-semantic-commit` に従う）。
+
 ```bash
-cd dotfiles/karabiner/
-npm run build
+# 例: 対象ファイルを明示して add → commit → pull --rebase → push
+git pull --rebase
+git push
 ```
 
-※ビルドが成功したら、ユーザーにその旨を報告してタスク完了とする。
+※ `writeToProfile` は実行マシンの `~/.config/karabiner/` を書き換える。ThinkPad / Mac mini 上での `npm run build` は MBA に効かないため、**本番ビルドは次ステップの MBA 側で行う**。型チェック目的でローカル build してもよいが、失敗しても MBA build を省略しない。
+
+### 5. MBA への反映（必須）
+```bash
+ssh mac 'cd ~/dotfiles && git pull && cd karabiner && npm run build'
+```
+
+- pull / build の出力にエラーがないこと（`Profile ... updated` 等）を確認する
+- バンドルIDをこのタイミングで再確認し、食い違いがあれば修正 → 再 push → 再 pull/build
+
+※ここまで成功したらユーザーに報告してタスク完了とする。
