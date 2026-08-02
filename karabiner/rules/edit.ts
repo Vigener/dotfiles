@@ -76,6 +76,12 @@ export const editRules = [
       .to("return_or_enter", ["left_command", "left_shift"])
       .condition(ifVar("eisuu_pressed", 1)),
 
+    // Mac標準のOption+ForwardDeleteで「次の単語を削除」
+    // JIS実機 (EventViewer): @ = open_bracket
+    map("open_bracket", "left_control", "any")
+      .to("delete_forward", "left_option")
+      .condition(ifVar("eisuu_pressed", 1)),
+
     // 英数+Ctrl+[ / ] → Cmd+Ctrl+[ / ]
     // JIS実機 (EventViewer): [ = close_bracket, ] = non_us_pound
     map("close_bracket", "left_control", "any")
@@ -113,6 +119,10 @@ export const editRules = [
     // 編集系・その他
     map("o", "optionalAny")
       .to("delete_or_backspace")
+      .condition(ifVar("eisuu_pressed", 1)),
+    // JIS: @ = open_bracket → Forward Delete（カーソル右側を1文字削除）
+    map("open_bracket", "optionalAny")
+      .to("delete_forward")
       .condition(ifVar("eisuu_pressed", 1)),
     map("q", "optionalAny").to("escape").condition(ifVar("eisuu_pressed", 1)),
     // 英数+; → Enter（物理修飾キーは押したまま残るので Shift+Enter 等も可）

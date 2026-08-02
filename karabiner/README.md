@@ -65,6 +65,7 @@
 | Ctrl+S (+ any) | eisuu_pressed = 1 | Cmd+Up        | 文頭へ              |
 | Ctrl+F (+ any) | eisuu_pressed = 1 | Cmd+Down      | 文末へ              |
 | Ctrl+O (+ any) | eisuu_pressed = 1 | Opt+Backspace | 単語削除            |
+| Ctrl+@ (+ any) | eisuu_pressed = 1 | Opt+Forward Delete | 次の単語削除（JIS: open_bracket） |
 | Shift+Enter (+ any) | eisuu_pressed = 1 | Cmd+Shift+Enter | 送信・確定系（小指負担軽減） |
 | Ctrl+[ (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+[ | cmux 前ワークスペース等（JIS: close_bracket） |
 | Ctrl+] (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+] | cmux 次ワークスペース等（JIS: non_us_pound） |
@@ -79,7 +80,8 @@
 | L + optionalAny     | eisuu_pressed = 1 | Right                     | カーソル右  |
 | S + optionalAny     | eisuu_pressed = 1 | Cmd+Left                  | 行頭        |
 | F + optionalAny     | eisuu_pressed = 1 | Cmd+Right                 | 行末        |
-| O + optionalAny     | eisuu_pressed = 1 | Backspace                 | 1文字削除   |
+| O + optionalAny     | eisuu_pressed = 1 | Backspace                 | 1文字削除（左側） |
+| @ + optionalAny     | eisuu_pressed = 1 | Delete Forward            | 1文字削除（右側）。JIS key_code: open_bracket |
 | Q + optionalAny     | eisuu_pressed = 1 | Escape                    | ESC         |
 | ; + optionalAny     | eisuu_pressed = 1 | Enter                     | Enter（小指負担軽減） |
 | W + optionalAny     | eisuu_pressed = 1 | Cmd+W                     | タブを閉じる |
