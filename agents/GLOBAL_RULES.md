@@ -37,7 +37,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 # モデル呼び出しと HPC 境界（2026-07-31）
 
 1. **agy Opus 原則禁止**（Google AI Pro が即 5h limit）。発想の同等が必要なら Cursor Sonnet 5 の許可を求める。
-2. **要許可**: Cursor Sonnet 5（発想・方針） / GPT-5.6 Terra（レビュー分析・計画の穴）。同役で並べない。無許可で可: pi(opencode-go)、agy(Gemini Flash/Pro, Sonnet 4.6, GPT-OSS)、Composer 2.5、Grok 4.5。
+2. **要許可**: Cursor Sonnet 5（発想・方針） / GPT-5.6 Terra（レビュー分析・計画の穴）。同役で並べない。無許可で可: pi(opencode-go 全)、agy(Gemini Flash/Pro, Sonnet 4.6, GPT-OSS)、Grok 4.5。**実装は `research-brain/wiki/ai-engineering/implementer.md` の model_id に自動委譲**（差し替えはその表だけ）。Composer は Grok と Cursor 枠共有のため原則使わない。
 3. **HPC**: 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
 4. **ゴール固定**: 長作業の開始時はスキル `goal`。敵対レビューはスキル `adversarial-review`（T3 は許可時 Terra。stop hook に載せない）。
 5. 前提の賞味期限: `research-brain/wiki/ai-engineering/ops_assumptions.md`。
