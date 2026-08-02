@@ -66,6 +66,8 @@
 | Ctrl+F (+ any) | eisuu_pressed = 1 | Cmd+Down      | 文末へ              |
 | Ctrl+O (+ any) | eisuu_pressed = 1 | Opt+Backspace | 単語削除            |
 | Shift+Enter (+ any) | eisuu_pressed = 1 | Cmd+Shift+Enter | 送信・確定系（小指負担軽減） |
+| Ctrl+[ (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+[ | cmux 前ワークスペース等 |
+| Ctrl+] (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+] | cmux 次ワークスペース等 |
 
 #### 基本移動・編集
 
@@ -78,7 +80,6 @@
 | S + optionalAny     | eisuu_pressed = 1 | Cmd+Left                  | 行頭        |
 | F + optionalAny     | eisuu_pressed = 1 | Cmd+Right                 | 行末        |
 | O + optionalAny     | eisuu_pressed = 1 | Backspace                 | 1文字削除   |
-| [ + optionalAny     | eisuu_pressed = 1 | Delete Forward            | 前方削除    |
 | Q + optionalAny     | eisuu_pressed = 1 | Escape                    | ESC         |
 | ; + optionalAny     | eisuu_pressed = 1 | Enter                     | Enter（小指負担軽減） |
 | W + optionalAny     | eisuu_pressed = 1 | Cmd+W                     | タブを閉じる |
@@ -102,6 +103,10 @@
 | Ctrl+T (+ any)  | eisuu_pressed = 1 | Cmd+Opt+T | New Tab in Group |
 | T + optionalAny | eisuu_pressed = 1 | Cmd+T | New Tab         |
 | P + optionalAny | eisuu_pressed = 1 | Cmd+P | Print / Palette |
+| B + optionalAny | eisuu_pressed = 1 | Cmd+B | Toggle Primary Sidebar |
+| U + optionalAny | eisuu_pressed = 1 | Cmd+U | Underline 等（Shift併用で Cmd+Shift+U） |
+| [ + optionalAny | eisuu_pressed = 1 | Cmd+[ | 戻る等（Ctrl併用で Cmd+Ctrl+[） |
+| ] + optionalAny | eisuu_pressed = 1 | Cmd+] | 進む等（Ctrl併用で Cmd+Ctrl+]） |
 | / + optionalAny | eisuu_pressed = 1 | Cmd+/ | コメント切替    |
 
 #### スクリーンショット
@@ -170,7 +175,7 @@
 | 入力            | 条件             | 出力                                                                                  | 備考                |
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
-| A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            |                     |
+| A + optionalAny | kana_pressed = 1 | Open: cmux (トグル)                                                                   | AI駆動開発メイン |
 | M + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | メインエディタ      |
 | Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     |                     |
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |

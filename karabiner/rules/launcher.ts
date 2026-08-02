@@ -12,6 +12,7 @@ const APP_REGISTRY: Record<string, string> = {
   Zen: "^app\\.zen-browser\\.zen$",
   // --- 開発ツール ---
   Antigravity: "^com\\.google\\.antigravity$",
+  cmux: "^com\\.cmuxterm\\.app$",
   Zed: "^dev\\.zed\\.Zed$",
   Cursor: "^com\\.todesktop\\.230313mzl4w4u92$",
   "Visual Studio Code": "^com\\.microsoft\\.VSCode$",
@@ -169,7 +170,7 @@ export const launcherRules = [
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
     ...toggleApp("o", "Obsidian"),
-    ...toggleApp("a", "Antigravity"),
+    ...toggleApp("a", "cmux"),
     ...toggleApp("m", "Cursor"),
     ...toggleApp("z", "Zed"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ

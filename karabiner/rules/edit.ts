@@ -76,9 +76,12 @@ export const editRules = [
       .to("return_or_enter", ["left_command", "left_shift"])
       .condition(ifVar("eisuu_pressed", 1)),
 
-    // Mac標準のOption+ForwardDeleteで「次の単語を削除」
+    // 英数+Ctrl+[ / ] → Cmd+Ctrl+[ / ]（cmux ワークスペース切替。optionalAny より先に評価）
     map("open_bracket", "left_control", "any")
-      .to("delete_forward", "left_option")
+      .to("open_bracket", ["left_command", "left_control"])
+      .condition(ifVar("eisuu_pressed", 1)),
+    map("close_bracket", "left_control", "any")
+      .to("close_bracket", ["left_command", "left_control"])
       .condition(ifVar("eisuu_pressed", 1)),
 
     // -------------------------------------------------------------
@@ -109,9 +112,6 @@ export const editRules = [
     // 編集系・その他
     map("o", "optionalAny")
       .to("delete_or_backspace")
-      .condition(ifVar("eisuu_pressed", 1)),
-    map("open_bracket", "optionalAny")
-      .to("delete_forward")
       .condition(ifVar("eisuu_pressed", 1)),
     map("q", "optionalAny").to("escape").condition(ifVar("eisuu_pressed", 1)),
     // 英数+; → Enter（物理修飾キーは押したまま残るので Shift+Enter 等も可）
@@ -179,6 +179,15 @@ export const editRules = [
     map("b", "optionalAny")
       .to("b", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Toggle Primary Sidebar
+    map("u", "optionalAny")
+      .to("u", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Underline / Cmd+U
+    map("open_bracket", "optionalAny")
+      .to("open_bracket", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Cmd+[（戻る等）
+    map("close_bracket", "optionalAny")
+      .to("close_bracket", "command")
+      .condition(ifVar("eisuu_pressed", 1)), // Cmd+]（進む等）
     map("slash", "optionalAny")
       .to("slash", "command")
       .condition(ifVar("eisuu_pressed", 1)), // Toggle Comment
