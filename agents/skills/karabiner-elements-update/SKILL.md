@@ -72,8 +72,10 @@ git push
 ※ `writeToProfile` は実行マシンの `~/.config/karabiner/` を書き換える。ThinkPad / Mac mini 上での `npm run build` は MBA に効かないため、**本番ビルドは次ステップの MBA 側で行う**。型チェック目的でローカル build してもよいが、失敗しても MBA build を省略しない。
 
 ### 5. MBA への反映（必須）
+非対話 SSH では PATH が細いことがあるため、Homebrew の `npm` を明示する。
+
 ```bash
-ssh mac 'cd ~/dotfiles && git pull && cd karabiner && npm run build'
+ssh mac 'export PATH="/opt/homebrew/bin:$PATH"; cd ~/dotfiles && git pull && cd karabiner && npm run build'
 ```
 
 - pull / build の出力にエラーがないこと（`Profile ... updated` 等）を確認する
