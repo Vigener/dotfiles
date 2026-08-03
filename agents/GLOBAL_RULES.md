@@ -2,6 +2,11 @@
 
 このファイルは、どのディレクトリにいる場合でも利用できる汎用的なAIエージェントのルールとスキルの案内です。
 
+## 0. 用語・省略名
+
+マシン・リポの略称（**MBA / TB / mini / rb / sandbox / KE** 等）は  
+`~/dotfiles/agents/glossary.md` を正本とする。会話中の略もこれに合わせること。
+
 ## 1. グローバルスキル (Skills) の活用
 特定のタスク（Miyabi等のHPCジョブ投入、Gitのセマンティックコミット等）を実行するための専門的な「スキル（手順書・プロンプト）」が以下のディレクトリに格納されています。
 
@@ -29,7 +34,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 1. **エージェント間・中間成果**: Markdown / 構造化テキスト（差分・grep・機械可読を優先）。`inbox/`・`logs/`・作業ノート。
 2. **人間レビュー・保存版概念解説**: HTML（`wiki/`）。フォーマットガイド: `research-brain/.agents/references/wiki_formatting_guide.md`。
 3. **セッション終了時（best-effort）**: 人間向け HTML を更新したら `open-artifact` スキルに従い、MBA でブラウザを開く（`ssh mac 'open URL'`）。オフライン時の失敗は無視して URL をチャットに出す。
-4. **配信**: Thinkpad の `http-brain`（:8766）等。素の `python -m http.server` 禁止（`thinkpad-resident`）。
+4. **配信**: 母艦（**mini**）の `http-brain`（:8766）等。素の `python -m http.server` 禁止（`thinkpad-resident`）。略称は `glossary.md`。
 5. **挙動設定の変更**: 必ず `update-agent-config` で層（Context / Harness / Loop / Graph A/B）を判定してから最小変更する。
 </RULE[artifact_handoff_html]>
 
