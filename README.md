@@ -16,10 +16,15 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 
 ### 管理対象ファイル
 
-- `zshrc`: Zsh のメイン設定ファイル。(`~/.zshrc` へリンク)
-- `Brewfile`: (予定) Homebrew による Mac アプリ・CLI ツールの一括管理リスト。
+- `zsh/.zshrc`: Zsh のメイン設定ファイル。（`~/.zshrc` へリンク）
+- `Brewfile`: Homebrew による Mac アプリ・CLI ツールの一括管理リスト。
 - `karabiner/index.ts`: Karabiner-Elements のキーバインド設定。TypeScript ベースで管理され、ビルドにより `~/.config/karabiner/karabiner.json` に出力されます。（macOS のみ）
     - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
+- `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。
+
+### リンク方針（Stow について）
+
+パッケージ直下に `.config/` 等を置くレイアウトは GNU Stow 互換だが、**現行運用は選択的な `ln -s`（手作業）**。複数端末でログ・プラグイン絶対パス等が混在するため、`stow -t ~ <pkg>` による一括展開は推奨しない。`stow` 自体のインストールは任意。
 
 ## 🛠 新端末でのセットアップ手順 (Setup Guide)
 
@@ -40,7 +45,7 @@ ln -s $(ghq list -p exact_match_dotfiles_repo) ~/dotfiles
 mv ~/.zshrc ~/.zshrc.bak
 
 # シンボリックリンクの作成
-ln -s ~/dotfiles/zshrc ~/.zshrc
+ln -s ~/dotfiles/zsh/.zshrc ~/.zshrc
 
 # Oh My Zsh 必須プラグインのインストール
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -50,9 +55,55 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 source ~/.zshrc
 ```
 
-### 3. 📱 macOS 固有のセットアップ
+### 3. herdr（エージェントワークスペース）
 
-#### 3.1 Karabiner-Elements のセットアップ
+エージェント制御プレーンとして **herdr** を使う。共有したい設定は `config.toml` のみ git 管理する。
+
+#### 3.1 導入
+
+```bash
+# macOS
+brew install herdr
+# Linux: 公式のインストール手順に従う（例: curl インストーラ / ローカル bin）
+
+mkdir -p ~/.config/herdr
+# 既存の stub があれば退避してからリンク
+# mv ~/.config/herdr/config.toml ~/.config/herdr/config.toml.stub.bak
+ln -sfn ~/dotfiles/herdr/.config/herdr/config.toml ~/.config/herdr/config.toml
+
+herdr   # または他マシンへ: herdr --remote <ssh-host>
+herdr server reload-config   # 設定変更後
+```
+
+主な共有設定（`config.toml`）:
+
+- Zoom: `ctrl+shift+enter`（SSH 越しでも通りやすい）
+- Agents パネル: pane（topic）優先表示（`[ui.sidebar.agents]`）
+- CJK IME: `reveal_hidden_cursor_for_cjk_ime` / `cjk_ime_agents` / `switch_ascii_input_source_in_prefix`（**Mac クライアント側**で効く。`--remote` 時は操作している Mac の config が必要）
+
+同期しないもの（マシンローカル）: `*.sock` / ログ / `session.json` / `plugins.json`（絶対パスを含みがち）
+
+#### 3.2 プラグイン: pane-topic-sync
+
+ペイン名をエージェントの topic（会話タイトル）に自動同期する。
+
+```bash
+# bun が PATH に入っていること（mise 等）
+ghq get https://github.com/danbuhler/herdr-pane-topic-sync
+herdr plugin link ~/ghq/github.com/danbuhler/herdr-pane-topic-sync
+# 必要なら手動 sync
+herdr plugin action invoke dan.pane-topic-sync.sync
+```
+
+注意:
+
+- herdr サーバの PATH に `bun` が無い場合、プラグイン manifest の command を **bun の絶対パス**に直す必要がある（端末ごとにパスが違うため git に `plugins.json` は載せない）
+- 推奨: `sync_panes = true` / `sync_tabs = false`（同タブ複数 pane でも agents パネルが同名にならない）
+- 任意 config 例: `~/.config/herdr/plugins/config/dan.pane-topic-sync/config.toml`（dotfiles 側にミラー可）
+
+### 4. 📱 macOS 固有のセットアップ
+
+#### 4.1 Karabiner-Elements のセットアップ
 
 Karabiner-Elements は macOS 専用のキーバインド設定ツールであり、TypeScript ベースの IaC (Infrastructure as Code) で完全管理されています。
 
@@ -95,7 +146,7 @@ cd ~/dotfiles/karabiner && npm run build
 - **設定変更は `index.ts` のみ**：自動生成される `karabiner.json` は出力結果に過ぎず、直接編集は厳禁です。
 - **`tsx` 採用理由**：ESM (ECMAScript Modules) 対応が必要なため、`tsx` を採用しています。
 
-### 4. Gitのグローバル設定（ノイズ排除）
+### 5. Gitのグローバル設定（ノイズ排除）
 
 Mac特有のゴミファイル（`.DS_Store` 等）がGitに混入するのを防ぐため、グローバルな `.gitignore` を適用します。
 
