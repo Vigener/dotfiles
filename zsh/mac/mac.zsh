@@ -6,16 +6,16 @@
 export HOMEBREW_PREFIX="/opt/homebrew"
 
 # ==========================================
-# Remote Execution (SSH Wrappers to Thinkpad)
+# Remote Execution (SSH / herdr)
 # ==========================================
-# 汎用リモート実行コマンド (e.g., on thinkpad docker ps)
+# 汎用リモート実行 (e.g., on thinkpad docker ps / on mini hostname)
 on() {
   local target="$1"
   shift
   ssh -t "$target" "$@"
 }
 
-# Zellij への最速アクセス用プレフィックス関数
+# ThinkPad（保険・Linux）: Zellij
 th-zj() {
   if [ -z "$1" ]; then
     ssh -t thinkpad '/home/mikoto/.local/bin/zellij attach -c main'
@@ -24,7 +24,16 @@ th-zj() {
   fi
 }
 
-# herdr への最速アクセス用プレフィックス関数
+# 母艦 mini: herdr（SSH でサーバ側 TUI に入る）
+mi-hd() {
+  if [ -z "$1" ]; then
+    ssh -t mini 'herdr'
+  else
+    ssh -t mini "herdr session attach '$1'"
+  fi
+}
+
+# 保険: ThinkPad herdr（縮退運用用）
 th-hd() {
   if [ -z "$1" ]; then
     ssh -t thinkpad '/home/mikoto/.local/bin/herdr'
@@ -33,5 +42,6 @@ th-hd() {
   fi
 }
 
-# ローカルクライアントを使ったリモート接続
-alias hdr="herdr --remote thinkpad"
+# MBA 等からの常用: ローカルクライアント → 母艦 mini
+# 同室 LAN 優先なら: alias hdr='herdr --remote mini-lan'
+alias hdr='herdr --remote mini'

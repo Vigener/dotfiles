@@ -22,15 +22,7 @@ fi
 # ==========================================
 # Custom Aliases & Overrides
 # ==========================================
-unalias tml 2>/dev/null || true
-tml() {
-  local session
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0 --prompt="Attach Tmux Session> ")
-  
-  if [ -n "$session" ]; then
-    tmux attach-session -t "$session"
-  fi
-}
+# tmux 独自ラッパは置かない（tmux ls / attach をそのまま使う）
 
 # ==========================================
 # Zellij wrapper
