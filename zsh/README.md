@@ -34,6 +34,13 @@ ghq get https://github.com/zsh-users/zsh-syntax-highlighting
 
 注意: MBA で `~/dotfiles` を `git pull` すると `.zshrc` が Starship 前提になる。横展開前に pull するなら、その前に `brew install starship` と ghq の2プラグインが必要。
 
+## リポジトリパス（2026-08-03）
+
+- **正本（実体）**: `~/ghq/github.com/<owner>/<repo>`（マシン横断で一意）
+- **入口**: **zoxide** / `cdg`（ghq+fzf）。短い `~/brain`・`~/projects` symlink は **当面なし**
+- GitHub 管理のリポはホーム上も同列（research-brain も projects の一つ、置き場で特別扱いしない）
+- MBA / ThinkPad の歴史的パス差は許容し、カットオーバー後に常用を ghq+zoxide へ寄せる検討
+
 ## symlink
 
 `~/dotfiles/bin/link-dotfiles-macos.sh` が `~/.zshrc` をリンクする。実行前にパス一覧を確認すること。
