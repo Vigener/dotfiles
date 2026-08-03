@@ -22,23 +22,8 @@ export EDITOR='nvim'
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/bin:$HOME/local/bin:$PATH"
 [[ -d "$HOME/superset/bin" ]] && export PATH="$HOME/superset/bin:$PATH"
 
-# --- short aliases (brain Make) ---
 alias nv='nvim'
 alias em='emacs -nw'
-alias rb-push='make -C ~/brain rb-day-update'
-alias lb-push='make -C ~/brain lb-day-update'
-alias rb-init='make -C ~/brain rb-init-day'
-alias lb-init='make -C ~/brain lb-init-day'
-alias brain-push='make -C ~/brain day-update'
-alias brain-init='make -C ~/brain init-day'
-
-univ() {
-  if [[ -d "$HOME/univ" ]]; then
-    cd "$HOME/univ"
-  else
-    echo "Directory $HOME/univ does not exist on this machine."
-  fi
-}
 
 # --- tools ---
 command -v mise >/dev/null && eval "$(mise activate zsh)"
@@ -47,19 +32,7 @@ command -v mise >/dev/null && eval "$(mise activate zsh)"
 command -v direnv >/dev/null && eval "$(direnv hook zsh)"
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 
-# ghq + fzf: Ctrl+]（zle）と cdg（Warp 向け）
-ghq_fzf_cd() {
-  local selected_repo
-  selected_repo=$(ghq list | fzf --prompt='Git Repo > ' --preview="ls -lah $(ghq root)/{}")
-  if [[ -n "$selected_repo" ]]; then
-    BUFFER="cd $(ghq root)/${selected_repo}"
-    zle accept-line
-  fi
-  zle reset-prompt
-}
-zle -N ghq_fzf_cd
-bindkey '^]' ghq_fzf_cd
-
+# ghq + fzf → リポへ cd
 cdg() {
   local selected_repo
   selected_repo=$(ghq list | fzf --prompt='Git Repo > ' --preview="ls -lah $(ghq root)/{}")
