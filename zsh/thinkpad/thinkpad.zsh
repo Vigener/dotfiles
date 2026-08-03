@@ -22,37 +22,7 @@ fi
 # ==========================================
 # Custom Aliases & Overrides
 # ==========================================
-# tmux 独自ラッパは置かない（tmux ls / attach をそのまま使う）
-
-# ==========================================
-# Zellij wrapper
-# ==========================================
-zj() {
-  if [ -z "$1" ]; then
-    zellij attach -c main
-  else
-    zellij attach -c "$1"
-  fi
-}
-
-zjk() {
-  local session
-  session=$(zellij list-sessions -n 2>/dev/null | fzf --exit-0 --prompt="Kill Zellij Session> ")
-  
-  if [ -n "$session" ]; then
-    zellij kill-session "$session"
-    echo "💀 Killed Zellij session: $session"
-  fi
-}
-
-zjl() {
-  local session
-  session=$(zellij list-sessions -n 2>/dev/null | fzf --exit-0 --prompt="Attach Zellij Session> ")
-  
-  if [ -n "$session" ]; then
-    zellij attach -c "$session"
-  fi
-}
+# tmux / zellij / herdr の独自ラッパは置かない（各コマンドをそのまま使う）
 
 # ==========================================
 # VSCode Remote Spot-Summoning Alias
