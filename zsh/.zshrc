@@ -18,24 +18,11 @@ if [[ -x "${HOMEBREW_PREFIX}/bin/brew" ]]; then
 fi
 
 # ------------------------------------------------------------------------------
-# 2. Oh My Zsh Configuration (OMZ設定 - 不要なコメントを排除し最小化)
+# 2. Zsh core (OMZ なし — 見た目は Starship、補助は ghq 上の2プラグイン)
 # ------------------------------------------------------------------------------
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="ys"
-
-# HPC/開発効率を高めるプラグイン群
-# ※ zsh-autosuggestions, zsh-syntax-highlighting は $ZSH_CUSTOM/plugins に別途クローンが必要
-plugins=(
-    git
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-)
-
 autoload -Uz compinit && compinit -u
 setopt hist_ignore_dups
 setopt auto_cd
-
-source $ZSH/oh-my-zsh.sh
 
 # 大文字小文字を区別せずに補完する (cd de -> Desktop)
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
@@ -199,5 +186,28 @@ tmk() {
 
 alias tml='tmux ls'
 
-# Superset CLI
-export PATH="/home/mikoto/superset/bin:$PATH"
+# Superset CLI (ThinkPad 等にパスがあるときだけ)
+[[ -d "$HOME/superset/bin" ]] && export PATH="$HOME/superset/bin:$PATH"
+
+# ------------------------------------------------------------------------------
+# Prompt + zsh plugins (ghq). syntax-highlighting は最後。
+# clone: ghq get https://github.com/zsh-users/zsh-autosuggestions
+#        ghq get https://github.com/zsh-users/zsh-syntax-highlighting
+# ------------------------------------------------------------------------------
+_ghq_root="${GHQ_ROOT:-}"
+if [[ -z "$_ghq_root" ]] && command -v ghq >/dev/null; then
+  _ghq_root="$(ghq root 2>/dev/null)"
+fi
+_ghq_root="${_ghq_root:-$HOME/ghq}"
+
+[[ -f "$_ghq_root/github.com/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
+  source "$_ghq_root/github.com/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+if command -v starship >/dev/null; then
+  eval "$(starship init zsh)"
+fi
+
+[[ -f "$_ghq_root/github.com/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
+  source "$_ghq_root/github.com/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+unset _ghq_root
