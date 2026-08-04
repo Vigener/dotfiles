@@ -16,6 +16,12 @@
       {
         "command": "bash '/home/mikoto/.cursor/hooks/on-stop-open-artifact.sh'"
       }
+    ],
+    "preToolUse": [
+      {
+        "command": "rtk hook cursor",
+        "matcher": "Shell"
+      }
     ]
   }
 }

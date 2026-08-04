@@ -21,6 +21,7 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 - `karabiner/index.ts`: Karabiner-Elements のキーバインド設定。TypeScript ベースで管理され、ビルドにより `~/.config/karabiner/karabiner.json` に出力されます。（macOS のみ）
     - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
 - `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。
+- `rtk/config.toml`: RTK（トークン圧縮）の共有設定。Linux は `~/.config/rtk/`、macOS は `~/Library/Application Support/rtk/` へ symlink。
 
 ### リンク方針（Stow について）
 
@@ -107,6 +108,26 @@ herdr plugin action invoke dan.pane-topic-sync.sync
 - herdr サーバの PATH に `bun` が無い場合、プラグイン manifest の command を **bun の絶対パス**に直す必要がある（端末ごとにパスが違うため git に `plugins.json` は載せない）
 - 推奨: `sync_panes = true` / `sync_tabs = false`（同タブ複数 pane でも agents パネルが同名にならない）
 - 任意 config 例: `~/.config/herdr/plugins/config/dan.pane-topic-sync/config.toml`（dotfiles 側にミラー可）
+
+### 3.3 RTK（トークン圧縮）
+
+詳細: [`rtk/README.md`](rtk/README.md)。正本は `rtk/config.toml` のみ。
+
+```bash
+# macOS
+brew install rtk
+~/dotfiles/bin/link-dotfiles-macos.sh   # Application Support へリンク
+
+# Linux
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+mkdir -p ~/.config/rtk
+ln -sfn ~/dotfiles/rtk/config.toml ~/.config/rtk/config.toml
+
+rtk gain   # 正しいパッケージか確認（無い＝別名 Rust Type Kit）
+rtk init -g --agent pi
+# Cursor: hooks.json をバックアップしてから
+rtk init -g --agent cursor --auto-patch
+```
 
 ### 4. 📱 macOS 固有のセットアップ
 

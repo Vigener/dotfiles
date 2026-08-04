@@ -20,6 +20,15 @@ cp ~/dotfiles/agents/hooks/cursor-hooks.json.example ~/.cursor/hooks.json
 | sessionStart | `herdr-agent-state.sh` | herdr |
 | beforeShellExecution | `hpc-shell-gate.sh` | 生 scheduler / クラスタ ssh を deny |
 | stop | `on-stop-open-artifact.sh` | `~/.cursor/open-on-stop.url` があるときだけ MBA open |
+| preToolUse | `rtk hook cursor` | Shell を RTK 経由に rewrite（バイナリ必須） |
+
+### RTK（preToolUse）
+
+- 正本の設定は [`rtk/README.md`](../../rtk/README.md)。`rtk` が PATH にあること。
+- **推奨**: example をベースに手で `preToolUse` を足すか、既存 `hooks.json` に上記エントリをマージする。
+- `rtk init -g --agent cursor` は Claude 向け hook も触ることがある。使わないなら Claude 成果物を入れない／入れたら手で外す。
+- `rtk init -g --uninstall --agent claude` は **Cursor の RTK 条目も消す**ことがある → 消えたら example の `preToolUse` を戻す。
+- 導入後は必ず `hpc-shell-gate` / `sessionStart` / `stop` が残っているか確認。
 
 ## hpc-shell-gate 回帰（手で回す）
 

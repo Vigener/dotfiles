@@ -27,3 +27,8 @@ herdr/.config/herdr/release-notes.json
 herdr/.config/herdr/.plugins.lock
 herdr/.config/herdr/*.sock
 
+# rtk: only config.toml + README are tracked under rtk/
+rtk/filters.toml
+rtk/**/*.db
+rtk/tee/
+

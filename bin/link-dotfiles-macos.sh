@@ -57,6 +57,7 @@ link_file "$DOTFILES/zsh/.zshrc" "$HOME/.zshrc"
 # .zprofile: intentionally not linked (machine-local brew shellenv / OrbStack)
 
 link_file "$DOTFILES/herdr/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+link_file "$DOTFILES/rtk/config.toml" "$HOME/Library/Application Support/rtk/config.toml"
 link_file "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 link_file "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 link_file "$DOTFILES/git/.gitignore_global" "$HOME/.gitignore_global"
@@ -73,3 +74,4 @@ fi
 echo "==> done (selective links; Stow not used)"
 echo "note: Oh My Zsh expected at ~/.oh-my-zsh until .zshrc is slimmed"
 echo "note: herdr links config.toml only (not the whole ~/.config/herdr dir)"
+echo "note: rtk links config.toml only (macOS Application Support path)"
