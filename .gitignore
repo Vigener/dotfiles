@@ -20,3 +20,10 @@ vocabulary.json
 *.log
 session.json
 
+# herdr machine-local (shared track is config.toml only)
+herdr/.config/herdr/plugins.json
+herdr/.config/herdr/plugins/
+herdr/.config/herdr/release-notes.json
+herdr/.config/herdr/.plugins.lock
+herdr/.config/herdr/*.sock
+

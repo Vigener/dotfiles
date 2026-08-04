@@ -84,7 +84,9 @@ herdr server reload-config   # 設定変更後
 - Agents パネル: pane（topic）優先表示（`[ui.sidebar.agents]`）
 - CJK IME: `reveal_hidden_cursor_for_cjk_ime` / `cjk_ime_agents` / `switch_ascii_input_source_in_prefix`（**打鍵する Mac クライアント側**で効く。`--remote` 時も操作している Mac の config。変更後は **herdr クライアント再起動**）
 
-同期しないもの（マシンローカル）: `*.sock` / ログ / `session.json` / `plugins.json`（絶対パスを含みがち）
+同期しないもの（マシンローカル）: `*.sock` / ログ / `session.json` / `plugins.json` / `release-notes.json`（絶対パス・実行時生成）
+
+リンク方針（MBA / mini / TB 共通）: **`~/.config/herdr` は実ディレクトリ**、`config.toml` だけを dotfiles へ symlink。ディレクトリ丸ごとリンクしない（機種ローカルが git 作業ツリーに混ざるため）。
 
 母艦運用（MBA→mini）の正本は research-brain wiki: `wiki/compute-environments/mac-mini-mothership.md`（略称は `agents/glossary.md`）。
 
