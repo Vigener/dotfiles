@@ -60,12 +60,13 @@ onboarding = false
 # Named punctuation such as minus, comma, ampersand, plus, and backtick is also accepted.
 # Most reliable direct bindings are ctrl+letter, function keys, and explicit modified chords.
 # alt+..., cmd/super, and punctuation-with-modifiers may depend on your terminal/tmux setup.
-# prefix = "ctrl+b"
+# 2026-08: MBA JIS — Ctrl+Space は OS の入力切替を無効化済み。配列で複数バインド可。
+prefix = "ctrl+space"
 
 # Prefix-mode actions
 # help = "prefix+?"
 # settings = "prefix+s"
-# detach = "prefix+q"
+detach = ["prefix+q", "prefix+ctrl+q"]
 # reload_config = "prefix+shift+r"
 # open_notification_target = "prefix+o"
 # workspace_picker = "prefix+w"
@@ -78,34 +79,33 @@ onboarding = false
 # close_workspace = "prefix+shift+d"
 # previous_workspace = "" # optional, unset by default
 # next_workspace = ""     # optional, unset by default
-# previous_agent = ""     # optional, unset by default
-# next_agent = ""         # optional, unset by default
+previous_agent = ["prefix+comma", "prefix+ctrl+comma", "ctrl+alt+comma"]
+next_agent = ["prefix+period", "prefix+ctrl+period", "ctrl+alt+period"]
 # focus_agent = ""        # optional indexed binding, e.g. "prefix+alt+1..9"
 # remote_image_paste = "ctrl+v" # only active in herdr --remote; empty disables raw-key image paste
-# new_tab = "prefix+c"
+new_tab = ["prefix+c", "prefix+ctrl+c"]
 # rename_tab = "prefix+shift+t"
-# previous_tab = "prefix+p"
-# next_tab = "prefix+n"
-# switch_tab = "prefix+1..9"
+previous_tab = ["prefix+p", "prefix+ctrl+p"]
+next_tab = ["prefix+n", "prefix+ctrl+n"]
+switch_tab = "prefix+1..9"
 # switch_workspace = ""   # optional indexed binding, e.g. "prefix+shift+1..9"
-# close_tab = "prefix+shift+x"
+close_tab = ["prefix+shift+x", "prefix+ctrl+shift+x"]
 # rename_pane = "prefix+shift+p"
-# edit_scrollback = "prefix+e"
-# focus_pane_left = "prefix+h"
-# focus_pane_down = "prefix+j"
-# focus_pane_up = "prefix+k"
-# focus_pane_right = "prefix+l"
-# cycle_pane_next = "prefix+tab"
-# cycle_pane_previous = "prefix+shift+tab"
+edit_scrollback = ["prefix+e", "prefix+ctrl+e"]
+focus_pane_left = ["prefix+h", "prefix+ctrl+h", "ctrl+alt+h"]
+focus_pane_down = ["prefix+j", "prefix+ctrl+j", "ctrl+alt+j"]
+focus_pane_up = ["prefix+k", "prefix+ctrl+k", "ctrl+alt+k"]
+focus_pane_right = ["prefix+l", "prefix+ctrl+l", "ctrl+alt+l"]
+cycle_pane_next = ["prefix+tab", "prefix+ctrl+tab"]
+cycle_pane_previous = ["prefix+shift+tab", "prefix+ctrl+shift+tab"]
 # last_pane = ""          # optional, unset by default; bind e.g. "prefix+tab" for global back-and-forth
-# split_vertical = "prefix+v"
-# split_horizontal = "prefix+minus"
-# close_pane = "prefix+x"
-# zoom = "prefix+z"       # legacy alias: fullscreen
-# SSH/PTY では Cmd が届かないことが多い → Ctrl 系を正本に。手癖の Cmd+Shift+Enter は MBA の Karabiner でこれに変換する
-zoom = "ctrl+shift+enter"
+split_vertical = ["prefix+v", "prefix+ctrl+v", "ctrl+alt+v"]
+split_horizontal = ["prefix+minus", "prefix+ctrl+minus", "ctrl+alt+minus"]
+close_pane = ["prefix+x", "prefix+ctrl+x"]
+# zoom: SSH 向け Ctrl+Shift+Enter を維持しつつ、prefix / Ctrl+Option も可
+zoom = ["ctrl+shift+enter", "prefix+z", "prefix+ctrl+z", "ctrl+alt+z"]
 # resize_mode = "prefix+r"
-# toggle_sidebar = "prefix+b"
+toggle_sidebar = ["prefix+b", "prefix+ctrl+b"]
 
 # Navigate-mode movement. These local shortcuts win while navigate mode is open.
 # They are independent from focus_pane_*. Do not include prefix+, esc, enter, tab, or 1..9 here.
