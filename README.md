@@ -77,11 +77,16 @@ herdr server reload-config   # 設定変更後
 
 主な共有設定（`config.toml`）:
 
-- Zoom: `ctrl+shift+enter`（SSH 越しでも通りやすい）
+- Prefix: `ctrl+space`（配列で `prefix+key` と `prefix+ctrl+key` の dual-bind）
+- 直叩き: `ctrl+alt+*` で pane hjkl・分割・zoom（タブ切替の Ctrl+Alt 直叩きは無し）
+- Agents 切替: `comma` / `period`
+- Zoom 保険: `ctrl+shift+enter`（SSH 越しでも通りやすい）
 - Agents パネル: pane（topic）優先表示（`[ui.sidebar.agents]`）
-- CJK IME: `reveal_hidden_cursor_for_cjk_ime` / `cjk_ime_agents` / `switch_ascii_input_source_in_prefix`（**Mac クライアント側**で効く。`--remote` 時は操作している Mac の config が必要）
+- CJK IME: `reveal_hidden_cursor_for_cjk_ime` / `cjk_ime_agents` / `switch_ascii_input_source_in_prefix`（**打鍵する Mac クライアント側**で効く。`--remote` 時も操作している Mac の config。変更後は **herdr クライアント再起動**）
 
 同期しないもの（マシンローカル）: `*.sock` / ログ / `session.json` / `plugins.json`（絶対パスを含みがち）
+
+母艦運用（MBA→mini）の正本は research-brain wiki: `wiki/compute-environments/mac-mini-mothership.md`（略称は `agents/glossary.md`）。
 
 #### 3.2 プラグイン: pane-topic-sync
 

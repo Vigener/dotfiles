@@ -25,21 +25,18 @@ ghq get https://github.com/zsh-users/zsh-syntax-highlighting
 
 更新は任意（現状で足りるなら `git pull` しなくてよい）。
 
-## ロールアウト（2026-08-03）
+## ロールアウト（2026-08-04 完了）
 
-- **優先**: Mac mini（今後の母艦・見る時間が最長）で Starship を試す
-- **MBA**: 現状の OMZ UI に満足なら **当面そのまま**。mini の見た目が良ければ後から移行
-- **ThinkPad**: 共有 `zsh/.zshrc` 更新の都合で先行して Starship + ghq プラグイン導入済み
-- mini がしっくりきたら MBA / ThinkPad（残作業・OMZ 削除など）へ横展開 → TODO: [now/TODO.md](file:///home/mikoto/brain/research-brain/now/TODO.md) の Mac mini 節「Starship の横展開」
+- **MBA / mini / TB**: Starship + ghq の2プラグイン導入済み。OMZ は使わない
+- 新規機: `brew install starship`（Linux は公式 or brew）→ 上記 `ghq get` 2本 → `~/dotfiles` の `.zshrc` をリンク／source
+- 運用正本（母艦）: [mac-mini-mothership.md](file:///home/mikoto/brain/research-brain/wiki/compute-environments/mac-mini-mothership.md)
 
-注意: MBA で `~/dotfiles` を `git pull` すると `.zshrc` が Starship 前提になる。横展開前に pull するなら、その前に `brew install starship` と ghq の2プラグインが必要。
-
-## リポジトリパス（2026-08-03）
+## リポジトリパス（2026-08）
 
 - **正本（実体）**: `~/ghq/github.com/<owner>/<repo>`（マシン横断で一意）
 - **入口**: **zoxide** / `cdg`（ghq+fzf）。短い `~/brain`・`~/projects` symlink は **当面なし**
-- GitHub 管理のリポはホーム上も同列（research-brain も projects の一つ、置き場で特別扱いしない）
-- MBA / ThinkPad の歴史的パス差は許容し、カットオーバー後に常用を ghq+zoxide へ寄せる検討
+- GitHub 管理のリポはホーム上も同列（research-brain も projects の一つ）
+- MBA / TB の歴史的パス差は許容。常用は ghq+zoxide へ寄せる（mini 母艦カットオーバー済み）
 
 ## symlink
 
