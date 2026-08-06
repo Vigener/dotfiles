@@ -9,8 +9,17 @@ export const sysRules = [
     map("caps_lock", "optionalAny").to("left_option"),
 
     // optionalAnyをつけることで、Shift等を押しながらでもフラグが立つようにする
+    // Tab 併用時は英数自体を left_option に化けさせ、英数を離すまで Opt を維持する
+    // （Tab 側で Opt+Tab を都度送ると Tab キーアップで Opt が切れ AltTab が閉じる）
     map("japanese_eisuu", "optionalAny")
       .to({ set_variable: { name: "eisuu_pressed", value: 1 } })
+      .toIfOtherKeyPressed(
+        [{ key_code: "tab", modifiers: { optional: ["any"] } }],
+        [
+          { set_variable: { name: "eisuu_pressed", value: 1 } },
+          { key_code: "left_option" },
+        ],
+      )
       .toAfterKeyUp({
         set_variable: { name: "eisuu_pressed", value: 0 },
       })

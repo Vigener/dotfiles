@@ -10,7 +10,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "karabiner.ts": "^1.36.0"
+        "karabiner.ts": "^1.38.0"
     },
     "devDependencies": {
         "@types/node": "^25.5.2",

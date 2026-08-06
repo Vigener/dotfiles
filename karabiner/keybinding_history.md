@@ -158,4 +158,9 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 
 ### 追記（同日）: `英数+Shift+Tab` で AltTab 後退
 連続 Tab での前進は問題なかったが、`optionalAny` → `Opt+Tab` だけでは物理 Shift が出力に乗らず後退できなかった。
-`英数+Shift+Tab`（左右 Shift）を明示的に **`Opt+Shift+Tab`** へマップして対応。
+いったん `英数+Shift+Tab` → `Opt+Shift+Tab` を明示マップしたが、**Tab を離した瞬間に Opt も切れ AltTab UI が閉じる**ため、Tab 後に Shift を足す古典的な操作は成立しなかった（`optionalAny` では解決不能）。
+
+### 追記（同日・再修正）: `to_if_other_key_pressed` で Opt を英数ホールドに載せる
+1. `japanese_eisuu` に `to_if_other_key_pressed(Tab)` → 英数自体を `left_option` に化けさせ、**英数を離すまで Opt を維持**
+2. `英数+Tab` / `英数+Shift+Tab` は Tab / Shift+Tab だけ送る（Opt は 1. が担当）
+3. `karabiner.ts` を 1.38.0 へ（`toIfOtherKeyPressed` API）

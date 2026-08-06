@@ -150,8 +150,8 @@
 | 入力                       | 条件              | 出力              | 想定アクション |
 | -------------------------- | ----------------- | ----------------- | -------------- |
 | Right Cmd + optionalAny    | kana_pressed = 1  | Cmd+Opt+Tab       | Raycast Switch Windows を開く（選択型） |
-| Tab + optionalAny          | eisuu_pressed = 1 | Opt+Tab           | AltTab 前進（ワンアクション直前ウィンドウ切替）。OS 標準 Cmd+Tab は温存 |
-| Shift+Tab (+ any)          | eisuu_pressed = 1 | Opt+Shift+Tab     | AltTab 後退 |
+| Tab + optionalAny          | eisuu_pressed = 1 | Tab（Opt は英数側でホールド） | AltTab 前進。英数を離すまで UI 維持。OS 標準 Cmd+Tab は温存 |
+| Shift+Tab (+ any)          | eisuu_pressed = 1 | Shift+Tab（同上） | AltTab 後退（Tab を離してから Shift+Tab しても可） |
 
 ### WINDOW（Raycast Windows Management - グローバル）
 
