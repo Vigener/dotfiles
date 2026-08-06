@@ -139,3 +139,19 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 ### 使い方の注意
 - 右Cmd+クリックは Shift+クリックになる。
 - 右Cmd 単体の Cmd 用途は消える。
+
+## 2026年8月6日: `英数+Tab` を AltTab に切替（Cmd+Tab 温存）
+
+### 背景と課題
+`英数+Tab` は Raycast Switch Windows（`Cmd+Opt+Tab`）に割り当てていたが、開いてから j/k + Enter で選ぶ二段操作だった。
+一方、かなレイヤーのアプリ起動は体に染み付いているものの右手が要る場面があり、特に「`英数+C` でコピーしたあと直前のターミナルへ戻る」ような **左手ワンアクションでの直前アプリ/ウィンドウ復帰** が欲しくなった。
+
+### 方針
+1. **OS 標準 `Cmd+Tab` は上書きしない**（物理 Cmd でのアプリ切替を温存）
+2. **`英数+Tab` だけ AltTab（デフォルト `Opt+Tab`）を発火**し、ワンアクションで直前ウィンドウへ戻れるようにする
+3. **`かな+Right Cmd` は Raycast Switch Windows のまま**残し、意図的な選択型スイッチャーとして使う
+
+### 変更内容
+1. MBA に AltTab（`brew install --cask alt-tab`）を導入。ショートカットは ⌥+Tab のまま（⌘+Tab 非割当）
+2. `英数+Tab`: `Cmd+Opt+Tab` + `raycast_window_mode` → **`Opt+Tab`（AltTab）**。`raycast_window_mode` は立てない
+3. `かな+Right Cmd`: Raycast Switch Windows を維持

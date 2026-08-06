@@ -77,17 +77,16 @@ export const windowRules = [
       //   .condition(ifVar("kana_pressed", 1)),
 
       // -------...---------
-      // 3. アプリ自体の切り替え(RaycastのSwitch Windows連携)
+      // 3. アプリ/ウィンドウ切替
       // -------...---------
-      // `Cmd+Option+Tab`に割り当てているので、同じショートカットを「かな+right_cmd」および「英数+Tab」で発火させる
-      // 同時にRaycast操作用の変数を1(ON)にする
+      // かな+Right Cmd → Raycast Switch Windows（Cmd+Opt+Tab）
+      // 英数+Tab → AltTab（デフォルト Opt+Tab）。OS 標準 Cmd+Tab は温存する
       map("right_command", "optionalAny")
         .to("tab", ["left_command", "left_option"])
         .toVar("raycast_window_mode", 1)
         .condition(ifVar("kana_pressed", 1)),
       map("tab", "optionalAny")
-        .to("tab", ["left_command", "left_option"])
-        .toVar("raycast_window_mode", 1)
+        .to("tab", "left_option")
         .condition(ifVar("eisuu_pressed", 1)),
 
       // ======= Raycast Switch Windows モード中の Vim風キーバインド =======

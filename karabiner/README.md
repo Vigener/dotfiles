@@ -145,12 +145,12 @@
 | : + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+R     | Reasonable Size    |
 | international1        | kana_pressed = 1 | Cmd+Opt+Ctrl+N     | Next Displayへ移動 |
 
-#### Raycast Switch Windows
+#### ウィンドウ / アプリ切替
 
-| 入力                       | 条件              | 出力         | 想定アクション        |
-| -------------------------- | ----------------- | ------------ | --------------------- |
-| Right Cmd + optionalAny    | kana_pressed = 1  | Cmd+Opt+Tab  | Switch Windows を開く |
-| Tab + optionalAny          | eisuu_pressed = 1 | Cmd+Opt+Tab  | 同上（キーボード差吸収） |
+| 入力                       | 条件              | 出力         | 想定アクション |
+| -------------------------- | ----------------- | ------------ | -------------- |
+| Right Cmd + optionalAny    | kana_pressed = 1  | Cmd+Opt+Tab  | Raycast Switch Windows を開く（選択型） |
+| Tab + optionalAny          | eisuu_pressed = 1 | Opt+Tab      | AltTab を発火（ワンアクション直前ウィンドウ切替）。OS 標準 Cmd+Tab は温存 |
 
 ### WINDOW（Raycast Windows Management - グローバル）
 
