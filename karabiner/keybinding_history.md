@@ -155,3 +155,7 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 1. MBA に AltTab（`brew install --cask alt-tab`）を導入。ショートカットは ⌥+Tab のまま（⌘+Tab 非割当）
 2. `英数+Tab`: `Cmd+Opt+Tab` + `raycast_window_mode` → **`Opt+Tab`（AltTab）**。`raycast_window_mode` は立てない
 3. `かな+Right Cmd`: Raycast Switch Windows を維持
+
+### 追記（同日）: `英数+Shift+Tab` で AltTab 後退
+連続 Tab での前進は問題なかったが、`optionalAny` → `Opt+Tab` だけでは物理 Shift が出力に乗らず後退できなかった。
+`英数+Shift+Tab`（左右 Shift）を明示的に **`Opt+Shift+Tab`** へマップして対応。
