@@ -120,6 +120,12 @@
 | Ctrl+Shift+3 (+ any) | eisuu_pressed = 1 | Cmd+Shift+Ctrl+3 | 全画面キャプチャ（クリップボード） |
 | Shift+3 (+ any)      | eisuu_pressed = 1 | Cmd+Shift+3      | 全画面キャプチャ（保存）           |
 
+#### herdr agent focus
+
+| 入力              | 条件              | 出力         | 用途                                      |
+| ----------------- | ----------------- | ------------ | ----------------------------------------- |
+| 1..9 + optionalAny | eisuu_pressed = 1 | Ctrl+Alt+1..9 | herdr `focus_agent`（pane 直バインドと同系） |
+
 
 
 ### WINDOW（かなレイヤー）
