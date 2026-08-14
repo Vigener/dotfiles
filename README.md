@@ -141,7 +141,7 @@ Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシ�
 ```
 
 - 共有: `Cmd+T` → herdr 新規タブ、`Ctrl+Tab` を herdr へ通す
-- MBA ローカル: `initial-command = herdr --remote mini`（2枚目は英数+N でシェル）
+- MBA ローカル: `initial-command = /opt/homebrew/bin/herdr --remote mini`（GUI は PATH が細い。2枚目は英数+N でシェル）
 - 英数+Ctrl+HJKL/V/- は Karabiner の Ghostty 限定ルール
 
 ### 4. 📱 macOS 固有のセットアップ

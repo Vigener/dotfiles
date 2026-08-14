@@ -1,4 +1,5 @@
 # MBA 専用。~/.config/ghostty/config.local へコピーする（symlink しない）。
+# GUI 起動では PATH が細いので herdr は Homebrew の絶対パス。
 # 1枚目だけ herdr --remote mini。2枚目以降はシェル（英数+N）。
 # フォント・テーマもここに書く（共有 config には置かない）。
-initial-command = herdr --remote mini
+initial-command = /opt/homebrew/bin/herdr --remote mini
