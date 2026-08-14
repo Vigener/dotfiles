@@ -142,8 +142,8 @@ function openNotionCalendar(key: FromKeyParam) {
 //    ブラウザ変更時はここだけを書き換える
 // =====================================================================
 const MAIN_BROWSER = "Dia";
-// タブ配置: Cmd+2 で思考ハブ (N キー用)、Cmd+1 で Antigravity タブ (G キー用)
-const BROWSER_AGENT_TAB = "1"; // かな+G: Antigravityタブ
+// タブ配置: Cmd+2 で思考ハブ (N キー用)。Cmd+1 (旧 かな+G Gemini) は未割当。
+const BROWSER_AGENT_TAB = "1"; // 旧 かな+G。レジストリ資産として残す
 const BROWSER_HUB_TAB = "2"; // かな+N: 思考ハブタブ
 const BROWSER_SLACK_TAB = "3"; // かな+S: Slackタブ
 const BROWSER_CALENDAR_TAB = "4"; // かな+C: カレンダータブ
@@ -185,9 +185,7 @@ export const launcherRules = [
 
     ...toggleApp("v", "Visual Studio Code"),
     ...toggleApp("f", "Finder"),
-
-    // 🚀 Gキー: メインブラウザを呼び出し、Cmd+[BROWSER_AGENT_TAB] でタブへジャンプ
-    ...toggleAppWithKey("g", MAIN_BROWSER, BROWSER_AGENT_TAB, ["command"]),
+    ...toggleApp("g", "Ghostty"),
 
     // 🚀 Cキー: メインブラウザを呼び出し、Cmd+[BROWSER_CALENDAR_TAB] でタブへジャンプ
     ...toggleAppWithKey("c", MAIN_BROWSER, BROWSER_CALENDAR_TAB, ["command"]),

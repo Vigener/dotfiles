@@ -209,7 +209,7 @@
 | N + optionalAny | kana_pressed = 1 | Open: Zen Browser / Cmd+2 (アクティブ時)                                               | 思考ハブ (Tab 2)    |
 | V + optionalAny | kana_pressed = 1 | Open: Visual Studio Code (トグル)                                                      |                     |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
-| G + optionalAny | kana_pressed = 1 | Open: Zen Browser + Cmd+1 (常時Geminiタブへ)                                          | Geminiタブへジャンプ |
+| G + optionalAny | kana_pressed = 1 | Open: Ghostty (トグル)                                                                 | herdr 外側端末      |
 | P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint (サイクル)                                                 | 起動中は Cmd+[     |
 | C + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+4 (常時Calendarタブへ)                                                | Calendarタブへジャンプ |
 | 8 + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+5 (常時Musicタブへ)                                                   | YouTube Musicタブへジャンプ |
