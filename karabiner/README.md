@@ -40,7 +40,7 @@
 | 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+V | 同上 | Ctrl+Alt+V | 縦分割 |
 | 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
 
-他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T。タブ送りは Ctrl+Tab（Karabiner ではなく Ghostty unbind + herdr）。
+他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T（Ghostty では herdr 新規タブ）。英数+W は既存の Cmd+W（Ghostty では herdr の **pane 閉じ**。タブ閉じではない）。タブ送りは Ctrl+Tab（Ghostty が prefix+n/p を送る）。
 
 ### APP_WARP
 
