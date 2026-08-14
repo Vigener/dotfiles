@@ -17,10 +17,18 @@ export const appRules = [
   // =====================================================================
   // [APP_GHOSTTY] Ghostty + herdr（英数+Ctrl を herdr の ctrl+alt 直叩きへ）
   // EDIT の英数+Ctrl+HJKL（単語/スクロール）より先に評価されるよう appRules 先頭側に置く
+  // 英数+Ctrl+Q は EDIT の英数+Q=Esc に吸われるので、Ghostty では Ctrl+Q のまま通す
+  // （Ghostty 側が prefix+q / デタッチにジャック。Cmd+Q は触らない）
   // =====================================================================
   rule(
-    "【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換",
+    "【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換",
   ).manipulators([
+    map("q", "left_control", "any")
+      .to("q", "left_control")
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
     map("h", "left_control", "any")
       .to("h", ["left_control", "left_option"])
       .condition(

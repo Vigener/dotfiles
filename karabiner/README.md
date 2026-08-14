@@ -33,14 +33,15 @@
 
 | ルール | 入力 | 条件 | 出力 | 備考 |
 | --- | --- | --- | --- | --- |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+H | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+H | pane 左 |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+J | 同上 | Ctrl+Alt+J | pane 下 |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+K | 同上 | Ctrl+Alt+K | pane 上 |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+L | 同上 | Ctrl+Alt+L | pane 右 |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+V | 同上 | Ctrl+Alt+V | 縦分割 |
-| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+H | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+H | pane 左 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+J | 同上 | Ctrl+Alt+J | pane 下 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+K | 同上 | Ctrl+Alt+K | pane 上 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+L | 同上 | Ctrl+Alt+L | pane 右 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+V | 同上 | Ctrl+Alt+V | 縦分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換 | Ctrl+Q | 同上 | Ctrl+Q | デタッチ（Ghostty が prefix+q）。Cmd+Q ではない |
 
-他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T（Ghostty では herdr 新規タブ）。英数+W は既存の Cmd+W（Ghostty では herdr の **pane 閉じ**。タブ閉じではない）。タブ送りは Ctrl+Tab（Ghostty が prefix+n/p を送る）。
+他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T（Ghostty では herdr 新規タブ）。英数+W は既存の Cmd+W（Ghostty では herdr の **pane 閉じ**。タブ閉じではない）。英数+Q は Esc のまま。英数+Ctrl+Q は Ghostty のみデタッチ。タブ送りは Ctrl+Tab（Ghostty が prefix+n/p を送る）。
 
 ### APP_WARP
 

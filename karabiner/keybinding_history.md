@@ -9,6 +9,7 @@ Cmux から Ghostty へ寄せる。Ghostty は herdr 専用、素のシェルは
 3. **タブ送り** は Ctrl+Tab（Ghostty が prefix+n/p を送る。unbind だけでは Tab と区別できない）。
 4. **英数+W** は既存の Cmd+W。Ghostty では herdr close_pane（prefix+x）。タブごと消さない。
 5. **英数+N** は Cmd+N のまま（thinkpad 確認用の2枚目シェル）。
+6. **英数+Ctrl+Q** は Ghostty のみ Ctrl+Q を通し、Ghostty が prefix+q（デタッチ）へ。英数+Q は Esc、Cmd+Q はアプリ終了のまま。
 
 ## 2026年7月6日: Zellij導入に伴う `Ctrl+Q` -> `Cmd+W` 廃止と `英数+W` の再定義
 

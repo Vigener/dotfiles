@@ -14,8 +14,10 @@ config-file = ?~/.config/ghostty/config.local
 keybind = cmd+t=text:\x00c
 
 # 英数+W → Cmd+W → herdr close_pane (prefix+x)。タブごと消さない。
-# Ghostty 窓を閉じるのは herdr デタッチ（prefix+q）か Cmd+Shift+W。
 keybind = cmd+w=text:\x00x
+
+# 英数+Ctrl+Q → Ctrl+Q → herdr detach (prefix+q)。Cmd+Q（アプリ終了）は触らない。
+keybind = ctrl+q=text:\x00q
 
 # Ctrl+Tab / Ctrl+Shift+Tab → herdr next/previous tab (prefix+n / prefix+p)
 keybind = ctrl+tab=text:\x00n
