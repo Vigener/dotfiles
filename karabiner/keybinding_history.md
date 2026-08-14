@@ -1,5 +1,14 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年8月14日: Ghostty を herdr 専用外側端末にする
+
+Cmux から Ghostty へ寄せる。Ghostty は herdr 専用、素のシェルは Warp。
+
+1. **Ghostty 限定:** 英数+Ctrl+HJKL/V/- → Ctrl+Alt+HJKL/V/-（herdr 既存の pane / split 直叩き）。他アプリの英数+Ctrl+HJKL（単語・スクロール）は維持。
+2. **英数+T** は従来どおり Cmd+T。Ghostty 側で Cmd+T を herdr 新規タブへジャック。
+3. **タブ送り** は Ctrl+Tab（Karabiner は触らない。Ghostty 既定を unbind し herdr が受ける）。
+4. **英数+N** は Cmd+N のまま（thinkpad 確認用の2枚目シェル）。
+
 ## 2026年7月6日: Zellij導入に伴う `Ctrl+Q` -> `Cmd+W` 廃止と `英数+W` の再定義
 
 ### 背景と課題

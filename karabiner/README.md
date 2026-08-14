@@ -29,6 +29,19 @@
 | 【Vivaldi】英数+W/G で 専用ショートカット起動 | w + optionalAny | eisuu_pressed = 1 かつ App = com.vivaldi.Vivaldi | Ctrl+Opt+Cmd+W | Vivaldi専用 |
 | 【Vivaldi】英数+W/G で 専用ショートカット起動 | g + optionalAny | eisuu_pressed = 1 かつ App = com.vivaldi.Vivaldi | Ctrl+Opt+Cmd+G | Vivaldi専用 |
 
+### APP_GHOSTTY
+
+| ルール | 入力 | 条件 | 出力 | 備考 |
+| --- | --- | --- | --- | --- |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+H | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+H | pane 左 |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+J | 同上 | Ctrl+Alt+J | pane 下 |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+K | 同上 | Ctrl+Alt+K | pane 上 |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+L | 同上 | Ctrl+Alt+L | pane 右 |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+V | 同上 | Ctrl+Alt+V | 縦分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
+
+他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T。タブ送りは Ctrl+Tab（Karabiner ではなく Ghostty unbind + herdr）。
+
 ### APP_WARP
 
 | ルール                                             | 入力       | 条件                       | 出力          | 備考     |

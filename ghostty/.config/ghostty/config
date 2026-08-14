@@ -1,0 +1,15 @@
+# Ghostty = herdr 専用の外側端末（MBA）。
+# 素のシェル / HPC SSH は Warp。thinkpad 確認は英数+N で2枚目を開く。
+#
+# initial-command は機種ローカル:
+#   ~/.config/ghostty/config.local
+# MBA では link-dotfiles-macos.sh が example から一度だけ作る。
+
+config-file = ?~/.config/ghostty/config.local
+
+# 英数+T → Cmd+T → herdr new_tab。prefix は ctrl+space (\x00)。
+keybind = cmd+t=text:\x00c
+
+# Ghostty 自身のタブ送りを捨て、herdr の ctrl+tab / ctrl+shift+tab へ通す。
+keybind = ctrl+tab=unbind
+keybind = ctrl+shift+tab=unbind

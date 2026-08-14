@@ -15,6 +15,51 @@ export const appRules = [
   ]),
 
   // =====================================================================
+  // [APP_GHOSTTY] Ghostty + herdr（英数+Ctrl を herdr の ctrl+alt 直叩きへ）
+  // EDIT の英数+Ctrl+HJKL（単語/スクロール）より先に評価されるよう appRules 先頭側に置く
+  // =====================================================================
+  rule(
+    "【Ghostty】英数+Ctrl+HJKL/V/- を herdr の Ctrl+Alt 直叩きに変換",
+  ).manipulators([
+    map("h", "left_control", "any")
+      .to("h", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+    map("j", "left_control", "any")
+      .to("j", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+    map("k", "left_control", "any")
+      .to("k", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+    map("l", "left_control", "any")
+      .to("l", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+    map("v", "left_control", "any")
+      .to("v", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+    map("hyphen", "left_control", "any")
+      .to("hyphen", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
+  ]),
+
+  // =====================================================================
   // [APP] Warp専用マッピング
   // =====================================================================
   rule(

@@ -21,6 +21,7 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 - `karabiner/index.ts`: Karabiner-Elements のキーバインド設定。TypeScript ベースで管理され、ビルドにより `~/.config/karabiner/karabiner.json` に出力されます。（macOS のみ）
     - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
 - `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。
+- `ghostty/.config/ghostty/config`: Ghostty（MBA・herdr 専用外側端末）の共有キーバインド。`~/.config/ghostty/config` へ symlink。`initial-command` は `~/.config/ghostty/config.local`（MBA のみ、symlink しない）。
 - `rtk/config.toml`: RTK（トークン圧縮）の共有設定。Linux は `~/.config/rtk/`、macOS は `~/Library/Application Support/rtk/` へ symlink。
 
 ### リンク方針（Stow について）
@@ -79,8 +80,8 @@ herdr server reload-config   # 設定変更後
 主な共有設定（`config.toml`）:
 
 - Prefix: `ctrl+space`（配列で `prefix+key` と `prefix+ctrl+key` の dual-bind）
-- 直叩き: `ctrl+alt+*` で pane hjkl・分割・zoom（タブ切替の Ctrl+Alt 直叩きは無し）
-- Agents 切替: `comma` / `period`
+- 直叩き: `ctrl+alt+*` で pane hjkl・分割・zoom。タブ送りは `ctrl+tab` / `ctrl+shift+tab`
+- Agents 切替: `comma` / `period`。`英数+1..9` → `ctrl+alt+1..9`
 - Zoom 保険: `ctrl+shift+enter`（SSH 越しでも通りやすい）
 - Agents パネル: pane（topic）優先表示（`[ui.sidebar.agents]`）
 - CJK IME: `reveal_hidden_cursor_for_cjk_ime` / `cjk_ime_agents` / `switch_ascii_input_source_in_prefix`（**打鍵する Mac クライアント側**で効く。`--remote` 時も操作している Mac の config。変更後は **herdr クライアント再起動**）
@@ -128,6 +129,20 @@ rtk init -g --agent pi
 # Cursor: hooks.json をバックアップしてから
 rtk init -g --agent cursor --auto-patch
 ```
+
+### 3.4 Ghostty（MBA・herdr の外側端末）
+
+Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシェルは Warp。
+
+```bash
+~/dotfiles/bin/link-dotfiles-macos.sh
+# MBA: ~/.config/ghostty/config.local が無ければ example から作成（initial-command）
+# Ghostty を完全終了してから起動。herdr クライアントも再起動。
+```
+
+- 共有: `Cmd+T` → herdr 新規タブ、`Ctrl+Tab` を herdr へ通す
+- MBA ローカル: `initial-command = herdr --remote mini`（2枚目は英数+N でシェル）
+- 英数+Ctrl+HJKL/V/- は Karabiner の Ghostty 限定ルール
 
 ### 4. 📱 macOS 固有のセットアップ
 
