@@ -1,3 +1,4 @@
 # MBA 専用。~/.config/ghostty/config.local へコピーする（symlink しない）。
 # 1枚目だけ herdr --remote mini。2枚目以降はシェル（英数+N）。
+# フォント・テーマもここに書く（共有 config には置かない）。
 initial-command = herdr --remote mini
