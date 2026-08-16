@@ -21,8 +21,14 @@ export const appRules = [
   // （Ghostty 側が prefix+q / デタッチにジャック。Cmd+Q は触らない）
   // =====================================================================
   rule(
-    "【Ghostty】英数+Ctrl+HJKL/V/-/Q を herdr 向けに変換",
+    "【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換",
   ).manipulators([
+    map("d", "left_control", "any")
+      .to("d", ["left_control", "left_option"])
+      .condition(
+        ifVar("eisuu_pressed", 1),
+        ifApp("^com\\.mitchellh\\.ghostty$"),
+      ),
     map("q", "left_control", "any")
       .to("q", "left_control")
       .condition(

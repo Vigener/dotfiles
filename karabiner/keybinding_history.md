@@ -1,5 +1,9 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年8月16日: Ghostty 英数+Ctrl+D で herdr file-viewer
+
+file-viewer（変更ファイル tree + diff）を prefix+d に置いた。HJKL と同じく Ghostty 限定で 英数+Ctrl+D → Ctrl+Alt+D。他アプリの 英数+D（一行選択）は維持。
+
 ## 2026年8月14日: かな+G を Dia Gemini から Ghostty トグルへ
 
 かな+G は Dia の Cmd+1（Gemini タブ）だったが、使用減と誤爆コストが大きい。起動が速い Ghostty（herdr 外側端末）のトグルに変更。Dia の Cmd+1 はランチャーから外すのみ（BROWSER_AGENT_TAB 定数は残す）。

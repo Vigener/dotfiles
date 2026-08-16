@@ -284,3 +284,18 @@ cjk_ime_cursor_shape = "steady_block"
 key = "prefix+y"
 type = "shell"
 command = "~/.local/bin/herdr-sidebar-launcher"
+
+# termscope: 画面のパス / 無ければリポ fuzzy。Ghostty は Cmd+P → prefix+f
+[[keys.command]]
+key = "prefix+f"
+type = "plugin_action"
+command = "termscope.open"
+description = "termscope file picker"
+
+# file-viewer: tree + 変更diff。すぐ消すかも。prefix+f は termscope のまま
+# 英数+Ctrl+D → Karabiner が Ctrl+Alt+D
+[[keys.command]]
+key = ["prefix+d", "ctrl+alt+d"]
+type = "plugin_action"
+command = "herdr-file-viewer.open-file-viewer"
+description = "file viewer (git-aware, read-only)"
