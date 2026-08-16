@@ -1,0 +1,8 @@
+#!/bin/sh
+# Run on MBA. Switch host IME to ABC (英数). Called from mini nvim via ssh mac.
+set -eu
+MACISM="${MACISM:-/opt/homebrew/bin/macism}"
+if [ -x "$MACISM" ]; then
+  exec "$MACISM" com.apple.keylayout.ABC 0
+fi
+exec osascript -e 'tell application "System Events" to key code 102'

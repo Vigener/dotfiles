@@ -73,6 +73,7 @@ link_file "$DOTFILES/rtk/config.toml" "$HOME/Library/Application Support/rtk/con
 link_file "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 link_file "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 link_file "$DOTFILES/git/.gitignore_global" "$HOME/.gitignore_global"
+link_file "$DOTFILES/nvim/.config/nvim" "$HOME/.config/nvim"
 
 mkdir -p "$HOME/.cursor"
 link_file "$DOTFILES/agents/skills" "$HOME/.cursor/skills"
