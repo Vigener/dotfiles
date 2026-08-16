@@ -22,3 +22,6 @@ keybind = ctrl+q=text:\x00q
 # Ctrl+Tab / Ctrl+Shift+Tab → herdr next/previous tab (prefix+n / prefix+p)
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
+
+# 英数+P → Cmd+P → termscope (prefix+f)
+keybind = cmd+p=text:\x00f
