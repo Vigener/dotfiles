@@ -2,4 +2,5 @@
 # GUI 起動では PATH が細いので herdr は Homebrew の絶対パス。
 # 1枚目だけ herdr --remote mini。2枚目以降はシェル（英数+N）。
 # フォント・テーマもここに書く（共有 config には置かない）。
-initial-command = /opt/homebrew/bin/herdr --remote mini
+# 1枚目はフラグ付き。再アタッチは zsh の herdr() が server を足す。
+initial-command = /opt/homebrew/bin/herdr --remote mini --remote-keybindings server
