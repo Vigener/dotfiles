@@ -6,6 +6,8 @@ Cmux を herdr 専用外側にするかの前段。タブ／ワークスペー�
 
 Ghostty は `cmd+t=text:\x00c`（NUL を PTY に書く）。Cmux は Cmd+T を新 surface として飲む。Karabiner が `com.cmuxterm.app` のときだけ Ctrl+Space → C を送る。英数+T は edit.ts の Cmd+T 化より先に消費する。Cmd+Shift+T は触らない。
 
+かな IME だと1打目の `c` が変換に吸われ、herdr の prefix ASCII 切替後の2打目だけ成功した。Karabiner で先に `com.apple.keylayout.ABC` へ切り、100ms 置いてから送る。
+
 ## 2026年8月16日: Ghostty 英数+Ctrl+D で herdr file-viewer
 
 file-viewer（変更ファイル tree + diff）を prefix+d に置いた。HJKL と同じく Ghostty 限定で 英数+Ctrl+D → Ctrl+Alt+D。他アプリの 英数+D（一行選択）は維持。

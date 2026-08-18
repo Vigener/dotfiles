@@ -5,16 +5,24 @@ const CMUX = "^com\\.cmuxterm\\.app$";
 export const appRules = [
   // =====================================================================
   // [APP_CMUX] Cmux 前景のみ: Cmd+T / 英数+T → herdr new_tab (prefix+c)
-  // Ghostty は cmd+t=text:\x00c。Cmux はアプリが Cmd+T を飲むので
-  // Karabiner が ctrl+space, c を直送する。試用。他アプリの英数+T は Cmd+T のまま。
-  // appRules が edit.ts より先なので、英数+T は Cmd+T に化ける前にここで消費する。
+  // Ghostty は cmd+t=text:\x00c（PTY 直書きで IME を通さない）。Cmux は
+  // キーイベントになるので、かなだと c が変換に吸われ1打目が外れる。
+  // 先に ABC へ切って 100ms 置いてから ctrl+space, c を送る。
   // =====================================================================
   rule("【Cmux】Cmd+T / 英数+T で herdr 新規タブ").manipulators([
     map("t", "optionalAny")
+      .to({
+        select_input_source: { input_source_id: "com.apple.keylayout.ABC" },
+      })
+      .toNone({ hold_down_milliseconds: 100 })
       .to("spacebar", "left_control")
       .to("c")
       .condition(ifVar("eisuu_pressed", 1), ifApp(CMUX)),
     map("t", "command")
+      .to({
+        select_input_source: { input_source_id: "com.apple.keylayout.ABC" },
+      })
+      .toNone({ hold_down_milliseconds: 100 })
       .to("spacebar", "left_control")
       .to("c")
       .condition(ifApp(CMUX)),
