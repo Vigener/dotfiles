@@ -1,6 +1,25 @@
 import { ifApp, ifVar, map, rule } from "karabiner.ts";
 
+const CMUX = "^com\\.cmuxterm\\.app$";
+
 export const appRules = [
+  // =====================================================================
+  // [APP_CMUX] Cmux 前景のみ: Cmd+T / 英数+T → herdr new_tab (prefix+c)
+  // Ghostty は cmd+t=text:\x00c。Cmux はアプリが Cmd+T を飲むので
+  // Karabiner が ctrl+space, c を直送する。試用。他アプリの英数+T は Cmd+T のまま。
+  // appRules が edit.ts より先なので、英数+T は Cmd+T に化ける前にここで消費する。
+  // =====================================================================
+  rule("【Cmux】Cmd+T / 英数+T で herdr 新規タブ").manipulators([
+    map("t", "optionalAny")
+      .to("spacebar", "left_control")
+      .to("c")
+      .condition(ifVar("eisuu_pressed", 1), ifApp(CMUX)),
+    map("t", "command")
+      .to("spacebar", "left_control")
+      .to("c")
+      .condition(ifApp(CMUX)),
+  ]),
+
   // =====================================================================
   // [APP_VIVALDI] Vivaldi専用マッピング
   // =====================================================================

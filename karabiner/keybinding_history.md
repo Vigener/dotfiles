@@ -1,5 +1,11 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年8月18日: Cmux 前景の Cmd+T / 英数+T で herdr 新規タブ（試用）
+
+Cmux を herdr 専用外側にするかの前段。タブ／ワークスペース系を全部外す前に、Ghostty で効いている「英数+T → herdr new_tab」だけを Cmux 前景に移植して安定性を見る。
+
+Ghostty は `cmd+t=text:\x00c`（NUL を PTY に書く）。Cmux は Cmd+T を新 surface として飲む。Karabiner が `com.cmuxterm.app` のときだけ Ctrl+Space → C を送る。英数+T は edit.ts の Cmd+T 化より先に消費する。Cmd+Shift+T は触らない。
+
 ## 2026年8月16日: Ghostty 英数+Ctrl+D で herdr file-viewer
 
 file-viewer（変更ファイル tree + diff）を prefix+d に置いた。HJKL と同じく Ghostty 限定で 英数+Ctrl+D → Ctrl+Alt+D。他アプリの 英数+D（一行選択）は維持。

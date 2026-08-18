@@ -22,6 +22,15 @@
 
 対象: karabiner/index.ts の現行有効ルール（コメントアウト行は除外）
 
+### APP_CMUX
+
+| ルール | 入力 | 条件 | 出力 | 備考 |
+| --- | --- | --- | --- | --- |
+| 【Cmux】Cmd+T / 英数+T で herdr 新規タブ | T + optionalAny | eisuu_pressed = 1 かつ App = com.cmuxterm.app | Ctrl+Space, C | herdr `prefix+c`（new_tab）。試用 |
+| 【Cmux】Cmd+T / 英数+T で herdr 新規タブ | Cmd+T | App = com.cmuxterm.app | Ctrl+Space, C | 物理 Cmd+T も同じ。Cmd+Shift+T は触らない |
+
+他アプリの英数+T は従来どおり Cmd+T。Ghostty の Cmd+T ジャック（`text:\x00c`）は Cmux では届かないので、こちらでキーイベントを送る。
+
 ### APP_VIVALDI
 
 | ルール                                        | 入力            | 条件                                             | 出力           | 備考        |
