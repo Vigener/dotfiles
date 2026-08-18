@@ -1,12 +1,14 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
-## 2026年8月18日: Cmux の herdr キージャックを撤回
+## 2026年8月18日: Cmux の herdr キージャックをオフ
 
-Karabiner で prefix 文字を送る経路は IME 待ちがあり、バグの温床。日常の外側は Ghostty。Cmux は drop / アプリ内 WebKit が要るときだけ。`rules/cmux.ts` を削除。履歴は `d7931a5` / `0401af6` / `133a016` に残る。
+試用自体は成功した。英数 IME では一打で herdr 新規タブが増えた。かなは当初1打目だけ外れ、ABC 切替 + 100ms のあと一打で通った。T のあと W/P/Q と pane 系も同じ経路で載せた。
+
+残さない理由は不具合ではない。Cmux を herdr 専用機にしていない今、ジャックを置いてもメリットが薄い。drop / アプリ内 WebKit のために Cmux を普通に使うと、英数+T が新 surface ではなく herdr タブになるなど、意図しない挙動になる。常用しないならオフがよい。`rules/cmux.ts` を削除。実装は `d7931a5` / `0401af6` / `133a016` に残る。
 
 ## 2026年8月18日: Cmux 専用 `rules/cmux.ts` に Ghostty 相当の herdr ジャックを移す
 
-T が安定したので、Ghostty 外側と同じ操作を Cmux 前景だけ足す。ファイルごと消せば試用を撤回できる。
+T がかな込みで一打成功したので、Ghostty 外側と同じ操作を Cmux 前景だけ足す。ファイルごと消せば試用を撤回できる。
 
 - prefix 系: 英数/Cmd+T/W/P と Ctrl+Q → ABC 100ms のあと prefix+c/x/f/q
 - 直叩き: 英数+Ctrl+HJKL/V/-/D → Ctrl+Alt（遅延なし）
@@ -18,7 +20,7 @@ Cmux を herdr 専用外側にするかの前段。タブ／ワークスペー�
 
 Ghostty は `cmd+t=text:\x00c`（NUL を PTY に書く）。Cmux は Cmd+T を新 surface として飲む。Karabiner が `com.cmuxterm.app` のときだけ Ctrl+Space → C を送る。英数+T は edit.ts の Cmd+T 化より先に消費する。Cmd+Shift+T は触らない。
 
-かな IME だと1打目の `c` が変換に吸われ、herdr の prefix ASCII 切替後の2打目だけ成功した。Karabiner で先に `com.apple.keylayout.ABC` へ切り、100ms 置いてから送る。
+英数 IME では問題なく成功。かな IME だと1打目の `c` が変換に吸われ、herdr の prefix ASCII 切替後の2打目だけ成功した。Karabiner で先に `com.apple.keylayout.ABC` へ切り、100ms 置いてから送るようにしたところ、かなでも一打で成功した。
 
 ## 2026年8月16日: Ghostty 英数+Ctrl+D で herdr file-viewer
 
