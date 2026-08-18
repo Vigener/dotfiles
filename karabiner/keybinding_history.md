@@ -1,5 +1,9 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年8月18日: Cmux の herdr キージャックを撤回
+
+Karabiner で prefix 文字を送る経路は IME 待ちがあり、バグの温床。日常の外側は Ghostty。Cmux は drop / アプリ内 WebKit が要るときだけ。`rules/cmux.ts` を削除。履歴は `d7931a5` / `0401af6` / `133a016` に残る。
+
 ## 2026年8月18日: Cmux 専用 `rules/cmux.ts` に Ghostty 相当の herdr ジャックを移す
 
 T が安定したので、Ghostty 外側と同じ操作を Cmux 前景だけ足す。ファイルごと消せば試用を撤回できる。

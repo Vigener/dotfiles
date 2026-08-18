@@ -1,8 +1,6 @@
 import { ifApp, ifVar, map, rule } from "karabiner.ts";
 
 export const appRules = [
-  // Cmux は rules/cmux.ts（index.ts で appRules より前）。要らなくなったらあのファイルを消す。
-
   // =====================================================================
   // [APP_VIVALDI] Vivaldi専用マッピング
   // =====================================================================

@@ -22,18 +22,6 @@
 
 対象: karabiner/index.ts の現行有効ルール（コメントアウト行は除外）
 
-### APP_CMUX（`rules/cmux.ts`・試用。不要ならファイルごと削除）
-
-| ルール | 入力 | 条件 | 出力 | 備考 |
-| --- | --- | --- | --- | --- |
-| 【Cmux】herdr prefix キー (T/W/P/Q) | 英数+T / Cmd+T | App = com.cmuxterm.app | ABC → 100ms → Ctrl+Space, C | new_tab。Cmd+Shift+T は触らない |
-| 【Cmux】herdr prefix キー (T/W/P/Q) | 英数+W / Cmd+W | 同上 | ABC → 100ms → Ctrl+Space, X | close_pane。Cmux のタブ閉じではない |
-| 【Cmux】herdr prefix キー (T/W/P/Q) | 英数+P / Cmd+P | 同上 | ABC → 100ms → Ctrl+Space, F | termscope |
-| 【Cmux】herdr prefix キー (T/W/P/Q) | Ctrl+Q / 英数+Ctrl+Q | 同上 | ABC → 100ms → Ctrl+Space, Q | detach。Cmd+Q は触らない。英数+Q は Esc のまま |
-| 【Cmux】英数+Ctrl+HJKL/V/-/D を herdr 向けに変換 | 英数+Ctrl+HJKL/V/-/D | eisuu_pressed = 1 かつ Cmux | Ctrl+Alt+HJKL/V/-/D | pane / split / file-viewer。遅延なし |
-
-他アプリの英数+T/W/P は従来どおり Cmd+T/W/P。Ctrl+Tab は herdr が直バインドするので、Cmux が食わなければ未設定。英数+N は Cmd+N のまま（Cmux では新ワークスペース）。英数+Ctrl+[ ] は従来どおり Cmux ワークスペース送り。
-
 ### APP_VIVALDI
 
 | ルール                                        | 入力            | 条件                                             | 出力           | 備考        |
