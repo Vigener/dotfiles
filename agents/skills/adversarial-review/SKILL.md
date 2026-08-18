@@ -15,6 +15,7 @@ description: >-
 - **トリガー駆動**: 毎ターン回さない
 - **agy Opus 禁止**（Google AI Pro が即 5h limit）
 - **要許可モデルは呼ぶ前に確認**: Cursor Sonnet 5 / GPT-5.6 Terra
+- **委譲チャネル**: 実装ループは herdr 推奨（`GLOBAL_RULES` `RULE[delegate_channel]`）。本スキル（敵対レビュー・採点）は Task / CLI 可。
 
 ## 役割分担（許可モデル）
 
@@ -39,14 +40,26 @@ T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に�
 ## 手順
 
 1. ティアを決める（迷ったら T1）。T3 なら Terra 許可を先に取る。
-2. 差分を取る:
+   - スコープ: `~/dotfiles/agents/GLOBAL_RULES.md` の `RULE[adversarial_scope]`。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Sol／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
+2. **モデル宣言（必須・呼び出し前）**: レビュアーを起動する**直前**に、チャット（標準出力）へ次を先に出す。宣言なしで `agy` / `pi` / Task / herdr を呼んではならない。
+
+```text
+レビュワーモデルとして、次を呼び出します:
+- 一次: <実コマンドに渡す model id>（例: agy claude-sonnet-4-6）
+- 二次（使うときのみ）: <model id>（例: なし / pi kimi-k3）
+- 経路: CLI | Cursor Task | herdr pane
+- ティア: T1|T2|T3
+```
+
+   herdr ペイン必須にはしない（宣言で可視性を担保）。ペインを使う場合も宣言は省略しない。
+3. 差分を取る:
 
 ```bash
 git diff --stat
 git diff > /tmp/adv-review.diff
 ```
 
-3. レビューを走らせる（例・T1）:
+4. レビューを走らせる（例・T1）:
 
 ```bash
 pi --model opencode-go/kimi-k3 --thinking medium --no-tools -p "$(cat <<'EOF'
@@ -64,11 +77,11 @@ EOF
 $(cat /tmp/adv-review.diff)"
 ```
 
-T3（許可後）は同等プロンプトを **GPT-5.6 Terra** に渡し、可能なら T2 結果との差分だけ追加指摘させる。
+T3（許可後）は同等プロンプトを **GPT-5.6 Terra** に渡し、可能なら T2 結果との差分だけ追加指摘させる。呼び出す前に手順2の宣言を更新すること。
 
-4. triage: blocker/major だけ修正。nit は溜めて無視可。
-5. 結果を `inbox/REVIEWS/` または sandbox `docs/logs/` に残す（任意）。
-6. レビュー後に設計の立て直しが必要なら、**別ターンで Sonnet 5 許可**を取り発想役に回す（レビューと混ぜない）。
+5. triage: blocker/major だけ修正。nit は溜めて無視可。
+6. 結果を `inbox/REVIEWS/` または sandbox `docs/logs/` に残す（任意）。ログ先頭にも実際に使った model id を1行残す。
+7. レビュー後に設計の立て直しが必要なら、**別ターンで Sonnet 5 許可**を取り発想役に回す（レビューと混ぜない）。
 
 ## hook にしない理由
 

@@ -13,6 +13,8 @@ description: >-
 ```text
 1. 人間向け成果を HTML として保存
    （トーン選択: スキル human-review-html → wiki/templates/human-review/ をコピー）
+   ※ 研究用記号・非一般用語は sticky サイドバー／スマホドロワー必須
+     （human-review-html「用語サイドバー」節）。本文だけで記号暗記を要求しない。
 2. Tailscale IP で URL を組み立てる
 3a. 今すぐ開く: ssh mac "open 'URL'"
 3b. セッション末に開く: URL を ~/.cursor/open-on-stop.url に書いて stop hook に任せる
