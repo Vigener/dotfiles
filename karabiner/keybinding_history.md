@@ -1,5 +1,13 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年8月18日: Cmux 専用 `rules/cmux.ts` に Ghostty 相当の herdr ジャックを移す
+
+T が安定したので、Ghostty 外側と同じ操作を Cmux 前景だけ足す。ファイルごと消せば試用を撤回できる。
+
+- prefix 系: 英数/Cmd+T/W/P と Ctrl+Q → ABC 100ms のあと prefix+c/x/f/q
+- 直叩き: 英数+Ctrl+HJKL/V/-/D → Ctrl+Alt（遅延なし）
+- 未設定: Ctrl+Tab（herdr 直バインド）、英数+N（Cmux 新ワークスペースのまま）
+
 ## 2026年8月18日: Cmux 前景の Cmd+T / 英数+T で herdr 新規タブ（試用）
 
 Cmux を herdr 専用外側にするかの前段。タブ／ワークスペース系を全部外す前に、Ghostty で効いている「英数+T → herdr new_tab」だけを Cmux 前景に移植して安定性を見る。

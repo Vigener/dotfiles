@@ -1,32 +1,7 @@
 import { ifApp, ifVar, map, rule } from "karabiner.ts";
 
-const CMUX = "^com\\.cmuxterm\\.app$";
-
 export const appRules = [
-  // =====================================================================
-  // [APP_CMUX] Cmux 前景のみ: Cmd+T / 英数+T → herdr new_tab (prefix+c)
-  // Ghostty は cmd+t=text:\x00c（PTY 直書きで IME を通さない）。Cmux は
-  // キーイベントになるので、かなだと c が変換に吸われ1打目が外れる。
-  // 先に ABC へ切って 100ms 置いてから ctrl+space, c を送る。
-  // =====================================================================
-  rule("【Cmux】Cmd+T / 英数+T で herdr 新規タブ").manipulators([
-    map("t", "optionalAny")
-      .to({
-        select_input_source: { input_source_id: "com.apple.keylayout.ABC" },
-      })
-      .toNone({ hold_down_milliseconds: 100 })
-      .to("spacebar", "left_control")
-      .to("c")
-      .condition(ifVar("eisuu_pressed", 1), ifApp(CMUX)),
-    map("t", "command")
-      .to({
-        select_input_source: { input_source_id: "com.apple.keylayout.ABC" },
-      })
-      .toNone({ hold_down_milliseconds: 100 })
-      .to("spacebar", "left_control")
-      .to("c")
-      .condition(ifApp(CMUX)),
-  ]),
+  // Cmux は rules/cmux.ts（index.ts で appRules より前）。要らなくなったらあのファイルを消す。
 
   // =====================================================================
   // [APP_VIVALDI] Vivaldi専用マッピング
