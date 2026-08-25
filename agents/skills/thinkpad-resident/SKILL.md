@@ -20,12 +20,14 @@ description: >-
 「この中の HTML をブラウザで見たい」と言われたら、**カレントで素の `python -m http.server` を始めない。**
 
 必ず `repo-http-serve`（または登録済みなら `thinkpad-resident`）を使う。
+このスキルの仕事はサーバを立てて URL を返すまで。ブラウザで開くのは `open-artifact` スキル。
 
-## 判断フロー
+## A/B の選び方（機械的）
 
-### A. 登録済みサイト（よく使うリポ）
+配信したい DIR が `research-brain` なら A で `http-brain`、`hybrid-workflow-sandbox` なら A で `http-sandbox`。
+それ以外の DIR はすべて B。
 
-`thinkpad-resident list` / `status` で名前がある → それを start。
+### A. 登録済みサイト
 
 例: `http-sandbox` (:8765), `http-brain` (:8766), worker `sandbox` / `brain`
 
@@ -38,25 +40,24 @@ thinkpad-resident start http-brain
 **sites/*.conf は必須ではない。** その場の tmux + `repo-http-serve` でよい。
 
 1. 配信ルートを絶対パスにする（例: `~/tmp/docs` → `/home/mikoto/tmp/docs`）
-2. 空きポートを選ぶ（8765/8766 は予約。`ss -ltnp | grep -E ':876[0-9]'` 等で確認し 8770 付近など）
-3. セッション名は短く一意に（例: `http-tmp-docs`）
-4. 起動:
+2. セッション名は短く一意に（例: `http-tmp-docs`）
+3. 以下を1ブロックで実行する（ポート選択・起動・URL 出力まで。8765/8766 は候補に入れない）:
 
 ```bash
 DIR="/home/mikoto/tmp/docs"   # 絶対パス
-PORT=8770
 NAME="http-tmp-docs"
-tmux has-session -t "$NAME" 2>/dev/null && tmux kill-session -t "$NAME"
+for PORT in 8770 8771 8772 8773 8774; do ss -ltn | grep -q ":$PORT " || break; done
+tmux has-session -t "$NAME" 2>/dev/null && NAME="${NAME}-$PORT"   # 既存セッションは殺さない
 tmux new-session -d -s "$NAME" \
   "exec $HOME/bin/repo-http-serve --dir $(printf %q "$DIR") --port $PORT --name $(printf %q "$NAME")"
+echo "Thinkpad 上: http://127.0.0.1:$PORT/"
+echo "Mac から:   http://$(tailscale ip -4 | head -n1):$PORT/"
 ```
 
-5. ユーザーに返す URL:
-   - Thinkpad 上: `http://127.0.0.1:$PORT/` または `http://localhost:$PORT/`
-   - Mac から: Tailscale IP の同じポート
-   - ファイルが `index.html` なら `/` または `/index.html`
+4. echo された2つの URL をそのままユーザーに返す。
+   ファイルが `index.html` なら `/` のまま、他のファイルはファイル名をパスに付ける。
 
-6. 止め方: `tmux kill-session -t http-tmp-docs`  
+5. 止め方: `tmux kill-session -t "$NAME"`（このターンで自分が作ったセッションに限る）  
    （登録サイトなら `thinkpad-resident stop <name>`）
 
 何度も使う・reboot 後も自動で上げたい → そのとき初めて `sites/<name>.conf` を追加（wiki 参照）。
@@ -66,6 +67,7 @@ tmux new-session -d -s "$NAME" \
 - `python3 -m http.server` / `python -m http.server` を直接常駐手段にする
 - `--bind 127.0.0.1` だけにして Tailscale から見えなくする（既定の `repo-http-serve` は `0.0.0.0`）
 - 既に使っている 8765/8766 を確認なしで潰す
+- 自分がこのターンで作っていない tmux セッションへの `tmux kill-session`
 
 ## 登録サイトの操作（要約）
 
