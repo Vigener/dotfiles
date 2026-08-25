@@ -67,7 +67,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 1. **実装・多段（編集→pytest→修正）**: 原則 `herdr pane split` + `agent start/prompt`（別ペイン・監視しやすい）。Task でも可だが長時間実装は herdr 優先。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: Cursor Task / `agy` / `pi` で可。herdr 必須にしない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別ペイン。モデル切替は `/model`。
-4. **モデル宣言（可視性）**: サブエージェントや CLI レビュアーを呼ぶ前に、チャットへ「レビュワー／実行モデルとして〇〇を呼び出します」と **先に宣言**する（スキル `adversarial-review` 手順2が正本）。herdr バナーだけに頼らない。
+4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Sol / Terra / Luna / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / pi / herdr は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
 </RULE[delegate_channel]>
 
 <RULE[paper_claim_level_and_language]>
