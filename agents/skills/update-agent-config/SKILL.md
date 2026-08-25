@@ -39,6 +39,8 @@ description: >-
 | グローバル規則テキスト | `~/dotfiles/agents/GLOBAL_RULES.md` / `~/dotfiles/agents/rules/` |
 | Cursor alwaysApply（brain ワークスペース） | `~/brain/.cursor/rules/*.mdc`（git 外の場合あり → wiki にも要旨を残す） |
 | research-brain プロジェクト規則 | `~/brain/research-brain/.agents/AGENTS.md`（書き込み禁止ファイルに注意） |
+| life-brain プロジェクト規則 | `~/ghq/github.com/Vigener/life-brain/.agents/AGENTS.md` / `.cursor/rules/` |
+| life-brain リポスキル | `life-brain/.agents/skills/`（Cursor 用: `.cursor/skills/` から symlink） |
 | モデル方針の説明 | `~/brain/research-brain/wiki/ai-engineering/cursor_model_routing.md` 等 |
 
 スキル新規作成後は `~/.cursor/skills` が symlink なら追加操作不要。

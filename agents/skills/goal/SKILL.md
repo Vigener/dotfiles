@@ -17,7 +17,7 @@ Antigravity 等の `/goal` に相当する薄い Cursor スキル。過剰なフ
 
 ## 手順
 
-1. ユーザー発話と `context/current_state.md`（research-brain）またはプロジェクト TODO を読む。
+1. ユーザー発話と、ワークスペースの `context/current_state.md`（あれば）および `now/TODO.md` を読む。research-brain / life-brain とも同じパス。
 2. 次のテンプレを **チャットに出し、必要なら `inbox/GOAL_YYYY-MM-DD.md` に保存**する:
 
 ```markdown
@@ -41,7 +41,7 @@ Antigravity 等の `/goal` に相当する薄い Cursor スキル。過剰なフ
 
 ## 関連
 
-- HANDOFF テンプレ: `research-brain/inbox/HANDOFF_*.md`
+- HANDOFF テンプレ: `inbox/HANDOFF_*.md`（life-brain は `inbox/HANDOFF_TEMPLATE.md`）
 - Loop 最小定義: sandbox `docs/logs/goal_based_loop_min_2026-07-31.md`
 - Verifier smoke（Loop ではない）: sandbox `scripts/lane_a_verifier_smoke.sh`
 - 設定変更時: `update-agent-config`
