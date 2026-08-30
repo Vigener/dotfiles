@@ -146,9 +146,9 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 | **C** | **Calendar** | メインブラウザ起動 → **カレンダー (タブ4: Ctrl+4)** へジャンプ |
 | **8** | **YouTube Music** | メインブラウザ起動 → **Music (タブ5: Ctrl+5)** へジャンプ |
 | **F** | **エクスプローラー** (Finder) | トグル起動 (`Win + E`) |
-| **G** | **Ghostty** | トグル起動 |
+| **G** | **Alacritty** | トグル起動（ThinkPad 外側端末） |
 | **P** | **Microsoft PowerPoint** | トグル起動 |
-| **L** | **LINE** | トグル起動 (※18:00〜翌08:00のみ許可) |
+| **L** | （window.ahk）右の仮想デスクトップ | LINE はかな+L と衝突するため未割り当て |
 
 ---
 

@@ -104,18 +104,7 @@ vk1C & 8::
     ToggleAppWithKey(MAIN_BROWSER_EXE, MAIN_BROWSER_PATH, "^" . BROWSER_MUSIC_TAB)
 }
 
-; L: LINE (時間制限: 18時〜翌8時 または トグル)
-vk1C & l::
-{
-    nowHour := Integer(FormatTime(, "HH"))
-    ; 18時以降または朝8時前のみ起動を許可（日中の集中維持）
-    if (nowHour >= 18 || nowHour < 8) {
-        LaunchRegisteredApp("LINE")
-    } else {
-        ToolTip("LINE is restricted during work hours (08:00 - 18:00).")
-        SetTimer(() => ToolTip(), -2000)
-    }
-}
+; L is virtual desktop right (rules/window.ahk). LINE is not on this key (Karabiner: kana+L = Space right).
 
 ; --- 4. YouTube Music バックグラウンド制御 (PowerShell連携) ---
 RunYTMPlaylist(scriptPath, url, label) {
