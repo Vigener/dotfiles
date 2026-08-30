@@ -19,7 +19,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$DotfilesRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$DotfilesRoot = Split-Path -Parent $PSScriptRoot
 $SrcDir = Join-Path $DotfilesRoot 'ghostty\windows'
 $GhosttyDir = Join-Path $env:LOCALAPPDATA 'ghostty'
 $MainCfg = Join-Path $GhosttyDir 'config.ghostty'

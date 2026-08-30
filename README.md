@@ -156,9 +156,10 @@ PowerShell（ThinkPad）:
 
 ```powershell
 cd $HOME\ghq\github.com\Vigener\dotfiles
-.\bin\link-ghostty-windows.ps1 -Install   # 本体 + config 一括
-# 本体済みなら: .\bin\link-ghostty-windows.ps1
+powershell -ExecutionPolicy Bypass -File .\bin\link-ghostty-windows.ps1 -Install
 ```
+
+ホーム（`C:\Users\mikoto`）から `.\bin\...` は動かない。dotfiles の `bin` を指す。
 
 - 配置: `%LOCALAPPDATA%\ghostty\config.ghostty`（共有）、`config.local.ghostty`（ThinkPad 専用・初回のみ example から作成）
 - 1枚目: `initial-command = ssh mini`（Tailscale + `~/.ssh/config` の Host mini）
