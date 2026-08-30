@@ -154,12 +154,22 @@ Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシ�
 
 PowerShell（ThinkPad）:
 
-```powershell
-cd $HOME\ghq\github.com\Vigener\dotfiles
-powershell -ExecutionPolicy Bypass -File .\bin\link-ghostty-windows.ps1 -Install
+Git Bash（ThinkPad）:
+
+```bash
+cd ~/ghq/github.com/Vigener/dotfiles
+git pull
+./bin/link-ghostty-windows.sh -Install
 ```
 
-ホーム（`C:\Users\mikoto`）から `.\bin\...` は動かない。dotfiles の `bin` を指す。
+`powershell -File .\bin\...` は Git Bash が `\` を消す。`-NoProfile` は壊れた `Microsoft.PowerShell_profile.ps1`（vim のクォート欠け）を飛ばす。
+
+PowerShell から直叩きするなら:
+
+```powershell
+cd $HOME\ghq\github.com\Vigener\dotfiles
+powershell -NoProfile -ExecutionPolicy Bypass -File .\bin\link-ghostty-windows.ps1 -Install
+```
 
 - 配置: `%LOCALAPPDATA%\ghostty\config.ghostty`（共有）、`config.local.ghostty`（ThinkPad 専用・初回のみ example から作成）
 - 1枚目: `initial-command = ssh mini`（Tailscale + `~/.ssh/config` の Host mini）
