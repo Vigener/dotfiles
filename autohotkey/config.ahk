@@ -39,6 +39,7 @@ global APP_REGISTRY := Map(
 
     ; ターミナル
     "Warp", ["warp.exe", EnvGet("LocalAppData") . "\Programs\Warp\Warp.exe"],
+    "Alacritty", ["alacritty.exe", "C:\Program Files\Alacritty\alacritty.exe"],
     "Ghostty", ["ghostty.exe", EnvGet("LocalAppData") . "\Programs\Ghostty\ghostty.exe"],
     "WindowsTerminal", ["WindowsTerminal.exe", "wt.exe"],
 

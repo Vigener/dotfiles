@@ -146,35 +146,20 @@ Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシ�
 - MBA ローカル: `initial-command = /opt/homebrew/bin/herdr --remote mini`（GUI は PATH が細い。2枚目は英数+N でシェル）
 - 英数+Ctrl+HJKL/V/- は Karabiner の Ghostty 限定ルール
 
-#### 3.4.1 Ghostty（ThinkPad Windows）
+#### 3.4.1 ThinkPad Windows の外側端末は Alacritty
 
-公式 Windows 版は未リリース。**LIL-JRG 非公式 Win32 ビルド**を使う。AutoHotkey の `APP_REGISTRY` は `%LocalAppData%\Programs\Ghostty\ghostty.exe` を想定。
-
-前提: `winget install Git.Git`（日常シェルは Git Bash。PowerShell は winget 専用）
-
-PowerShell（ThinkPad）:
-
-Git Bash（ThinkPad）:
-
-```bash
-cd ~/ghq/github.com/Vigener/dotfiles
-git pull
-./bin/link-ghostty-windows.sh -Install
-```
-
-`powershell -File .\bin\...` は Git Bash が `\` を消す。`-NoProfile` は壊れた `Microsoft.PowerShell_profile.ps1`（vim のクォート欠け）を飛ばす。
-
-PowerShell から直叩きするなら:
+Ghostty 公式 Windows は無い。非公式ビルドは使わない。
 
 ```powershell
-cd $HOME\ghq\github.com\Vigener\dotfiles
-powershell -NoProfile -ExecutionPolicy Bypass -File .\bin\link-ghostty-windows.ps1 -Install
+winget install --id Alacritty.Alacritty -e
 ```
 
-- 配置: `%LOCALAPPDATA%\ghostty\config.ghostty`（共有）、`config.local.ghostty`（ThinkPad 専用・初回のみ example から作成）
-- 1枚目: `initial-command = ssh mini`（Tailscale + `~/.ssh/config` の Host mini）
-- 2枚目以降: `Ctrl+Shift+T` でローカル Git Bash
-- macOS 版の `cmd+t` / herdr prefix キーバインドは **Windows では使わない**
+```bash
+mkdir -p "$APPDATA/alacritty"
+cp ~/ghq/github.com/Vigener/dotfiles/alacritty/alacritty.toml "$APPDATA/alacritty/alacritty.toml"
+```
+
+`ghostty/windows/` と `bin/link-ghostty-windows.*` は残置だが ThinkPad では使わない。
 
 ### 4. 📱 macOS 固有のセットアップ
 

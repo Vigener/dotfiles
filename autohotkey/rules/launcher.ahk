@@ -15,7 +15,7 @@
 ;   N: Zen / メインブラウザ (アクティブ時は思考ハブ Ctrl+2 へ)
 ;   V: Visual Studio Code
 ;   F: エクスプローラー
-;   G: Ghostty
+;   G: Alacritty
 ;   C: メインブラウザ -> Calendarタブ (Ctrl+4)
 ;   8: メインブラウザ -> YouTube Musicタブ (Ctrl+5)
 ;   P: Microsoft PowerPoint
@@ -55,8 +55,8 @@ vk1C & e::LaunchRegisteredApp("Edge")
 ; B: Google Chrome
 vk1C & b::LaunchRegisteredApp("Chrome")
 
-; G: Ghostty
-vk1C & g::LaunchRegisteredApp("Ghostty")
+; G: Alacritty (ThinkPad outer terminal; Ghostty is Mac/herdr only)
+vk1C & g::LaunchRegisteredApp("Alacritty")
 
 ; F: エクスプローラー (Finder 相当)
 vk1C & f::
