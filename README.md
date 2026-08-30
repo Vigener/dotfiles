@@ -23,6 +23,8 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 - `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。
 - `ghostty/.config/ghostty/config`: Ghostty（MBA・herdr 専用外側端末）の共有キーバインド。`~/.config/ghostty/config` へ symlink。`initial-command` は `~/.config/ghostty/config.local`（MBA のみ、symlink しない）。
 - `rtk/config.toml`: RTK（トークン圧縮）の共有設定。Linux は `~/.config/rtk/`、macOS は `~/Library/Application Support/rtk/` へ symlink。
+- `google-ime/azik_romantable.txt`: Google 日本語入力の AZIK ローマ字表。symlink しない。IME 設定からインポート。
+- `autohotkey/main.ahk`: Windows 専用の AutoHotkey v2 キーバインド設定。Mac の Karabiner-Elements と同一の操作感を Windows 上に完全再現。（Windows のみ）
 
 ### リンク方針（Stow について）
 
@@ -144,6 +146,25 @@ Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシ�
 - MBA ローカル: `initial-command = /opt/homebrew/bin/herdr --remote mini`（GUI は PATH が細い。2枚目は英数+N でシェル）
 - 英数+Ctrl+HJKL/V/- は Karabiner の Ghostty 限定ルール
 
+#### 3.4.1 Ghostty（ThinkPad Windows）
+
+公式 Windows 版は未リリース。**LIL-JRG 非公式 Win32 ビルド**を使う。AutoHotkey の `APP_REGISTRY` は `%LocalAppData%\Programs\Ghostty\ghostty.exe` を想定。
+
+前提: `winget install Git.Git`（日常シェルは Git Bash。PowerShell は winget 専用）
+
+PowerShell（ThinkPad）:
+
+```powershell
+cd $HOME\ghq\github.com\Vigener\dotfiles
+.\bin\link-ghostty-windows.ps1 -Install   # 本体 + config 一括
+# 本体済みなら: .\bin\link-ghostty-windows.ps1
+```
+
+- 配置: `%LOCALAPPDATA%\ghostty\config.ghostty`（共有）、`config.local.ghostty`（ThinkPad 専用・初回のみ example から作成）
+- 1枚目: `initial-command = ssh mini`（Tailscale + `~/.ssh/config` の Host mini）
+- 2枚目以降: `Ctrl+Shift+T` でローカル Git Bash
+- macOS 版の `cmd+t` / herdr prefix キーバインドは **Windows では使わない**
+
 ### 4. 📱 macOS 固有のセットアップ
 
 #### 4.1 Karabiner-Elements のセットアップ
@@ -188,6 +209,24 @@ cd ~/dotfiles/karabiner && npm run build
 - **GUI操作は禁止**：Karabiner-Elements アプリ上で「Add predefined rule」などによるルール追加は、次回ビルド時にすべて上書きされます。
 - **設定変更は `index.ts` のみ**：自動生成される `karabiner.json` は出力結果に過ぎず、直接編集は厳禁です。
 - **`tsx` 採用理由**：ESM (ECMAScript Modules) 対応が必要なため、`tsx` を採用しています。
+
+#### 4.2 Windows 固有のセットアップ (AutoHotkey v2)
+
+Windows 端末で macOS (Karabiner-Elements) と同一のキーバインドを再現するための設定です。
+
+詳細は [`autohotkey/README.md`](autohotkey/README.md) を参照してください。
+
+```powershell
+# 1. AutoHotkey v2 のインストール
+winget install AutoHotkey.AutoHotkey
+
+# 2. スタートアップ登録（PC起動時に自動常駐）
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\AutoHotkey_dotfiles.lnk")
+$Shortcut.TargetPath = "$HOME\dotfiles\autohotkey\main.ahk"
+$Shortcut.WorkingDirectory = "$HOME\dotfiles\autohotkey"
+$Shortcut.Save()
+```
 
 ### 5. Gitのグローバル設定（ノイズ排除）
 

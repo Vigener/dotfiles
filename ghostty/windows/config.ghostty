@@ -1,0 +1,27 @@
+# ThinkPad Windows — Ghostty（非公式 Win32 ビルド）
+# 配置先: %LOCALAPPDATA%\ghostty\config.ghostty
+# link-ghostty-windows.ps1 が dotfiles からコピーする。
+#
+# macOS 版 config（cmd+ キーバインド / herdr prefix）は Windows では使わない。
+# ローカル上書き: config.local.ghostty（initial-command 等）
+
+config-file = ?config.local.ghostty
+
+window-save-state = always
+
+# 日常シェルは Git Bash（PowerShell は winget 専用）
+command = C:\Program Files\Git\bin\bash.exe
+command = --login
+command = -i
+
+# フォントは入っていれば JetBrains、なければ Consolas
+font-family = JetBrains Mono
+font-family = Consolas
+
+font-size = 12
+
+# システムのライト/ダークに追従
+theme = light:Default,dark:Default
+
+# Windows では macos-* は無視される（エラーにはならない）
+background-blur = true
