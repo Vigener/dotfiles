@@ -1,5 +1,5 @@
-# macOS
-.DS_Store
+# Nested clone (do not vendor as submodule)
+autohotkey/win-env/.git/
 
 # Editor temp files
 *.swp
