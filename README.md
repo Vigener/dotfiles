@@ -25,6 +25,7 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 - `rtk/config.toml`: RTK（トークン圧縮）の共有設定。Linux は `~/.config/rtk/`、macOS は `~/Library/Application Support/rtk/` へ symlink。
 - `google-ime/azik_romantable.txt`: Google 日本語入力の AZIK ローマ字表。symlink しない。IME 設定からインポート。
 - `autohotkey/main.ahk`: Windows 専用の AutoHotkey v2 キーバインド設定。Mac の Karabiner-Elements と同一の操作感を Windows 上に完全再現。（Windows のみ）
+- `chrome/README.md`: ローカル Chrome 拡張機能（パッケージ化されていない拡張機能）の管理カタログ。新端末での環境再現用。
 
 ### リンク方針（Stow について）
 
@@ -160,6 +161,19 @@ cp ~/ghq/github.com/Vigener/dotfiles/alacritty/alacritty.toml "$APPDATA/alacritt
 ```
 
 `ghostty/windows/` と `bin/link-ghostty-windows.*` は残置だが ThinkPad では使わない。
+
+### 3.5 ローカル Chrome 拡張機能 (Local Extensions)
+
+Google アカウント同期の対象外となる自作・ローカル Chrome 拡張機能（`auto-tab-group` 等）の管理リスト。
+
+詳細は [`chrome/README.md`](chrome/README.md) を参照。
+
+```bash
+# 一括クローン / 更新
+ghq get -u -p Vigener/auto-tab-group
+ghq get -u -p Vigener/pukiwiki-markdown-bridge
+ghq get -u -p Vigener/manaba-quick-nav
+```
 
 ### 4. 📱 macOS 固有のセットアップ
 
