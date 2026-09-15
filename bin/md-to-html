@@ -1,0 +1,366 @@
+#!/usr/bin/env python3
+"""md-to-html: Universal Markdown to Standalone HTML Builder.
+
+Keep Markdown as the single source of truth (SSOT).
+Compiles any Markdown document into an elegant, standalone, mobile-friendly,
+and print-ready HTML page with marked.js.
+
+Part of dotfiles / agent skills.
+Usage:
+  md-to-html input.md [-o output.html] [--theme tactical|sepia|minimal] [--open]
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+THEMES = {
+    "tactical": {
+        "bg": "#111418",
+        "paper": "#181d24",
+        "paper_card": "#1f2630",
+        "ink": "#e8edf4",
+        "muted": "#8b99ab",
+        "accent": "#5c9df2",
+        "teal": "#4ec9b0",
+        "warn": "#e5b567",
+        "line": "#2b3644",
+        "font_body": '"Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        "serif": '"Literata", "Hiragino Mincho ProN", serif',
+        "mono": '"IBM Plex Mono", ui-monospace, monospace',
+        "radial": 'radial-gradient(800px 400px at 10% -5%, rgba(92,157,242,.12), transparent 55%), radial-gradient(600px 300px at 90% 15%, rgba(78,201,176,.08), transparent 50%)',
+    },
+    "sepia": {
+        "bg": "#14110e",
+        "paper": "#1c1814",
+        "paper_card": "#221d18",
+        "ink": "#f3ebe1",
+        "muted": "#a89888",
+        "accent": "#e08a4a",
+        "teal": "#5cb8a8",
+        "warn": "#d4a04a",
+        "line": "#3a322a",
+        "font_body": '"Noto Sans JP", "Literata", "Hiragino Mincho ProN", serif',
+        "serif": '"Literata", "Hiragino Mincho ProN", serif',
+        "mono": '"IBM Plex Mono", ui-monospace, monospace',
+        "radial": 'radial-gradient(700px 380px at 15% -5%, rgba(224,138,74,.14), transparent 55%), radial-gradient(600px 320px at 90% 10%, rgba(92,184,168,.1), transparent 50%)',
+    },
+    "minimal": {
+        "bg": "#f9f9fb",
+        "paper": "#ffffff",
+        "paper_card": "#f0f2f5",
+        "ink": "#1a1d20",
+        "muted": "#5f6874",
+        "accent": "#0969da",
+        "teal": "#1a7f37",
+        "warn": "#9a6700",
+        "line": "#d0d7de",
+        "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
+        "serif": '"Hiragino Mincho ProN", serif',
+        "mono": 'ui-monospace, monospace',
+        "radial": 'none',
+    },
+}
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {{
+      --bg: {bg};
+      --paper: {paper};
+      --paper-card: {paper_card};
+      --ink: {ink};
+      --muted: {muted};
+      --accent: {accent};
+      --teal: {teal};
+      --warn: {warn};
+      --line: {line};
+      --font-body: {font_body};
+      --serif: {serif};
+      --mono: {mono};
+    }}
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      font-family: var(--font-body);
+      background: {radial}, var(--bg);
+      color: var(--ink);
+      line-height: 1.8;
+      padding: 2.2rem 1.25rem 5rem;
+    }}
+    .wrap {{ max-width: 940px; margin: 0 auto; }}
+    .eyebrow {{
+      font-family: var(--mono); font-size: .75rem; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: .5rem;
+    }}
+    h1 {{
+      font-family: var(--serif);
+      font-size: clamp(1.45rem, 3.8vw, 2.05rem);
+      font-weight: 700; line-height: 1.35; margin-bottom: .75rem; color: var(--ink);
+    }}
+    .meta-bar {{
+      font-family: var(--mono); font-size: .8rem; color: var(--muted);
+      border-bottom: 1px solid var(--line); padding-bottom: .9rem; margin-bottom: 2rem;
+      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center;
+    }}
+    .nav-links {{ display: flex; gap: .5rem; flex-wrap: wrap; }}
+    .btn-nav {{
+      background: rgba(128,128,128,.1); border: 1px solid var(--line);
+      color: var(--accent); padding: .3rem .65rem; border-radius: 6px;
+      text-decoration: none; font-family: var(--mono); font-size: .78rem;
+      display: inline-flex; align-items: center; gap: .3rem; transition: all .15s;
+    }}
+    .btn-nav:hover {{ background: rgba(128,128,128,.2); border-color: var(--accent); }}
+
+    /* Markdown Core Elements */
+    #content {{ margin-top: 1rem; }}
+    #content h1:first-child {{ display: none; }} /* Already shown in header */
+    #content h2 {{
+      font-size: 1.25rem; margin: 2.5rem 0 .8rem; color: var(--accent);
+      border-bottom: 1px solid var(--line); padding-bottom: .45rem; display: flex; align-items: center; gap: .5rem;
+    }}
+    #content h3 {{
+      font-size: 1.1rem; margin: 1.6rem 0 .5rem; color: var(--teal);
+    }}
+    #content h4 {{
+      font-size: .95rem; margin: 1.2rem 0 .4rem; color: var(--ink);
+    }}
+    #content p {{ margin-bottom: 1.1rem; }}
+    #content ul, #content ol {{ margin: 0 0 1.2rem 1.4rem; }}
+    #content li {{ margin-bottom: .35rem; }}
+    #content strong {{ color: var(--ink); font-weight: 700; }}
+    
+    /* Code & Terminal Styling */
+    #content pre {{
+      background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+      padding: .9rem 1.1rem; overflow-x: auto; margin: 1.2rem 0; font-family: var(--mono); font-size: .85rem;
+      line-height: 1.6;
+    }}
+    #content code {{
+      font-family: var(--mono); font-size: .88em; background: rgba(128,128,128,.15);
+      padding: .15em .4em; border-radius: 4px; color: var(--accent);
+    }}
+    #content pre code {{ background: none; padding: 0; color: inherit; }}
+
+    /* Speech Bubble / Quote Blocks */
+    #content blockquote {{
+      background: var(--paper);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: .85rem 1.15rem;
+      margin: 1.2rem 0;
+      color: var(--ink);
+    }}
+    #content blockquote p:last-child {{ margin-bottom: 0; }}
+
+    /* Responsive Tables */
+    #content table {{
+      width: 100%; border-collapse: collapse; margin: 1.4rem 0;
+      background: var(--paper); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+      font-size: .88rem;
+    }}
+    #content th, #content td {{
+      padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--line);
+    }}
+    #content th {{
+      background: var(--paper-card); color: var(--accent); font-family: var(--mono); font-size: .82rem;
+    }}
+    #content tr:last-child td {{ border-bottom: none; }}
+
+    /* HR */
+    #content hr {{
+      border: none; border-top: 1px dashed var(--line); margin: 2.4rem 0;
+    }}
+
+    /* Checkbox list */
+    #content input[type="checkbox"] {{
+      margin-right: .5rem; accent-color: var(--accent);
+    }}
+
+    /* Print Stylesheet (A4 paper clipboard ready) */
+    @media print {{
+      body {{ background: #fff !important; color: #111 !important; padding: 0 !important; }}
+      .wrap {{ max-width: 100% !important; margin: 0 !important; }}
+      .meta-bar .nav-links, .eyebrow {{ display: none !important; }}
+      #content h2 {{ color: #000 !important; border-color: #ccc !important; }}
+      #content h3 {{ color: #222 !important; }}
+      #content blockquote {{ background: #f5f5f5 !important; color: #000 !important; border-left-color: #333 !important; }}
+      #content table {{ background: #fff !important; border-color: #ccc !important; }}
+      #content th {{ background: #eee !important; color: #000 !important; }}
+      #content td {{ border-color: #ccc !important; color: #000 !important; }}
+      #content pre {{ background: #f8f8f8 !important; color: #111 !important; border-color: #ccc !important; }}
+      .foot {{ display: none !important; }}
+    }}
+
+    .foot {{
+      margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+      font-family: var(--mono); font-size: .8rem; color: var(--muted);
+    }}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;">
+      <p class="eyebrow">{eyebrow}</p>
+      <div class="nav-links">
+        <a href="javascript:window.print()" class="btn-nav">🖨️ A4印刷 / PDF</a>
+      </div>
+    </div>
+
+    <h1>{title}</h1>
+    <div class="meta-bar">
+      <span>正本: <code>{src_filename}</code></span>
+      <span>出力: <code>{dst_filename}</code></span>
+    </div>
+
+    <!-- Rendered Content Container -->
+    <main id="content">
+      <p class="muted">Loading content from markdown source...</p>
+    </main>
+
+    <div class="foot">
+      <span>Generated by md-to-html (dotfiles)</span>
+      <span>Source: {src_relpath}</span>
+    </div>
+  </div>
+
+  <!-- Raw Markdown Data -->
+  <script id="md-source" type="text/markdown">
+{markdown_raw}
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {{
+      const raw = document.getElementById("md-source").textContent;
+      if (window.marked && raw) {{
+        marked.setOptions({{
+          gfm: true,
+          breaks: true
+        }});
+        document.getElementById("content").innerHTML = marked.parse(raw);
+      }}
+    }});
+  </script>
+</body>
+</html>
+"""
+
+
+def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, str]:
+    title = default_title
+    eyebrow = "Document · Knowledge Base"
+    
+    # 1. Search for first # Header
+    m_h1 = re.search(r"^#\s+(.+)$", md_text, flags=re.MULTILINE)
+    if m_h1:
+        title = m_h1.group(1).strip()
+    
+    # 2. Check for hints in text
+    lower = md_text.lower()
+    if "seminar" in lower or "就活" in lower or "面接" in lower or "インターン" in lower:
+        eyebrow = "Career & Application · Tactical Sheet"
+    elif "雑談" in lower or "幸福" in lower or "生活" in lower or "パートナー" in lower:
+        eyebrow = "Life Events & Communication · Protocol"
+    elif "finance" in lower or "資産" in lower or "sim" in lower:
+        eyebrow = "Finance & Life Planning"
+
+    return title, eyebrow
+
+
+def auto_detect_theme(md_text: str) -> str:
+    lower = md_text.lower()
+    if "雑談" in lower or "幸福" in lower or "アジェンダ" in lower or "生活" in lower:
+        return "sepia"
+    if "seminar" in lower or "ヒアリング" in lower or "タイムキープ" in lower or "逆質問" in lower:
+        return "tactical"
+    return "tactical"
+
+
+def compile_markdown_to_html(
+    src_path: Path,
+    dst_path: Path | None = None,
+    theme_name: str = "auto",
+    custom_title: str | None = None,
+    open_browser: bool = False,
+) -> Path:
+    if not src_path.exists():
+        raise FileNotFoundError(f"Source file not found: {src_path}")
+    
+    if dst_path is None:
+        dst_path = src_path.with_suffix(".html")
+        
+    md_text = src_path.read_text(encoding="utf-8")
+    title, eyebrow = extract_title_and_eyebrow(md_text, default_title=src_path.stem)
+    if custom_title:
+        title = custom_title
+
+    if theme_name == "auto" or theme_name not in THEMES:
+        theme_name = auto_detect_theme(md_text)
+    
+    theme_cfg = THEMES[theme_name]
+    safe_md = md_text.replace("</script>", "<\\/script>")
+
+    html_content = HTML_TEMPLATE.format(
+        title=title,
+        eyebrow=eyebrow,
+        src_filename=src_path.name,
+        dst_filename=dst_path.name,
+        src_relpath=src_path.name,
+        markdown_raw=safe_md,
+        **theme_cfg,
+    )
+    
+    dst_path.write_text(html_content, encoding="utf-8")
+    print(f"Generated ({theme_name}): {dst_path}")
+    
+    if open_browser:
+        if sys.platform == "darwin":
+            subprocess.run(["open", str(dst_path)])
+        elif os.name == "posix":
+            subprocess.run(["xdg-open", str(dst_path)])
+            
+    return dst_path
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Compile any Markdown into a standalone, print-ready, responsive HTML."
+    )
+    parser.add_argument("input", help="Path to input Markdown file (.md)")
+    parser.add_argument("-o", "--output", help="Path to output HTML file (.html)")
+    parser.add_argument(
+        "-t",
+        "--theme",
+        choices=["auto", "tactical", "sepia", "minimal"],
+        default="auto",
+        help="Visual theme (default: auto detect based on content)",
+    )
+    parser.add_argument("--title", help="Custom page title")
+    parser.add_argument("--open", action="store_true", help="Open generated HTML in browser")
+
+    args = parser.parse_args()
+    src = Path(args.input).resolve()
+    dst = Path(args.output).resolve() if args.output else None
+
+    compile_markdown_to_html(
+        src_path=src,
+        dst_path=dst,
+        theme_name=args.theme,
+        custom_title=args.title,
+        open_browser=args.open,
+    )
+
+
+if __name__ == "__main__":
+    main()
