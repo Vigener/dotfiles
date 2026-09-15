@@ -287,6 +287,45 @@ def auto_detect_theme(md_text: str) -> str:
     return "tactical"
 
 
+
+def open_in_browser(target_path: Path):
+    """Open target in browser, ALWAYS prioritizing MBA via ssh, falling back to local."""
+    target_str = str(target_path)
+    url = None
+    try:
+        ts_ip = subprocess.check_output(["tailscale", "ip", "-4"], text=True, timeout=2).strip().splitlines()[0]
+        p_str = str(target_path.resolve())
+        if "/life-brain/" in p_str:
+            rel = p_str.split("/life-brain/", 1)[1]
+            url = f"http://{ts_ip}:8770/{rel}"
+        elif "/research-brain/" in p_str:
+            rel = p_str.split("/research-brain/", 1)[1]
+            url = f"http://{ts_ip}:8766/{rel}"
+        elif "/hybrid-workflow-sandbox/" in p_str:
+            rel = p_str.split("/hybrid-workflow-sandbox/", 1)[1]
+            url = f"http://{ts_ip}:8765/{rel}"
+    except Exception:
+        pass
+
+    dest = url or target_str
+
+    # Prioritize MBA via ssh
+    res = subprocess.run(
+        ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=3", "mba", f"open '{dest}'"],
+        capture_output=True,
+    )
+    if res.returncode == 0:
+        print(f"Opened on MBA: {dest}")
+        return
+
+    # Fallback to local open
+    print("ssh mba failed or unreachable. Falling back to local open...")
+    if sys.platform == "darwin":
+        subprocess.run(["open", target_str])
+    elif os.name == "posix":
+        subprocess.run(["xdg-open", target_str])
+
+
 def compile_markdown_to_html(
     src_path: Path,
     dst_path: Path | None = None,
@@ -325,10 +364,7 @@ def compile_markdown_to_html(
     print(f"Generated ({theme_name}): {dst_path}")
     
     if open_browser:
-        if sys.platform == "darwin":
-            subprocess.run(["open", str(dst_path)])
-        elif os.name == "posix":
-            subprocess.run(["xdg-open", str(dst_path)])
+        open_in_browser(dst_path)
             
     return dst_path
 
