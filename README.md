@@ -143,7 +143,7 @@ Cmux の代わりに Ghostty を herdr 専用フロントにする。素のシ�
 # Ghostty を完全終了してから起動。herdr クライアントも再起動。
 ```
 
-- 共有: `Cmd+T` → 新規タブ、`Cmd+W` は誤爆防止のため無効化（`Cmd+Shift+W` / `英数+Shift+W` → pane 閉じ）、`Ctrl+Q` → デタッチ、`Ctrl+Tab` → タブ送り（いずれも prefix 列を `text:` で送る）。`Cmd+Q` はアプリ終了のまま。
+- 共有: `Cmd+T` → 新規タブ、`Cmd+W` / `Cmd+Shift+W` は誤爆・連鎖消滅防止のため unbind（pane 閉じは由緒ある prefix `Ctrl+Space` → `x` または `exit` / `Ctrl+D` のみ）、`Ctrl+Q` → デタッチ、`Ctrl+Tab` → タブ送り（いずれも prefix 列を `text:` で送る）。`Cmd+Q` はアプリ終了のまま。
 - MBA ローカル: `initial-command = /opt/homebrew/bin/herdr --remote mini`（GUI は PATH が細い。2枚目は英数+N でシェル）
 - 英数+Ctrl+HJKL/V/- は Karabiner の Ghostty 限定ルール
 
