@@ -13,8 +13,9 @@ config-file = ?~/.config/ghostty/config.local
 # 英数+T → Cmd+T → herdr new_tab (prefix+c)
 keybind = cmd+t=text:\x00c
 
-# 英数+W → Cmd+W → herdr close_pane (prefix+x)。タブごと消さない。
-keybind = cmd+w=text:\x00x
+# 英数+W / Cmd+W は誤爆防止のため無効化。Shift 付き（英数+Shift+W / Cmd+Shift+W）でのみ herdr close_pane (prefix+x)
+keybind = cmd+w=unbind
+keybind = cmd+shift+w=text:\x00x
 
 # 英数+Ctrl+Q → Ctrl+Q → herdr detach (prefix+q)。Cmd+Q（アプリ終了）は触らない。
 keybind = ctrl+q=text:\x00q

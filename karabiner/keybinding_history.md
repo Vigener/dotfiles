@@ -1,5 +1,11 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年9月16日: Ghostty の close_pane を Cmd+Shift+W / 英数+Shift+W に変更（Cmd+W 誤爆防止）
+
+herdr ではタブやペインを閉じるとプロセスが即時終了され、ターミナルバッファやIDも破棄されるため復元（Undo / Reopen）が不可能。Ghostty がアクティブな状態（または他アプリ操作中のフォーカス誤認）で手癖の `英数+W`（Cmd+W）を押してしまうと、確認なしでペインやタブが即死する危険があった。
+
+対策として、Ghostty 設定で `cmd+w=unbind` とし、`cmd+shift+w=text:\x00x` に移行。Karabiner 側の `英数+W`（`optionalAny`）は物理 Shift をそのまま通過させるため、`英数+Shift+W`（または `Cmd+Shift+W`）と意図的に Shift を添えた場合のみ herdr のペイン閉じが発火するよう安全化を図った。
+
 ## 2026年8月18日: Cmux の herdr キージャックをオフ
 
 試用自体は成功した。英数 IME では一打で herdr 新規タブが増えた。かなは当初1打目だけ外れ、ABC 切替 + 100ms のあと一打で通った。T のあと W/P/Q と pane 系も同じ経路で載せた。
