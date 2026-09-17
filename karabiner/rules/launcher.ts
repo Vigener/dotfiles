@@ -21,6 +21,7 @@ const APP_REGISTRY: Record<string, string> = {
   // --- コミュニケーション ---
   Slack: "^com\\.tinyspeck\\.slackmacgap$",
   Mail: "^com\\.apple\\.mail$",
+  "zoom.us": "^us\\.zoom\\.xos$",
   // --- システム ---
   Finder: "^com\\.apple\\.finder$",
   // --- ドキュメント ---
@@ -172,7 +173,7 @@ export const launcherRules = [
     ...toggleApp("o", "Obsidian"),
     ...toggleApp("a", "cmux"),
     ...toggleApp("m", "Cursor"),
-    ...toggleApp("z", "Zed"),
+    ...toggleApp("z", "zoom.us"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
     ...toggleAppWithKey("s", MAIN_BROWSER, BROWSER_SLACK_TAB, ["command"]),
     ...toggleApp("w", "Warp"),

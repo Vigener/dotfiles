@@ -13,6 +13,11 @@
 
 ## メモ（キー割り当ての決定経緯など）
 
+- **Zoom を「かな＋Z」にした理由**
+  - Zed は使用頻度が月0回になり、必要時も Cursor で足りる。一方 Zoom は週1のチームMTGで必ず使い、その 1.5〜2 時間だけ他アプリとの行き来が頻発する。
+  - 初期立ち上げウィンドウは消す運用なので、PowerPoint のようなウィンドウサイクルは不要。既存の `toggleApp`（前面なら Cmd+H、それ以外は起動）でトグルする。
+  - 起動名は `zoom.us`（`open -a Zoom` は失敗する）。Zed の Bundle ID はレジストリに残す。
+
 - **YouTube Music（ブラウザ5番目のタブ）を「かな＋8」にした理由**
   - 音量系操作（U:アップ、I:ダウン、Y:ミュート）との近さと、音楽という絶対的サブタスク（バックグラウンド用）であることから、できればノールックで瞬間的に押したい作業であるため。
   - ノー・ルックで押しやすいキーを考慮すると、右手の中指と薬指を自然と伸ばした先にある「8」と「0」が候補として残った。その上で、UとIの上にある「8」を採用した。
@@ -201,7 +206,7 @@
 | O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
 | A + optionalAny | kana_pressed = 1 | Open: cmux (トグル)                                                                   | AI駆動開発メイン |
 | M + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | メインエディタ      |
-| Z + optionalAny | kana_pressed = 1 | Open: Zed (トグル)                                                                     |                     |
+| Z + optionalAny | kana_pressed = 1 | Open: zoom.us (トグル)                                                                 | 週次MTG中の行き来用 |
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
 | T + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   |                     |
