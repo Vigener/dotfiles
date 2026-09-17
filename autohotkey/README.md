@@ -99,8 +99,8 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 |---|---|---|
 | **Shift + 4** / **Ctrl + Shift + 4** | `Win + Shift + S` | 範囲切り取り (Snipping Tool) |
 | **Shift + 3** / **Ctrl + Shift + 3** | `PrintScreen` | 全画面キャプチャ |
-| **1 〜 9** | `Ctrl + Alt + 1..9` | herdr `focus_agent` / ペイン直フォーカス |
-| **8 / [** | 括弧囲み | 選択テキストを `()` や `[]` で囲む |
+| **1 〜 8** | `Ctrl + Alt + 1..8` | herdr `focus_agent` |
+| **9 / 0** | AHK 管理 | **9**: スクリプト編集 / **0**: リロード（herdr 外） |
 
 ---
 
@@ -141,7 +141,7 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 | **W / T** | **Warp** / Windows Terminal | ターミナル トグル |
 | **E** | **Edge** / Mail | ブラウザ / メール トグル |
 | **B** | **Google Chrome** | トグル起動 |
-| **N** | **Zen Browser** (メインブラウザ) | 最前面時は **思考ハブ (タブ2: Ctrl+2)** へジャンプ |
+| **N** | **Google Chrome** (メインブラウザ) | 最前面時は **思考ハブ (タブ2: Ctrl+2)** へジャンプ |
 | **S** | **Slack** | メインブラウザ起動 → **Slack (タブ3: Ctrl+3)** へジャンプ |
 | **C** | **Calendar** | メインブラウザ起動 → **カレンダー (タブ4: Ctrl+4)** へジャンプ |
 | **8** | **YouTube Music** | メインブラウザ起動 → **Music (タブ5: Ctrl+5)** へジャンプ |
@@ -170,6 +170,9 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 
 - **無変換 + 0**: スクリプトを即座にリロード（設定変更を即時反映）
 - **無変換 + 9**: スクリプトをエディタで開く
+- **無変換 + 1〜8**: herdr `Ctrl+Alt+1..8`（9/0 は herdr 対象外）
+
+> **重要**: 起動するのは `autohotkey/main.ahk` のみ。`win-env/` 配下の旧 `main*.ahk` はアーカイブです。スタートアップやタスクトレイに複数登録すると `Duplicate hotkey` で落ちます。
 
 ---
 

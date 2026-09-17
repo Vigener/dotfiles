@@ -8,12 +8,19 @@
 ; ==============================================================================
 
 ; --- メインブラウザ設定 ---
-; 使用するメインブラウザ: "msedge.exe", "chrome.exe", "zen.exe", "dia.exe" など
-global MAIN_BROWSER_EXE := "zen.exe"
-global MAIN_BROWSER_PATH := EnvGet("LocalAppData") . "\zen\zen.exe"
-; フォールバック（見つからない場合のブラウザ）
+; ThinkPad / Windows: Chrome 優先。Mac Karabiner は launcher.ts の MAIN_BROWSER (Dia/Zen) を参照。
 global FALLBACK_BROWSER_EXE := "msedge.exe"
 global FALLBACK_BROWSER_PATH := "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+global MAIN_BROWSER_EXE := "chrome.exe"
+global MAIN_BROWSER_PATH := "C:\Program Files\Google\Chrome\Application\chrome.exe"
+if !FileExist(MAIN_BROWSER_PATH)
+    MAIN_BROWSER_PATH := "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+if !FileExist(MAIN_BROWSER_PATH)
+    MAIN_BROWSER_PATH := EnvGet("LocalAppData") . "\Google\Chrome\Application\chrome.exe"
+if !FileExist(MAIN_BROWSER_PATH) {
+    MAIN_BROWSER_EXE := FALLBACK_BROWSER_EXE
+    MAIN_BROWSER_PATH := FALLBACK_BROWSER_PATH
+}
 
 ; ブラウザのタブ番号 (Mac版 Karabiner と同一)
 global BROWSER_HUB_TAB := "2"       ; 変換 + N: 思考ハブ (Zen Tab 2)

@@ -35,8 +35,8 @@ SetWorkingDir(A_ScriptDir)
 ; 6. 短縮入力 (Hotstrings)
 #Include "rules/hotstrings.ahk"
 
-; --- スクリプト管理ショートカット ---
-; 無変換 + 0 でスクリプトを即時リロード
+; --- スクリプト管理ショートカット (herdr は 1..8 のみ。9/0 は AHK 専用) ---
+; 無変換 + 0: リロード / 無変換 + 9: スクリプトをエディタで開く
 ~vk1D & 0::
 {
     ToolTip("Reloading AutoHotkey...")
@@ -44,7 +44,6 @@ SetWorkingDir(A_ScriptDir)
     Reload()
 }
 
-; 無変換 + 9 でスクリプトディレクトリをエディタで開く
 ~vk1D & 9::
 {
     Edit()
