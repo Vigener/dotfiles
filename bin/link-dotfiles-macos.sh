@@ -84,6 +84,7 @@ link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 
 mkdir -p "$HOME/.gemini/config/skills"
 link_file "$DOTFILES/agents/skills/md-to-html" "$HOME/.gemini/config/skills/md-to-html"
+link_file "$DOTFILES/agents/skills/herdr" "$HOME/.gemini/config/skills/herdr"
 
 if command -v git >/dev/null; then
   git config --global core.excludesfile "$HOME/.gitignore_global"
