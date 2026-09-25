@@ -42,7 +42,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 # モデル呼び出しと HPC 境界（2026-07-31／2026-08-07 補訂）
 
 1. **agy Opus 原則禁止**（Google AI Pro が即 5h limit）。発想の同等が必要なら Cursor Sonnet 5 の許可を求める。
-2. **要許可**: Cursor Sonnet 5（発想・方針） / GPT-5.6 Terra（レビュー分析・計画の穴）。同役で並べない。無許可で可: pi(opencode-go 全)、agy(Gemini Flash/Pro, Sonnet 4.6, GPT-OSS)、Grok 4.5。**実装は `research-brain/wiki/ai-engineering/implementer.md` の model_id に自動委譲**（差し替えはその表だけ）。Composer は明示時のみ（Grok と Cursor 枠共有に注意）。
+2. **要許可**: Cursor Sonnet 5（発想・方針） / GPT-5.6 Terra（レビュー分析・計画の穴）。同役で並べない。無許可で可: agy(Gemini Flash/Pro, Sonnet 4.6, GPT-OSS)、Grok 4.7 / 4.6、Composer 2.5（実装役）。**OpenCode Go 未契約のため `pi`（`opencode-go/*`）は使わない。** 実装は `research-brain/wiki/ai-engineering/implementer.md` の model_id に自動委譲（差し替えはその表だけ。2026-09-22 現在 Composer 2.5 / `agent`）。司令塔は Grok 4.7、実装は Composer。同一 Cursor Models 枠なので Grok でコード量産しない。
 3. **Fable 5（Other）**: 長時間駆動・夜間放置連鎖はしない。**短時間の発想・問い切り・教員説明の穴・仮説1本の BRIEF は積極利用してよい**（司令塔 Grok が独断で「温存」して止めない）。テーマ全探索・Bレーン風呂敷再開・実装長文は渡さない。Sol は敵対・操作定義の穴向け（Fable と同日同問にしない）。
 4. **HPC**: 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
 5. **ゴール固定**: 長作業の開始時はスキル `goal`。敵対レビューはスキル `adversarial-review`（T3 は許可時 Terra。stop hook に載せない）。
