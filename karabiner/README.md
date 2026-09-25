@@ -47,6 +47,8 @@
 | 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
 | 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+Q | 同上 | Ctrl+Q | デタッチ（Ghostty が prefix+q）。Cmd+Q ではない |
 
+Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1。英数+1 の直下）/ 前の Agent（prefix+comma）/ 次の Agent（prefix+period）。Opt+E（アキュートのデッドキー）は潰さない。同じ Q/W/R は、ブラウザ（Vivaldi / Chrome / Zen / Dia）では先頭タブ / 前のタブ / 次のタブ、Cursor と VSCode では第1グループ / 前のタブ / 次のタブ、Slack では未読一覧 / 前の未読 / 次の未読。
+
 他アプリでは英数+Ctrl+HJKL は従来どおり（単語移動 / 高速スクロール）。英数+T は既存の Cmd+T（Ghostty では herdr 新規タブ）。英数+W は既存の Cmd+W（Ghostty では誤爆・連鎖消滅防止のため unbind。herdr の pane 閉じは由緒ある prefix `Ctrl+Space` → `x` または `exit` / `Ctrl+D` のみ）。英数+Q は Esc のまま。英数+Ctrl+Q は Ghostty のみデタッチ。タブ送りは Ctrl+Tab（Ghostty が prefix+n/p を送る）。
 
 ### APP_WARP

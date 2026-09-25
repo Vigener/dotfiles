@@ -74,6 +74,96 @@ export const appRules = [
   ]),
 
   // =====================================================================
+  // 基準ジャンプと左右移動（左手 Alt）。Opt+E は ABC のアキュート・デッドキーなので使わない。
+  // Q=左 / W=基準 / R=右。Ghostty・ブラウザ・Cursor・Slack が前面のときだけ。
+  // =====================================================================
+  rule("【Ghostty】左Alt+Q/W/R で herdr の基準・前・次").manipulators([
+    map("q", "left_option")
+      .to("1", ["left_control", "left_option"])
+      .condition(ifApp("^com\\.mitchellh\\.ghostty$")),
+    map("w", "left_option")
+      .to("spacebar", "left_control")
+      .to("comma")
+      .condition(ifApp("^com\\.mitchellh\\.ghostty$")),
+    map("r", "left_option")
+      .to("spacebar", "left_control")
+      .to("period")
+      .condition(ifApp("^com\\.mitchellh\\.ghostty$")),
+  ]),
+
+  rule("【ブラウザ】左Alt+Q/W/R で先頭タブ・前のタブ・次のタブ").manipulators([
+    map("q", "left_option")
+      .to("1", "left_command")
+      .condition(
+        ifApp([
+          "^com\\.vivaldi\\.Vivaldi$",
+          "^com\\.google\\.Chrome$",
+          "^app\\.zen-browser\\.zen$",
+          "^company\\.thebrowser\\.dia$",
+        ]),
+      ),
+    map("w", "left_option")
+      .to("close_bracket", ["left_command", "left_shift"])
+      .condition(
+        ifApp([
+          "^com\\.vivaldi\\.Vivaldi$",
+          "^com\\.google\\.Chrome$",
+          "^app\\.zen-browser\\.zen$",
+          "^company\\.thebrowser\\.dia$",
+        ]),
+      ),
+    map("r", "left_option")
+      .to("non_us_pound", ["left_command", "left_shift"])
+      .condition(
+        ifApp([
+          "^com\\.vivaldi\\.Vivaldi$",
+          "^com\\.google\\.Chrome$",
+          "^app\\.zen-browser\\.zen$",
+          "^company\\.thebrowser\\.dia$",
+        ]),
+      ),
+  ]),
+
+  rule("【Cursor/VSCode】左Alt+Q/W/R で第1グループ・前のタブ・次のタブ").manipulators([
+    map("q", "left_option")
+      .to("1", "left_command")
+      .condition(
+        ifApp([
+          "^com\\.todesktop\\.230313mzl4w4u92$",
+          "^com\\.microsoft\\.VSCode$",
+        ]),
+      ),
+    map("w", "left_option")
+      .to("close_bracket", ["left_command", "left_shift"])
+      .condition(
+        ifApp([
+          "^com\\.todesktop\\.230313mzl4w4u92$",
+          "^com\\.microsoft\\.VSCode$",
+        ]),
+      ),
+    map("r", "left_option")
+      .to("non_us_pound", ["left_command", "left_shift"])
+      .condition(
+        ifApp([
+          "^com\\.todesktop\\.230313mzl4w4u92$",
+          "^com\\.microsoft\\.VSCode$",
+        ]),
+      ),
+  ]),
+
+  rule("【Slack】左Alt+Q/W/R で未読一覧・前の未読・次の未読").manipulators([
+    map("q", "left_option")
+      .to("a", ["left_command", "left_shift"])
+      .condition(ifApp("^com\\.tinyspeck\\.slackmacgap$")),
+    map("w", "left_option")
+      .to("up_arrow", ["left_option", "left_shift"])
+      .condition(ifApp("^com\\.tinyspeck\\.slackmacgap$")),
+    map("r", "left_option")
+      .to("down_arrow", ["left_option", "left_shift"])
+      .condition(ifApp("^com\\.tinyspeck\\.slackmacgap$")),
+  ]),
+
+  // =====================================================================
   // [APP] Warp専用マッピング
   // =====================================================================
   rule(
