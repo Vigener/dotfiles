@@ -1,4 +1,41 @@
+# ==========================================
+# OS & Editor artifacts
+# ==========================================
 .DS_Store
+.obsidian/
+.AppleDouble
+.LSOverride
+._*
 *.swp
 *.swo
 *~
+
+# ==========================================
+# Security & Credentials (最重要: 漏洩防止)
+# ==========================================
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.token
+*.cert
+*credentials*
+*secret*
+id_rsa*
+id_ed25519*
+
+# ==========================================
+# Large Archives & Binaries
+# ==========================================
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# ==========================================
+# AI Agent & Scratch Workspaces
+# ==========================================
+.gemini/scratch/
+.claude/scratch/
