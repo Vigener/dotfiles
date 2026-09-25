@@ -22,3 +22,31 @@ herdr() {
     command herdr "$@"
   fi
 }
+
+# mini のシェルから MBA の Cursor IDE を Remote SSH で開く。
+# 確認済み（Cursor 3.17 / MBA）:
+#   /opt/homebrew/bin/cursor editor -n --classic --folder-uri "vscode-remote://ssh-remote+mini<abs-path>"
+# MBA では定義しない（Darwin 共通のこのファイルでも hostname で分岐）。
+if [[ "$(scutil --get LocalHostName 2>/dev/null)" == "mikoto-mac-mini" ]]; then
+  cursor() {
+    if [[ -n "${VSCODE_IPC_HOOK_CLI:-}" ]]; then
+      command cursor "$@"
+      return
+    fi
+    case "${1:-}" in
+      agent|editor|tunnel|--help|-h|--version|-v)
+        command cursor "$@"
+        return
+        ;;
+    esac
+    local target
+    if (( $# == 0 )) || [[ "$1" == "." ]]; then
+      target="$PWD"
+    else
+      target="$1"
+    fi
+    target="$(realpath "$target")" || return
+    local uri="vscode-remote://ssh-remote+mini${target}"
+    ssh mac "/opt/homebrew/bin/cursor editor -n --classic --folder-uri $(printf %q "$uri")"
+  }
+fi
