@@ -82,6 +82,9 @@ link_file "$DOTFILES/agents/rules/cursorrules" "$HOME/.cursorrules"
 mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 
+mkdir -p "$HOME/bin"
+link_file "$DOTFILES/bin/repo-http-serve" "$HOME/bin/repo-http-serve"
+
 mkdir -p "$HOME/.gemini/config/skills"
 link_file "$DOTFILES/agents/skills/md-to-html" "$HOME/.gemini/config/skills/md-to-html"
 link_file "$DOTFILES/agents/skills/herdr" "$HOME/.gemini/config/skills/herdr"
