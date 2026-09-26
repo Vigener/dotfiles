@@ -27,3 +27,7 @@
   - リポジトリ内のファイル（`.md` や `.html` 等）にリンクを記述する際は、**絶対にホスト固有の絶対ファイルパス（`file:///Users/...` 等）を書き込まないこと**。
   - 必ず **相対パス（例: `./path/to/file.md`、`../notes/file.md`）** または **Obsidian の WikiLink 記法（`[[filename]]`）** を使用すること（MBA 側から SMB 経由で開いた際にファイルが存在せずリンク破損・外部警告が出るのを防ぐため）。
 
+## Markdown 編集・検証ルール
+- **Markdown 編集時**: テーブル変更時は `mise exec -- npx -y markdownlint-cli2 "<file>"` (exit 0)、リンク変更時は `! git grep -nE "file:///|/Users/|/home/" "<file>"` (0件) で機械的検証を行うこと。
+
+
