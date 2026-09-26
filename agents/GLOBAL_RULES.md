@@ -88,3 +88,18 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
    - 記号（O2a, OBS_R1 等）は初出で一言定義。専門外でも追える文にする。
 3. **過信禁止**: 司令塔単独の「これで十分／新規テーマ不要」断定を避け、Fable 等の短時間発想を選択肢として残す。捏造・未実施実験の勝利宣言はしない。
 </RULE[paper_claim_level_and_language]>
+
+<RULE[link_portability_and_cli_format]>
+# リンク記法・ファイル内リンクのポータビリティルール（2026-09-26）
+
+Ghostty CLI / Herdr 環境での閲覧性、および SMB 経由（MBA）での Obsidian 閲覧ポータビリティを保証するための全エージェント共通規定。
+
+1. **チャット回答文でのリンク記法（Ghostty CLI / Herdr 最適化）**:
+   - ホスト絶対パスの `file:///...` リンクは一切出力しないこと（Ghostty CLI ではクリック不可で視覚的ノイズになるため）。
+   - ファイルに言及する際は、シンプルな相対パス（例: `notes/lecture-outline.md`、`wiki/hpc/foo.md`）またはファイル名のみで表記すること。
+   - ブラウザで開くべき成果物（HTML 等）のみ、コピーして即開ける `http://mikotomac-mini:8766/...`（または Tailscale URL）の形式で提示すること。
+2. **ファイル内リンクの絶対パス禁止（ポータビリティ保証）**:
+   - リポジトリ内のファイル（`.md` や `.html` 等）にリンクを記述する際は、**絶対にホスト固有の絶対ファイルパス（`file:///Users/...` 等）を書き込まないこと**。
+   - 必ず **相対パス（例: `./path/to/file.md`、`../notes/file.md`）** または **Obsidian の WikiLink 記法（`[[filename]]`）** を使用すること（MBA 側から SMB 共有経由で開いた際にファイルが存在せずリンク破損・外部警告が出るのを防ぐため）。
+</RULE[link_portability_and_cli_format]>
+
