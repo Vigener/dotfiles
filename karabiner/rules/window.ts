@@ -19,23 +19,23 @@ export const windowRules = [
   // =====================================================================
   // [WINDOW] かなレイヤー (ウィンドウマネジメント・スペース移動)
   // =====================================================================
-  rule("【WINDOW】かなレイヤー (Raycast & Mac標準ウィンドウ操作)").manipulators(
+  rule("【WINDOW】かなレイヤー (Rectangle & Mac標準ウィンドウ操作)").manipulators(
     [
       // -------...---------
       // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
       // -------...---------
       map("h", "optionalAny")
-        .to("left_arrow", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)), // 左半分（スナップ）
+        .to("left_arrow", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 左半分（Rectangle）
       map("l", "optionalAny")
-        .to("right_arrow", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)), // 右半分（スナップ）
+        .to("right_arrow", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 右半分（Rectangle）
       map("j", "optionalAny")
         .to("h", "command")
         .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
       map("k", "optionalAny")
-        .to("f", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)), // 最大化
+        .to("return_or_enter", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle）
       map("comma", "optionalAny")
         .to("left_arrow", "control")
         .condition(ifVar("kana_pressed", 1)), // 左のスペース
@@ -45,17 +45,17 @@ export const windowRules = [
       map("slash", "optionalAny")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
-      // Next Display: HHKB は ; 、Conductor は Del（delete_forward）
+      // Next Display: Rectangle の Ctrl+Opt+Cmd+Right。HHKB は ; 、Conductor は Del と MB1。
       map("semicolon", "optionalAny")
-        .to("n", ["left_control", "left_option", "left_command"])
+        .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
       map("delete_forward", "optionalAny")
-        .to("n", ["left_control", "left_option", "left_command"])
+        .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
       // Conductor MB1（L 右隣）: かな中のみ Next Display。device_if で Mac トラックパッド・HHKB ポインティングを除外。
       // VID/PID は ZMK 既定 USB (0x1D50/0x615E)。実機の Conductor 表記が違えば差し替え。BLE は USB ID と一致しない可能性あり（未確認・未所持）。
       mapPointingButton("button1")
-        .to("n", ["left_control", "left_option", "left_command"])
+        .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(
           ifVar("kana_pressed", 1),
           ifDevice({ vendor_id: 0x1d50, product_id: 0x615e }),
@@ -135,33 +135,21 @@ export const windowRules = [
   // =====================================================================
   // 【WINDOW】Raycast Windows Management (template)
   // =====================================================================
-  rule("【WINDOW】Raycast Windows Management (template)").manipulators([
-    // Option+, でウィンドウを左半分に配置(Cmd+Opt+Control+←)
+  rule("【WINDOW】Rectangle Windows Management (template)").manipulators([
+    // Option+, でウィンドウを左半分に配置（Rectangle: Ctrl+Opt+←）
     // (他での役割が出るまで)英数+,でも発火するようにする
-    map("comma", "option").to("left_arrow", [
-      "left_command",
-      "left_option",
-      "left_control",
-    ]),
+    map("comma", "option").to("left_arrow", ["left_control", "left_option"]),
     map("comma", "optionalAny")
-      .to("left_arrow", ["left_command", "left_option", "left_control"])
+      .to("left_arrow", ["left_control", "left_option"])
       .condition(ifVar("eisuu_pressed", 1)),
-    // Option+. でウィンドウを右半分に配置(Cmd+Opt+Control+→)
+    // Option+. でウィンドウを右半分に配置（Rectangle: Ctrl+Opt+→）
     // (他での役割が出るまで)英数+.でも発火するようにする
-    map("period", "option").to("right_arrow", [
-      "left_command",
-      "left_option",
-      "left_control",
-    ]),
+    map("period", "option").to("right_arrow", ["left_control", "left_option"]),
     map("period", "optionalAny")
-      .to("right_arrow", ["left_command", "left_option", "left_control"])
+      .to("right_arrow", ["left_control", "left_option"])
       .condition(ifVar("eisuu_pressed", 1)),
-    // Option+kでウィンドウを最大化(Cmd+Opt+Control+F)
-    map("k", "left_option").to("f", [
-      "left_command",
-      "left_option",
-      "left_control",
-    ]),
+    // Option+kでウィンドウを最大化（Rectangle: Ctrl+Opt+Return）
+    map("k", "option").to("return_or_enter", ["left_control", "left_option"]),
     // Option+nでNext Displayへ移動(Cmd+Opt+Control+n)
     // map("n", "option").to("n", ["left_command", "left_option", "left_control"]),
   ]),

@@ -156,16 +156,16 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力                  | 条件                                                                 | 出力               | 想定アクション                          |
 | --------------------- | -------------------------------------------------------------------- | ------------------ | --------------------------------------- |
-| H + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Left  | 左半分（スナップ）                      |
-| L + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Right | 右半分（スナップ）                      |
+| H + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Left      | 左半分（Rectangle）                     |
+| L + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Right     | 右半分（Rectangle）                     |
 | J + optionalAny       | kana_pressed = 1                                                     | Cmd+H              | 隠す                                    |
-| K + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+F     | 最大化                                  |
+| K + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化（Rectangle）                     |
 | , + optionalAny       | kana_pressed = 1                                                     | Ctrl+Left          | 左のスペース                            |
 | . + optionalAny       | kana_pressed = 1                                                     | Ctrl+Right         | 右のスペース                            |
 | / + optionalAny       | kana_pressed = 1                                                     | Ctrl+Cmd+F         | フルスクリーン                          |
-| ; + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+N     | Next Display（HHKB）                    |
-| delete_forward + optionalAny | kana_pressed = 1                                              | Cmd+Opt+Ctrl+N     | Next Display（Conductor Del）           |
-| pointing button1      | kana_pressed = 1 かつ device vendor_id=0x1D50 product_id=0x615E | Cmd+Opt+Ctrl+N     | Next Display（Conductor MB1、L 右隣）   |
+| ; + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Cmd+Right | Next Display（HHKB。Rectangle）         |
+| delete_forward + optionalAny | kana_pressed = 1                                              | Ctrl+Opt+Cmd+Right | Next Display（Conductor Del。Rectangle） |
+| pointing button1      | kana_pressed = 1 かつ device vendor_id=0x1D50 product_id=0x615E | Ctrl+Opt+Cmd+Right | Next Display（Conductor MB1、L 右隣）   |
 | D + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Shift+D | Switch Display Preset                 |
 
 #### ウィンドウ / アプリ切替
@@ -180,10 +180,10 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力  | 条件 | 出力               | 想定アクション                   |
 | ----- | ---- | ------------------ | -------------------------------- |
-| Opt+, | なし | Cmd+Opt+Ctrl+Left  | 左半分配置（グローバル）         |
-| Opt+. | なし | Cmd+Opt+Ctrl+Right | 右半分配置（グローバル）         |
-| Opt+K | なし | Cmd+Opt+Ctrl+F     | 最大化（グローバル）             |
-| Opt+N | なし | Cmd+Opt+Ctrl+N     | Next Displayへ移動（グローバル） |
+| Opt+, | なし | Ctrl+Opt+Left      | 左半分配置（Rectangle。英数+, も同じ） |
+| Opt+. | なし | Ctrl+Opt+Right     | 右半分配置（Rectangle。英数+. も同じ） |
+| Opt+K | なし | Ctrl+Opt+Return    | 最大化（Rectangle）                    |
+| Opt+N | なし | （コメントアウト） | Next Display。かな + ; が正。未使用 |
 
 ### APP（かなレイヤー）
 
