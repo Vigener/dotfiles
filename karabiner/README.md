@@ -38,13 +38,13 @@
 
 | ルール | 入力 | 条件 | 出力 | 備考 |
 | --- | --- | --- | --- | --- |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+D | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+D | file-viewer |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+H | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+H | pane 左 |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+J | 同上 | Ctrl+Alt+J | pane 下 |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+K | 同上 | Ctrl+Alt+K | pane 上 |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+L | 同上 | Ctrl+Alt+L | pane 右 |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+V | 同上 | Ctrl+Alt+V | 縦分割 |
-| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+- | 横分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+D | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+Shift+D | file-viewer。Rectangle の Ctrl+Opt+D と分ける |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+H | eisuu_pressed = 1 かつ App = com.mitchellh.ghostty | Ctrl+Alt+Shift+H | pane 左 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+J | 同上 | Ctrl+Alt+Shift+J | pane 下。Rectangle の左下 1/4 と分ける |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+K | 同上 | Ctrl+Alt+Shift+K | pane 上。Rectangle の右下 1/4 と分ける |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+L | 同上 | Ctrl+Alt+Shift+L | pane 右 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+V | 同上 | Ctrl+Alt+Shift+V | 縦分割 |
+| 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+- | 同上（hyphen） | Ctrl+Alt+Shift+- | 横分割。Rectangle の縮小と分ける |
 | 【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換 | Ctrl+Q | 同上 | Ctrl+Q | デタッチ（Ghostty が prefix+q）。Cmd+Q ではない |
 
 Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1。英数+1 の直下）/ 前の Agent（prefix+comma）/ 次の Agent（prefix+period）。Opt+E（アキュートのデッドキー）は潰さない。同じ Q/W/R は、ブラウザ（Vivaldi / Chrome / Zen / Dia）では先頭タブ / 前のタブ / 次のタブ、Cursor と VSCode では第1グループ / 前のタブ / 次のタブ、Slack では未読一覧 / 前の未読 / 次の未読。

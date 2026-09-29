@@ -92,15 +92,15 @@ switch_tab = "prefix+1..9"
 close_tab = ["prefix+shift+x", "prefix+ctrl+shift+x"]
 # rename_pane = "prefix+shift+p"
 edit_scrollback = ["prefix+e", "prefix+ctrl+e"]
-focus_pane_left = ["prefix+h", "prefix+ctrl+h", "ctrl+alt+h"]
-focus_pane_down = ["prefix+j", "prefix+ctrl+j", "ctrl+alt+j"]
-focus_pane_up = ["prefix+k", "prefix+ctrl+k", "ctrl+alt+k"]
-focus_pane_right = ["prefix+l", "prefix+ctrl+l", "ctrl+alt+l"]
+focus_pane_left = ["prefix+h", "prefix+ctrl+h", "ctrl+alt+shift+h"]
+focus_pane_down = ["prefix+j", "prefix+ctrl+j", "ctrl+alt+shift+j"]
+focus_pane_up = ["prefix+k", "prefix+ctrl+k", "ctrl+alt+shift+k"]
+focus_pane_right = ["prefix+l", "prefix+ctrl+l", "ctrl+alt+shift+l"]
 cycle_pane_next = ["prefix+tab", "prefix+ctrl+tab"]
 cycle_pane_previous = ["prefix+shift+tab", "prefix+ctrl+shift+tab"]
 # last_pane = ""          # optional, unset by default; bind e.g. "prefix+tab" for global back-and-forth
-split_vertical = ["prefix+v", "prefix+ctrl+v", "ctrl+alt+v"]
-split_horizontal = ["prefix+minus", "prefix+ctrl+minus", "ctrl+alt+minus"]
+split_vertical = ["prefix+v", "prefix+ctrl+v", "ctrl+alt+shift+v"]
+split_horizontal = ["prefix+minus", "prefix+ctrl+minus", "ctrl+alt+shift+minus"]
 close_pane = ["prefix+x", "prefix+ctrl+x"]
 # zoom: SSH 向け Ctrl+Shift+Enter を維持しつつ、prefix / Ctrl+Option も可
 zoom = ["ctrl+shift+enter", "prefix+z", "prefix+ctrl+z", "ctrl+alt+z"]
@@ -293,9 +293,9 @@ command = "termscope.open"
 description = "termscope file picker"
 
 # file-viewer: tree + 変更diff。すぐ消すかも。prefix+f は termscope のまま
-# 英数+Ctrl+D → Karabiner が Ctrl+Alt+D
+# 英数+Ctrl+D → Karabiner が Ctrl+Alt+Shift+D（Rectangle の Ctrl+Opt+D と分ける）
 [[keys.command]]
-key = ["prefix+d", "ctrl+alt+d"]
+key = ["prefix+d", "ctrl+alt+shift+d"]
 type = "plugin_action"
 command = "herdr-file-viewer.open-file-viewer"
 description = "file viewer (git-aware, read-only)"

@@ -1,5 +1,9 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年9月29日: Ghostty の英数+Ctrl+HJKL/V/-/D を Ctrl+Alt+Shift へ
+
+指は Control+英数のまま。Rectangle 推奨既定が Ctrl+Opt+J（左下）、K（右下）、D（左1/3）、-（縮小）なので、この族の送出に Shift を足した。Cmd は Ghostty がアプリ側で食う。英数+Ctrl+Q のデタッチ（Ctrl+Q）は重ならないのでそのまま。herdr の直叩きも `ctrl+alt+shift+…` に合わせた。
+
 ## 2026年9月16日: Ghostty の close 関連直バインド（Cmd+W / Cmd+Shift+W）を全廃し prefix+x に一本化
 
 herdr ではタブやペインを閉じるとプロセスが即時終了され、ターミナルバッファやIDも破棄されるため復元（Undo / Reopen）が不可能。Ghostty がアクティブな状態（または他アプリ操作中のフォーカス誤認）で手癖の `英数+W`（Cmd+W）を押してしまうと、確認なしでペインやタブが即死する危険があった。

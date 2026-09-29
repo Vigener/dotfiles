@@ -15,7 +15,8 @@ export const appRules = [
   ]),
 
   // =====================================================================
-  // [APP_GHOSTTY] Ghostty + herdr（英数+Ctrl を herdr の ctrl+alt 直叩きへ）
+  // [APP_GHOSTTY] Ghostty + herdr（英数+Ctrl を herdr の ctrl+alt+shift 直叩きへ）
+  // Rectangle 推奨既定が Ctrl+Opt+J/K/D/- を使うため、族ごと Shift を足す。Cmd は Ghostty が食う。
   // EDIT の英数+Ctrl+HJKL（単語/スクロール）より先に評価されるよう appRules 先頭側に置く
   // 英数+Ctrl+Q は EDIT の英数+Q=Esc に吸われるので、Ghostty では Ctrl+Q のまま通す
   // （Ghostty 側が prefix+q / デタッチにジャック。Cmd+Q は触らない）
@@ -24,7 +25,7 @@ export const appRules = [
     "【Ghostty】英数+Ctrl+HJKL/V/-/Q/D を herdr 向けに変換",
   ).manipulators([
     map("d", "left_control", "any")
-      .to("d", ["left_control", "left_option"])
+      .to("d", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
@@ -36,37 +37,37 @@ export const appRules = [
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("h", "left_control", "any")
-      .to("h", ["left_control", "left_option"])
+      .to("h", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("j", "left_control", "any")
-      .to("j", ["left_control", "left_option"])
+      .to("j", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("k", "left_control", "any")
-      .to("k", ["left_control", "left_option"])
+      .to("k", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("l", "left_control", "any")
-      .to("l", ["left_control", "left_option"])
+      .to("l", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("v", "left_control", "any")
-      .to("v", ["left_control", "left_option"])
+      .to("v", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
       ),
     map("hyphen", "left_control", "any")
-      .to("hyphen", ["left_control", "left_option"])
+      .to("hyphen", ["left_control", "left_option", "left_shift"])
       .condition(
         ifVar("eisuu_pressed", 1),
         ifApp("^com\\.mitchellh\\.ghostty$"),
