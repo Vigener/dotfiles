@@ -25,11 +25,11 @@ export const windowRules = [
       // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
       // -------...---------
       map("h", "optionalAny")
-        .to("left_arrow", ["left_control", "left_option"])
-        .condition(ifVar("kana_pressed", 1)), // 左半分（Rectangle）
+        .to("left_arrow", "control")
+        .condition(ifVar("kana_pressed", 1)), // 左のスペース
       map("l", "optionalAny")
-        .to("right_arrow", ["left_control", "left_option"])
-        .condition(ifVar("kana_pressed", 1)), // 右半分（Rectangle）
+        .to("right_arrow", "control")
+        .condition(ifVar("kana_pressed", 1)), // 右のスペース
       map("j", "optionalAny")
         .to("h", "command")
         .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
@@ -37,16 +37,20 @@ export const windowRules = [
         .to("return_or_enter", ["left_control", "left_option"])
         .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle）
       map("comma", "optionalAny")
-        .to("left_arrow", "control")
-        .condition(ifVar("kana_pressed", 1)), // 左のスペース
+        .to("left_arrow", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 左半分（Rectangle）
       map("period", "optionalAny")
-        .to("right_arrow", "control")
-        .condition(ifVar("kana_pressed", 1)), // 右のスペース
+        .to("right_arrow", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 右半分（Rectangle）
       map("slash", "optionalAny")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
       // Next Display: Rectangle の Ctrl+Opt+Cmd+Right。HHKB は ; 、Conductor は Del と MB1。
       map("semicolon", "optionalAny")
+        .to("right_arrow", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)),
+      // Next Display の名残。HHKB / JIS のろ。主は semicolon
+      map("international1", "optionalAny")
         .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
       map("delete_forward", "optionalAny")
