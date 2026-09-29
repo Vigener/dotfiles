@@ -1,4 +1,4 @@
-import { ifApp, ifVar, map, rule } from "karabiner.ts";
+import { ifApp, ifDevice, ifVar, map, mapPointingButton, rule } from "karabiner.ts";
 
 // =====================================================================
 // 🛡️ 条件定義: RaycastのSwitch Windowsモード中であること
@@ -22,54 +22,47 @@ export const windowRules = [
   rule("【WINDOW】かなレイヤー (Raycast & Mac標準ウィンドウ操作)").manipulators(
     [
       // -------...---------
-      // 1. デスクトップ空間（Spaces）とウィンドウ状態の操作
+      // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
       // -------...---------
       map("h", "optionalAny")
-        .to("left_arrow", "control")
-        .condition(ifVar("kana_pressed", 1)), // 左のスペース
+        .to("left_arrow", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)), // 左半分（スナップ）
       map("l", "optionalAny")
-        .to("right_arrow", "control")
-        .condition(ifVar("kana_pressed", 1)), // 右のスペース
+        .to("right_arrow", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)), // 右半分（スナップ）
       map("j", "optionalAny")
         .to("h", "command")
         .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
       map("k", "optionalAny")
+        .to("f", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)), // 最大化
+      map("comma", "optionalAny")
+        .to("left_arrow", "control")
+        .condition(ifVar("kana_pressed", 1)), // 左のスペース
+      map("period", "optionalAny")
+        .to("right_arrow", "control")
+        .condition(ifVar("kana_pressed", 1)), // 右のスペース
+      map("slash", "optionalAny")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
-      map("k", ["shift"])
-        .to("f", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)),
-
-      // -------...---------
-      // 2. 画面内でのウィンドウリサイズ (Raycast連携: Ctrl+Opt+Cmd)
-      // -------...---------
-      // 左半分
-      map("comma", "optionalAny")
-        .to("left_arrow", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)),
-      // 右半分
-      map("period", "optionalAny")
-        .to("right_arrow", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)),
-      // ほぼ最大化(Cmd+Opt+Control+F)
-      map("slash", "optionalAny")
-        .to("f", ["left_control", "left_option", "left_command"])
-        .condition(ifVar("kana_pressed", 1)),
-      // 完全最大化 (Shift追加)(Cmd+Control+F)
-      map("slash", ["left_shift"])
-        .to("f", ["left_control", "left_command"])
-        .condition(ifVar("kana_pressed", 1)),
-      // Next Display (backslash)(Cmd+Opt+Control+n)
-      map("international1", "optionalAny")
+      // Next Display: HHKB は ; 、Conductor は Del（delete_forward）
+      map("semicolon", "optionalAny")
         .to("n", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
+      map("delete_forward", "optionalAny")
+        .to("n", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)),
+      // Conductor MB1（L 右隣）: かな中のみ Next Display。device_if で Mac トラックパッド・HHKB ポインティングを除外。
+      // VID/PID は ZMK 既定 USB (0x1D50/0x615E)。実機の Conductor 表記が違えば差し替え。BLE は USB ID と一致しない可能性あり（未確認・未所持）。
+      mapPointingButton("button1")
+        .to("n", ["left_control", "left_option", "left_command"])
+        .condition(
+          ifVar("kana_pressed", 1),
+          ifDevice({ vendor_id: 0x1d50, product_id: 0x615e }),
+        ),
       // Switch Display Preset (Raycast Display Placer: Cmd+Opt+Ctrl+Shift+d)
       map("d", "optionalAny")
         .to("d", ["left_control", "left_option", "left_command", "left_shift"])
-        .condition(ifVar("kana_pressed", 1)),
-      // Mission Control (Ctrl+Up)
-      map("semicolon", "optionalAny")
-        .to("up_arrow", "control")
         .condition(ifVar("kana_pressed", 1)),
       // Reasonable Size (Cmd+Opt+Control+r)
       // map(";", "optionalAny")

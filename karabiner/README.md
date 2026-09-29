@@ -152,26 +152,21 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 ### WINDOW（かなレイヤー）
 
-#### Spaces・ウィンドウ状態操作
+#### ウィンドウ配置・スペース・ディスプレイ
 
-| 入力            | 条件             | 出力       | 想定アクション |
-| --------------- | ---------------- | ---------- | -------------- |
-| H + optionalAny | kana_pressed = 1 | Ctrl+Left  | 左のスペース   |
-| L + optionalAny | kana_pressed = 1 | Ctrl+Right | 右のスペース   |
-| J + optionalAny | kana_pressed = 1 | Cmd+H      | 隠す           |
-| K + optionalAny | kana_pressed = 1 | Ctrl+Cmd+F | フルスクリーン |
-
-#### Raycast Windows Management (かなレイヤー)
-
-| 入力                  | 条件             | 出力               | 想定アクション     |
-| --------------------- | ---------------- | ------------------ | ------------------ |
-| , + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+Left  | 左半分配置         |
-| . + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+Right | 右半分配置         |
-| / + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+F     | ほぼ最大化         |
-| Shift+/ + optionalAny | kana_pressed = 1 | Cmd+Ctrl+F         | 完全最大化         |
-| ; + optionalAny       | kana_pressed = 1 | Ctrl+Up            | Mission Control    |
-| : + optionalAny       | kana_pressed = 1 | Cmd+Opt+Ctrl+R     | Reasonable Size    |
-| international1        | kana_pressed = 1 | Cmd+Opt+Ctrl+N     | Next Displayへ移動 |
+| 入力                  | 条件                                                                 | 出力               | 想定アクション                          |
+| --------------------- | -------------------------------------------------------------------- | ------------------ | --------------------------------------- |
+| H + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Left  | 左半分（スナップ）                      |
+| L + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Right | 右半分（スナップ）                      |
+| J + optionalAny       | kana_pressed = 1                                                     | Cmd+H              | 隠す                                    |
+| K + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+F     | 最大化                                  |
+| , + optionalAny       | kana_pressed = 1                                                     | Ctrl+Left          | 左のスペース                            |
+| . + optionalAny       | kana_pressed = 1                                                     | Ctrl+Right         | 右のスペース                            |
+| / + optionalAny       | kana_pressed = 1                                                     | Ctrl+Cmd+F         | フルスクリーン                          |
+| ; + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+N     | Next Display（HHKB）                    |
+| delete_forward + optionalAny | kana_pressed = 1                                              | Cmd+Opt+Ctrl+N     | Next Display（Conductor Del）           |
+| pointing button1      | kana_pressed = 1 かつ device vendor_id=0x1D50 product_id=0x615E | Cmd+Opt+Ctrl+N     | Next Display（Conductor MB1、L 右隣）   |
+| D + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Shift+D | Switch Display Preset                 |
 
 #### ウィンドウ / アプリ切替
 
