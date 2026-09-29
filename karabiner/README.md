@@ -202,7 +202,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | 入力            | 条件             | 出力                                                                                  | 備考                |
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
-| A + optionalAny | kana_pressed = 1 | Open: cmux (トグル)                                                                   | AI駆動開発メイン |
+| A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            | AI駆動開発メイン |
 | M + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | メインエディタ      |
 | Z + optionalAny | kana_pressed = 1 | Open: zoom.us (トグル)                                                                 | 週次MTG中の行き来用 |
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |

@@ -171,7 +171,7 @@ export const launcherRules = [
     // アプリ起動 (ネイティブアプリ: トグル式)
     // -------------------------------------------------------------
     ...toggleApp("o", "Obsidian"),
-    ...toggleApp("a", "cmux"),
+    ...toggleApp("a", "Antigravity"),
     ...toggleApp("m", "Cursor"),
     ...toggleApp("z", "zoom.us"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
