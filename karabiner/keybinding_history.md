@@ -1,5 +1,9 @@
 # Karabiner-Elements キーバインド変更履歴と経緯
 
+## 2026年9月30日: かな+K とかな+/ を最大化に揃え、Shift 付きだけフルスクリーン
+
+動画の全画面は再生中の F とダブルクリックで足りる。両手ホームでは K、右手だけなら / の方が近いので、Shift なしは両方とも最大化（Ctrl+Opt+Return）。フルスクリーン（Ctrl+Cmd+F）はかな+Shift+K とかな+Shift+/。左右の物理 Shift を別マニピュレータにして、optionalAny より前に置いた。右 Cmd はかな押下中は Shift にならないので、フルスクリーンは物理 Shift。
+
 ## 2026年9月29日: Ghostty の英数+Ctrl+HJKL/V/-/D を Ctrl+Alt+Shift へ
 
 指は Control+英数のまま。Rectangle 推奨既定が Ctrl+Opt+J（左下）、K（右下）、D（左1/3）、-（縮小）なので、この族の送出に Shift を足した。Cmd は Ghostty がアプリ側で食う。英数+Ctrl+Q のデタッチ（Ctrl+Q）は重ならないのでそのまま。herdr の直叩きも `ctrl+alt+shift+…` に合わせた。

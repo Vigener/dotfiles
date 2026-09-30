@@ -159,10 +159,12 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | H + optionalAny       | kana_pressed = 1                                                     | Ctrl+Left          | 左のスペース                            |
 | L + optionalAny       | kana_pressed = 1                                                     | Ctrl+Right         | 右のスペース                            |
 | J + optionalAny       | kana_pressed = 1                                                     | Cmd+H              | 隠す                                    |
-| K + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化（Rectangle）                     |
+| K + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。Shift 付きを先に評価    |
+| K + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化（Rectangle / Raycast）           |
 | , + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Left      | 左半分（Rectangle）                     |
 | . + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Right     | 右半分（Rectangle）                     |
-| / + optionalAny       | kana_pressed = 1                                                     | Ctrl+Cmd+F         | フルスクリーン                          |
+| / + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。K の Shift と同じ       |
+| / + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化。K と同じ                        |
 | ; + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Cmd+Right | Next Display（HHKB。Rectangle）         |
 | international1 + optionalAny | kana_pressed = 1                                              | Ctrl+Opt+Cmd+Right | Next Display の名残。JIS ろ（HHKB / MBA 内蔵） |
 | delete_forward + optionalAny | kana_pressed = 1                                              | Ctrl+Opt+Cmd+Right | Next Display（Conductor Del。Rectangle） |

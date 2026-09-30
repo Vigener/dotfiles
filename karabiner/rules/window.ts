@@ -33,18 +33,31 @@ export const windowRules = [
       map("j", "optionalAny")
         .to("h", "command")
         .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
+      // Shift 付きを optionalAny より前。残った Shift で最大化が吸われないように左右を分けて必須化する。
+      map("k", "left_shift", "any")
+        .to("f", ["control", "command"])
+        .condition(ifVar("kana_pressed", 1)), // フルスクリーン
+      map("k", "right_shift", "any")
+        .to("f", ["control", "command"])
+        .condition(ifVar("kana_pressed", 1)), // フルスクリーン
       map("k", "optionalAny")
         .to("return_or_enter", ["left_control", "left_option"])
-        .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle）
+        .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle / Raycast）
       map("comma", "optionalAny")
         .to("left_arrow", ["left_control", "left_option"])
         .condition(ifVar("kana_pressed", 1)), // 左半分（Rectangle）
       map("period", "optionalAny")
         .to("right_arrow", ["left_control", "left_option"])
         .condition(ifVar("kana_pressed", 1)), // 右半分（Rectangle）
-      map("slash", "optionalAny")
+      map("slash", "left_shift", "any")
         .to("f", ["control", "command"])
         .condition(ifVar("kana_pressed", 1)), // フルスクリーン
+      map("slash", "right_shift", "any")
+        .to("f", ["control", "command"])
+        .condition(ifVar("kana_pressed", 1)), // フルスクリーン
+      map("slash", "optionalAny")
+        .to("return_or_enter", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle / Raycast）
       // Next Display: Rectangle の Ctrl+Opt+Cmd+Right。HHKB は ; 、Conductor は Del と MB1。
       map("semicolon", "optionalAny")
         .to("right_arrow", ["left_control", "left_option", "left_command"])
