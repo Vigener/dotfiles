@@ -172,19 +172,18 @@ export const launcherRules = [
     // -------------------------------------------------------------
     ...toggleApp("o", "Obsidian"),
     ...toggleApp("a", "Antigravity"),
-    ...toggleApp("m", "Cursor"),
+    ...toggleApp("m", "Ghostty"),
     ...toggleApp("z", "zoom.us"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
     ...toggleAppWithKey("s", MAIN_BROWSER, BROWSER_SLACK_TAB, ["command"]),
     ...toggleApp("w", "Warp"),
-    ...toggleApp("t", "Warp"),
     ...toggleApp("e", "Mail"),
     ...toggleApp("b", "Google Chrome"),
 
     // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
     ...toggleAppOrSendKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),
 
-    ...toggleApp("v", "Visual Studio Code"),
+    ...toggleApp("v", "Cursor"),
     ...toggleApp("f", "Finder"),
     ...toggleApp("g", "Ghostty"),
 
