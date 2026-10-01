@@ -84,6 +84,7 @@ link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 
 mkdir -p "$HOME/bin"
 link_file "$DOTFILES/bin/repo-http-serve" "$HOME/bin/repo-http-serve"
+link_file "$DOTFILES/bin/chrome-open-or-reload" "$HOME/bin/chrome-open-or-reload"
 
 mkdir -p "$HOME/.gemini/config/skills"
 link_file "$DOTFILES/agents/skills/md-to-html" "$HOME/.gemini/config/skills/md-to-html"

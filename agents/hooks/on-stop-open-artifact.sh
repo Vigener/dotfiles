@@ -13,7 +13,7 @@ logfile="${HOME}/.cursor/hooks/on-stop-open-artifact.log"
     rm -f "$marker"
     if [[ "$url" == http://* || "$url" == https://* ]]; then
       # Single-quoted remote arg avoids double-eval of ? & in URLs
-      if ssh -o BatchMode=yes -o ConnectTimeout=5 mac "open '$url'" >>"$logfile" 2>&1; then
+      if ssh -o BatchMode=yes -o ConnectTimeout=5 mac "~/dotfiles/bin/chrome-open-or-reload '$url'" >>"$logfile" 2>&1; then
         echo "$(date -Iseconds) OK $url" >>"$logfile"
       else
         echo "$(date -Iseconds) FAIL $url" >>"$logfile"

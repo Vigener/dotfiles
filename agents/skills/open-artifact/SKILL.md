@@ -1,8 +1,8 @@
 ---
 name: open-artifact
 description: >-
-  人間レビュー向け HTML を http-brain 等経由で MBA ブラウザに開く。
-  Plan 締め・/goal 完了・「開いて」で発動。流れは [HTML保存 → URL決定 → ssh mac open]。
+  人間レビュー向け HTML を http-brain 等経由で MBA Chrome に開く。
+  Plan 締め・/goal 完了・「開いて」で発動。流れは [HTML保存 → URL決定 → ssh mac chrome-open-or-reload]。
   open 失敗時も URL は必ずチャットに出す。素の python -m http.server は使わない。
 ---
 
@@ -16,7 +16,7 @@ description: >-
    ※ 研究用記号・非一般用語は sticky サイドバー／スマホドロワー必須
      （human-review-html「用語サイドバー」節）。本文だけで記号暗記を要求しない。
 2. Tailscale IP で URL を組み立てる
-3a. 今すぐ開く: ssh mac "open 'URL'"
+3a. 今すぐ開く: ssh mac "~/dotfiles/bin/chrome-open-or-reload 'URL'"
 3b. セッション末に開く: URL を ~/.cursor/open-on-stop.url に書いて stop hook に任せる
 ```
 
@@ -29,7 +29,8 @@ Cursor `stop` hook（`on-stop-open-artifact.sh`）は **3b のマーカーがあ
 
 ## 前提
 
-- Thinkpad: `http-brain`（`:8766` → `~/brain/research-brain`）tmux 常駐
+- 母艦（Mac mini）: `http-brain`（`:8766` → ghq `research-brain`）tmux 常駐
+- 画面（MBA）: Google Chrome で成果物確認（`ssh mac` 経由で開く・既存タブは自動リロード）
 - 人間レビュー=HTML / エージェント間=Markdown
 - best-effort の範囲は 3a/3b の open コマンドだけ。手順1の HTML 保存と URL のチャット出力は省略しない
 - MBA オフラインで open が失敗しても、エラーは無視して URL をチャットに出す
@@ -71,7 +72,7 @@ thinkpad-resident start http-brain   # research-brain の HTML のとき
 ### 3a. 今すぐ開く（推奨・締め）
 
 ```bash
-ssh -o BatchMode=yes -o ConnectTimeout=5 mac "open '$URL'" || true
+ssh -o BatchMode=yes -o ConnectTimeout=5 mac "~/dotfiles/bin/chrome-open-or-reload '$URL'" || true
 echo "$URL"
 ```
 
@@ -97,6 +98,7 @@ printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
 | `update-agent-config` | 挙動設定変更時の層判定 |
 | `adversarial-review` | HTML 化する前の品質ゲート（任意） |
 
-## Mac mini 移行（未実施）
+## 体制（Mac mini 母艦・MBA 画面）
 
-配信ホストは Thinkpad のみ。ユーザーが「mini」と明示するまでホスト・ポートを読み替えない。移行手順は playbook R13/R14。
+母艦は Mac mini（`:8766` 配信）、閲覧画面は MBA（SSH 経由で Chrome リロード）。
+ThinkPad はバックアップ・クラスタ作業用。詳細: `wiki/compute-environments/mac-mini-migration-playbook.md`。

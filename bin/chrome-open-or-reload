@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# chrome-open-or-reload
+#
+# 正本: ~/dotfiles/bin/chrome-open-or-reload
+# リンク先: ~/bin/chrome-open-or-reload (link-dotfiles-macos.sh でリンク)
+#
+# 用途:
+#   指定された URL を Google Chrome で開く。
+#   すでに同じ URL のタブが開いている場合は、そのタブをアクティブにしてリロードする。
+#   開いていない場合は新規タブで開き、Chrome を最前面にする。
+#
+# 想定利用シーン:
+#   - Mac mini (作業側/母艦) から MBA (画面側) への成果物ハンドオフ (open-artifact)
+#   - 手動での HTML 成果物確認
+# ==============================================================================
+set -euo pipefail
+
+TARGET_URL="${1:-}"
+if [[ -z "$TARGET_URL" ]]; then
+  echo "Usage: chrome-open-or-reload <URL>" >&2
+  exit 1
+fi
+
+osascript - "$TARGET_URL" << 'EOF'
+on run argv
+    set targetUrl to item 1 of argv
+    
+    tell application "Google Chrome"
+        -- ウィンドウが 1 つも存在しない場合は新規ウィンドウで開く
+        if not (exists window 1) then
+            make new window
+            set URL of active tab of window 1 to targetUrl
+            activate
+            return
+        end if
+        
+        -- 全ウィンドウ・全タブを探索
+        repeat with w in windows
+            set tabIndex to 1
+            repeat with t in tabs of w
+                set currentUrl to URL of t
+                -- 完全一致、または末尾スラッシュ違い、またはアンカー (#) 違いを同一ページとみなす
+                if currentUrl is targetUrl or ¬
+                   currentUrl is (targetUrl & "/") or ¬
+                   (currentUrl & "/") is targetUrl or ¬
+                   currentUrl starts with (targetUrl & "#") or ¬
+                   targetUrl starts with (currentUrl & "#") then
+                    
+                    set active tab index of w to tabIndex
+                    set index of w to 1
+                    tell t to reload
+                    activate
+                    return
+                end if
+                set tabIndex to tabIndex + 1
+            end repeat
+        end repeat
+        
+        -- 一致するタブがなければ新規タブで開く
+        tell window 1
+            make new tab with properties {URL:targetUrl}
+        end tell
+        activate
+    end tell
+end run
+EOF
