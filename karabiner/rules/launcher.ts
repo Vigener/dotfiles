@@ -18,6 +18,7 @@ const APP_REGISTRY: Record<string, string> = {
   "Visual Studio Code": "^com\\.microsoft\\.VSCode$",
   Warp: "^dev\\.warp\\.Warp-Stable$",
   Ghostty: "^com\\.mitchellh\\.ghostty$",
+  "Grok Bot": "^com\\.anysphere\\.sand$",
   // --- コミュニケーション ---
   Slack: "^com\\.tinyspeck\\.slackmacgap$",
   Mail: "^com\\.apple\\.mail$",
@@ -185,7 +186,7 @@ export const launcherRules = [
 
     ...toggleApp("v", "Cursor"),
     ...toggleApp("f", "Finder"),
-    ...toggleApp("g", "Ghostty"),
+    ...toggleApp("g", "Grok Bot"),
 
     // 🚀 Cキー: メインブラウザを呼び出し、Cmd+[BROWSER_CALENDAR_TAB] でタブへジャンプ
     ...toggleAppWithKey("c", MAIN_BROWSER, BROWSER_CALENDAR_TAB, ["command"]),
