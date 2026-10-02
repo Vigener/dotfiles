@@ -77,14 +77,14 @@ export const windowRules = [
           ifVar("kana_pressed", 1),
           ifDevice({ vendor_id: 0x1d50, product_id: 0x615e }),
         ),
+      // Mission Control (Ctrl+Up): かな+: (JISのコロン / quote)
+      map("quote", "optionalAny")
+        .to("up_arrow", "control")
+        .condition(ifVar("kana_pressed", 1)),
       // Switch Display Preset (Raycast Display Placer: Cmd+Opt+Ctrl+Shift+d)
       map("d", "optionalAny")
         .to("d", ["left_control", "left_option", "left_command", "left_shift"])
         .condition(ifVar("kana_pressed", 1)),
-      // Reasonable Size (Cmd+Opt+Control+r)
-      // map(";", "optionalAny")
-      //   .to("r", ["left_control", "left_option", "left_command"])
-      //   .condition(ifVar("kana_pressed", 1)),
 
       // -------...---------
       // 3. アプリ/ウィンドウ切替

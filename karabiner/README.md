@@ -166,6 +166,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | / + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。K の Shift と同じ       |
 | / + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化。K と同じ                        |
 | ; + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Cmd+Right | Next Display（HHKB。Rectangle）         |
+| : + optionalAny (quote) | kana_pressed = 1                                                   | Ctrl+Up            | Mission Control                         |
 | international1 + optionalAny | kana_pressed = 1                                              | Ctrl+Opt+Cmd+Right | Next Display の名残。JIS ろ（HHKB / MBA 内蔵） |
 | delete_forward + optionalAny | kana_pressed = 1                                              | Ctrl+Opt+Cmd+Right | Next Display（Conductor Del。Rectangle） |
 | pointing button1      | kana_pressed = 1 かつ device vendor_id=0x1D50 product_id=0x615E | Ctrl+Opt+Cmd+Right | Next Display（Conductor MB1、L 右隣）   |
