@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""md-to-html: Universal Markdown to Standalone HTML Builder.
+"""md-to-html: Universal Markdown to Modern Responsive Standalone HTML Builder.
 
 Keep Markdown as the single source of truth (SSOT).
 Compiles any Markdown document into an elegant, standalone, mobile-friendly,
-and print-ready HTML page with marked.js.
+and print-ready HTML page with marked.js, MathJax (with LaTeX copy buttons),
+and Mermaid diagram support.
 
 Part of dotfiles / agent skills.
 Usage:
@@ -20,49 +21,52 @@ from pathlib import Path
 
 THEMES = {
     "tactical": {
-        "bg": "#111418",
-        "paper": "#181d24",
-        "paper_card": "#1f2630",
-        "ink": "#e8edf4",
-        "muted": "#8b99ab",
-        "accent": "#5c9df2",
-        "teal": "#4ec9b0",
-        "warn": "#e5b567",
-        "line": "#2b3644",
-        "font_body": '"Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        "bg": "#0f141c",
+        "paper": "#161c26",
+        "paper_card": "#1d2533",
+        "ink": "#e6edf3",
+        "muted": "#8b949e",
+        "accent": "#58a6ff",
+        "teal": "#3fb950",
+        "warn": "#d29922",
+        "line": "#30363d",
+        "code_bg": "#111620",
+        "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
         "serif": '"Literata", "Hiragino Mincho ProN", serif',
-        "mono": '"IBM Plex Mono", ui-monospace, monospace',
-        "radial": 'radial-gradient(800px 400px at 10% -5%, rgba(92,157,242,.12), transparent 55%), radial-gradient(600px 300px at 90% 15%, rgba(78,201,176,.08), transparent 50%)',
+        "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, Menlo, monospace',
+        "radial": "radial-gradient(800px 400px at 10% -5%, rgba(88,166,255,.08), transparent 55%), radial-gradient(600px 300px at 90% 15%, rgba(63,185,80,.06), transparent 50%)",
     },
     "sepia": {
         "bg": "#14110e",
         "paper": "#1c1814",
-        "paper_card": "#221d18",
+        "paper_card": "#241e18",
         "ink": "#f3ebe1",
         "muted": "#a89888",
         "accent": "#e08a4a",
         "teal": "#5cb8a8",
         "warn": "#d4a04a",
         "line": "#3a322a",
+        "code_bg": "#0e0c0a",
         "font_body": '"Noto Sans JP", "Literata", "Hiragino Mincho ProN", serif',
         "serif": '"Literata", "Hiragino Mincho ProN", serif',
         "mono": '"IBM Plex Mono", ui-monospace, monospace',
-        "radial": 'radial-gradient(700px 380px at 15% -5%, rgba(224,138,74,.14), transparent 55%), radial-gradient(600px 320px at 90% 10%, rgba(92,184,168,.1), transparent 50%)',
+        "radial": "radial-gradient(700px 380px at 15% -5%, rgba(224,138,74,.12), transparent 55%), radial-gradient(600px 320px at 90% 10%, rgba(92,184,168,.08), transparent 50%)",
     },
     "minimal": {
-        "bg": "#f9f9fb",
+        "bg": "#ffffff",
         "paper": "#ffffff",
-        "paper_card": "#f0f2f5",
-        "ink": "#1a1d20",
-        "muted": "#5f6874",
+        "paper_card": "#f6f8fa",
+        "ink": "#1f2328",
+        "muted": "#656d76",
         "accent": "#0969da",
         "teal": "#1a7f37",
         "warn": "#9a6700",
         "line": "#d0d7de",
+        "code_bg": "#f6f8fa",
         "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
         "serif": '"Hiragino Mincho ProN", serif',
-        "mono": 'ui-monospace, monospace',
-        "radial": 'none',
+        "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, monospace',
+        "radial": "none",
     },
 }
 
@@ -70,158 +74,514 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>__TITLE__</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
-    :root {{
-      --bg: {bg};
-      --paper: {paper};
-      --paper-card: {paper_card};
-      --ink: {ink};
-      --muted: {muted};
-      --accent: {accent};
-      --teal: {teal};
-      --warn: {warn};
-      --line: {line};
-      --font-body: {font_body};
-      --serif: {serif};
-      --mono: {mono};
-    }}
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
+    :root {
+__CSS_VARS__
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
       font-family: var(--font-body);
-      background: {radial}, var(--bg);
+      background: var(--radial), var(--bg);
       color: var(--ink);
-      line-height: 1.8;
-      padding: 2.2rem 1.25rem 5rem;
-    }}
-    .wrap {{ max-width: 940px; margin: 0 auto; }}
-    .eyebrow {{
-      font-family: var(--mono); font-size: .75rem; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--accent); margin-bottom: .5rem;
-    }}
-    h1 {{
-      font-family: var(--serif);
-      font-size: clamp(1.45rem, 3.8vw, 2.05rem);
-      font-weight: 700; line-height: 1.35; margin-bottom: .75rem; color: var(--ink);
-    }}
-    .meta-bar {{
-      font-family: var(--mono); font-size: .8rem; color: var(--muted);
-      border-bottom: 1px solid var(--line); padding-bottom: .9rem; margin-bottom: 2rem;
-      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center;
-    }}
-    .nav-links {{ display: flex; gap: .5rem; flex-wrap: wrap; }}
-    .btn-nav {{
-      background: rgba(128,128,128,.1); border: 1px solid var(--line);
-      color: var(--accent); padding: .3rem .65rem; border-radius: 6px;
-      text-decoration: none; font-family: var(--mono); font-size: .78rem;
-      display: inline-flex; align-items: center; gap: .3rem; transition: all .15s;
-    }}
-    .btn-nav:hover {{ background: rgba(128,128,128,.2); border-color: var(--accent); }}
+      line-height: 1.75;
+      padding: 2.2rem 1.5rem 5rem;
+      font-size: 16px;
+    }
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-    /* Markdown Core Elements */
-    #content {{ margin-top: 1rem; }}
-    #content h1:first-child {{ display: none; }} /* Already shown in header */
-    #content h2 {{
-      font-size: 1.25rem; margin: 2.5rem 0 .8rem; color: var(--accent);
-      border-bottom: 1px solid var(--line); padding-bottom: .45rem; display: flex; align-items: center; gap: .5rem;
-    }}
-    #content h3 {{
-      font-size: 1.1rem; margin: 1.6rem 0 .5rem; color: var(--teal);
-    }}
-    #content h4 {{
-      font-size: .95rem; margin: 1.2rem 0 .4rem; color: var(--ink);
-    }}
-    #content p {{ margin-bottom: 1.1rem; }}
-    #content ul, #content ol {{ margin: 0 0 1.2rem 1.4rem; }}
-    #content li {{ margin-bottom: .35rem; }}
-    #content strong {{ color: var(--ink); font-weight: 700; }}
-    
+    /* Header & Navigation Bar */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-nav {
+      background: rgba(128, 128, 128, 0.12);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-nav:hover {
+      background: rgba(128, 128, 128, 0.22);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    h1.page-title {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3.6vw, 2.1rem);
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 0.75rem;
+      color: var(--ink);
+      word-break: break-word;
+    }
+    .meta-bar {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.9rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1.5rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .meta-bar code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: rgba(128, 128, 128, 0.15);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* Core Markdown Styling */
+    #content {
+      margin-top: 1rem;
+      word-break: break-word;
+    }
+    #content h1:first-child { display: none; } /* Page title already rendered */
+    #content h2 {
+      font-size: 1.4rem;
+      margin: 2.5rem 0 0.85rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #content h3 {
+      font-size: 1.15rem;
+      margin: 1.8rem 0 0.5rem;
+      color: var(--teal);
+    }
+    #content h4 {
+      font-size: 1rem;
+      margin: 1.3rem 0 0.4rem;
+      color: var(--ink);
+    }
+    #content p {
+      margin-bottom: 1.15rem;
+    }
+    #content ul, #content ol {
+      margin: 0 0 1.2rem 1.4rem;
+    }
+    #content li {
+      margin-bottom: 0.35rem;
+    }
+    #content strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    #content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(88, 166, 255, 0.35);
+      transition: all 0.15s ease;
+    }
+    #content a:hover {
+      border-bottom-color: var(--accent);
+      background: rgba(88, 166, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    /* Table of Contents (TOC) Card */
+    #content > ul:first-of-type,
+    #content > ol:first-of-type {
+      background: var(--paper_card);
+      padding: 1.2rem 1.8rem 1.2rem 2.2rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      margin: 1.5rem 0 2.2rem 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    #content > ul:first-of-type li,
+    #content > ol:first-of-type li {
+      margin-bottom: 0.45rem;
+      font-size: 0.98rem;
+    }
+
     /* Code & Terminal Styling */
-    #content pre {{
-      background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
-      padding: .9rem 1.1rem; overflow-x: auto; margin: 1.2rem 0; font-family: var(--mono); font-size: .85rem;
-      line-height: 1.6;
-    }}
-    #content code {{
-      font-family: var(--mono); font-size: .88em; background: rgba(128,128,128,.15);
-      padding: .15em .4em; border-radius: 4px; color: var(--accent);
-    }}
-    #content pre code {{ background: none; padding: 0; color: inherit; }}
+    code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: rgba(128, 128, 128, 0.15);
+      padding: 0.15em 0.42em;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    pre {
+      background: var(--code_bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.95rem 1.15rem;
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+      margin: 1.3rem 0;
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: var(--ink);
+      border-radius: 0;
+      font-size: inherit;
+    }
 
     /* Speech Bubble / Quote Blocks */
-    #content blockquote {{
+    blockquote {
       background: var(--paper);
       border-left: 4px solid var(--accent);
       border-radius: 0 8px 8px 0;
-      padding: .85rem 1.15rem;
-      margin: 1.2rem 0;
+      padding: 0.85rem 1.15rem;
+      margin: 1.3rem 0;
       color: var(--ink);
-    }}
-    #content blockquote p:last-child {{ margin-bottom: 0; }}
+    }
+    blockquote p:last-child { margin-bottom: 0; }
 
-    /* Responsive Tables */
-    #content table {{
-      width: 100%; border-collapse: collapse; margin: 1.4rem 0;
-      background: var(--paper); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
-      font-size: .88rem;
-    }}
-    #content th, #content td {{
-      padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--line);
-    }}
-    #content th {{
-      background: var(--paper-card); color: var(--accent); font-family: var(--mono); font-size: .82rem;
-    }}
-    #content tr:last-child td {{ border-bottom: none; }}
+    /* Responsive Tables with Isolated Scrolling */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 1.4rem 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+    table {
+      width: 100%;
+      min-width: 480px;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: var(--paper_card);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-bottom: 2px solid var(--line);
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: rgba(128, 128, 128, 0.03); }
 
-    /* HR */
-    #content hr {{
-      border: none; border-top: 1px dashed var(--line); margin: 2.4rem 0;
-    }}
+    /* Math Blocks & LaTeX Copy Button */
+    .math-block-wrap {
+      position: relative;
+      margin: 1.2rem 0;
+      padding: 0.4rem 2.4rem 0.4rem 0.6rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .math-block-wrap .math-block-body {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+      padding: 0.4rem 0;
+    }
+    .math-copy-btn {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper_card);
+      color: var(--muted);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.15s ease;
+    }
+    .math-block-wrap:hover .math-copy-btn,
+    .math-copy-btn:focus-visible {
+      opacity: 1;
+    }
+    .math-copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(88, 166, 255, 0.15);
+    }
+    .math-copy-btn.copied {
+      border-color: var(--teal);
+      color: var(--teal);
+      opacity: 1;
+    }
+    .math-latex-source {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
-    /* Checkbox list */
-    #content input[type="checkbox"] {{
-      margin-right: .5rem; accent-color: var(--accent);
-    }}
+    /* Mermaid Diagrams */
+    .mermaid {
+      background: var(--paper_card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 1.4rem 0;
+      text-align: center;
+    }
+
+    /* GitHub-style Alerts */
+    .alert-note, .alert-important, .alert-tip {
+      padding: 0.9rem 1.15rem;
+      margin: 1.3rem 0;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    .alert-note {
+      background: rgba(88, 166, 255, 0.08);
+      border-color: var(--accent);
+    }
+    .alert-important {
+      background: rgba(210, 153, 34, 0.1);
+      border-color: var(--warn);
+    }
+    .alert-tip {
+      background: rgba(63, 185, 80, 0.08);
+      border-color: var(--teal);
+    }
+
+    /* HR & Checkboxes */
+    hr {
+      border: none;
+      border-top: 1px dashed var(--line);
+      margin: 2.2rem 0;
+    }
+    input[type="checkbox"] {
+      margin-right: 0.45rem;
+      accent-color: var(--accent);
+    }
+
+    /* Mobile Responsive Optimizations (<= 768px) */
+    @media (max-width: 768px) {
+      * {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      body {
+        font-size: 12.5px;
+        line-height: 1.58;
+        padding: 0.75rem 0.65rem 3rem;
+      }
+      p, blockquote, li, div {
+        max-height: 999999px;
+      }
+      h1.page-title {
+        font-size: 1.15rem;
+        line-height: 1.32;
+        margin-bottom: 0.45rem;
+      }
+      #content h2 {
+        font-size: 1.02rem;
+        margin: 1.4rem 0 0.45rem;
+        padding-bottom: 0.25rem;
+      }
+      #content h3 {
+        font-size: 0.88rem;
+        margin: 1rem 0 0.35rem;
+        line-height: 1.38;
+      }
+      #content h4 {
+        font-size: 0.82rem;
+        margin: 0.8rem 0 0.25rem;
+      }
+      #content p {
+        margin-bottom: 0.65rem;
+        font-size: 0.9rem;
+        line-height: 1.58;
+      }
+      #content ul, #content ol {
+        margin: 0 0 0.65rem 1rem;
+        font-size: 0.9rem;
+      }
+      #content li {
+        margin-bottom: 0.18rem;
+        line-height: 1.55;
+      }
+      blockquote {
+        font-size: 0.82rem;
+        line-height: 1.54;
+        padding: 0.45rem 0.65rem;
+        margin: 0.7rem 0;
+        border-left-width: 3px;
+      }
+      .header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+      }
+      .meta-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+        font-size: 0.7rem;
+      }
+      #content > ul:first-of-type,
+      #content > ol:first-of-type {
+        padding: 0.55rem 0.65rem 0.55rem 1.1rem;
+        margin: 0.8rem 0 1.1rem 0;
+        font-size: 0.8rem;
+      }
+      pre {
+        padding: 0.55rem 0.65rem;
+        font-size: 0.74rem;
+        margin: 0.7rem 0;
+      }
+      table {
+        font-size: 0.75rem;
+      }
+      th, td {
+        padding: 0.4rem 0.55rem;
+      }
+      .math-block-wrap {
+        padding: 0.2rem 1.8rem 0.2rem 0.35rem;
+        margin: 0.7rem 0;
+      }
+      .math-copy-btn {
+        width: 1.5rem;
+        height: 1.5rem;
+        top: 0.25rem;
+        right: 0.25rem;
+      }
+      .foot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+      }
+    }
 
     /* Print Stylesheet (A4 paper clipboard ready) */
-    @media print {{
-      body {{ background: #fff !important; color: #111 !important; padding: 0 !important; }}
-      .wrap {{ max-width: 100% !important; margin: 0 !important; }}
-      .meta-bar .nav-links, .eyebrow {{ display: none !important; }}
-      #content h2 {{ color: #000 !important; border-color: #ccc !important; }}
-      #content h3 {{ color: #222 !important; }}
-      #content blockquote {{ background: #f5f5f5 !important; color: #000 !important; border-left-color: #333 !important; }}
-      #content table {{ background: #fff !important; border-color: #ccc !important; }}
-      #content th {{ background: #eee !important; color: #000 !important; }}
-      #content td {{ border-color: #ccc !important; color: #000 !important; }}
-      #content pre {{ background: #f8f8f8 !important; color: #111 !important; border-color: #ccc !important; }}
-      .foot {{ display: none !important; }}
-    }}
+    @media print {
+      body { background: #fff !important; color: #111 !important; padding: 0 !important; }
+      .wrap { max-width: 100% !important; margin: 0 !important; }
+      .meta-bar .nav-links, .header-bar .btn-nav, .eyebrow, .math-copy-btn { display: none !important; }
+      #content h2 { color: #000 !important; border-color: #ccc !important; }
+      #content h3 { color: #222 !important; }
+      #content blockquote { background: #f5f5f5 !important; color: #000 !important; border-left-color: #333 !important; }
+      .table-wrap, table { background: #fff !important; border-color: #ccc !important; }
+      th { background: #eee !important; color: #000 !important; }
+      td { border-color: #ccc !important; color: #000 !important; }
+      pre, code { background: #f8f8f8 !important; color: #111 !important; border-color: #ccc !important; }
+      .math-block-wrap { background: #fff !important; border-color: #ccc !important; }
+      .foot { display: none !important; }
+    }
 
-    .foot {{
-      margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
-      font-family: var(--mono); font-size: .8rem; color: var(--muted);
-    }}
+    .foot {
+      margin-top: 3.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
   </style>
+
+  <!-- MathJax Configuration & Loader -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+        displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
   <div class="wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;">
-      <p class="eyebrow">{eyebrow}</p>
+    <div class="header-bar">
+      <p class="eyebrow">__EYEBROW__</p>
       <div class="nav-links">
-        <a href="javascript:window.print()" class="btn-nav">🖨️ A4印刷 / PDF</a>
+        <button type="button" onclick="window.print()" class="btn-nav">🖨️ A4印刷 / PDF</button>
       </div>
     </div>
 
-    <h1>{title}</h1>
+    <h1 class="page-title">__TITLE__</h1>
     <div class="meta-bar">
-      <span>正本: <code>{src_filename}</code></span>
-      <span>出力: <code>{dst_filename}</code></span>
+      <span>正本: <code>__SRC_FILENAME__</code></span>
+      <span>出力: <code>__DST_FILENAME__</code></span>
     </div>
 
     <!-- Rendered Content Container -->
@@ -231,26 +591,180 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     <div class="foot">
       <span>Generated by md-to-html (dotfiles)</span>
-      <span>Source: {src_relpath}</span>
+      <span>Source: __SRC_RELPATH__</span>
     </div>
   </div>
 
   <!-- Raw Markdown Data -->
   <script id="md-source" type="text/markdown">
-{markdown_raw}
+__MARKDOWN_RAW__
   </script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {{
+    // 1. Math Protection (Unicode PUA avoids marked interpreting '_' or '*' inside TeX)
+    function protectMath(md) {
+      const store = [];
+      const stash = (match) => {
+        const id = store.length;
+        store.push(match);
+        return "\\uE000MATH" + id + "\\uE001";
+      };
+      md = md.replace(/\\$\\$[\\s\\S]+?\\$\\$/g, stash);
+      md = md.replace(/\\\\\\[[\\s\\S]+?\\\\\\]/g, stash);
+      md = md.replace(/(?<!\\$)\\$(?!\\$)[^$\\n]+?\\$/g, stash);
+      return { md, store };
+    }
+
+    const MATH_COPY_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+    function escapeTextarea(text) {
+      return text.replace(/<\\/textarea/gi, "<\\\\/textarea");
+    }
+
+    function wrapDisplayMathBlock(tex, innerLatex) {
+      const safe = escapeTextarea(innerLatex);
+      return (
+        '<div class="math-block-wrap">' +
+        '<button type="button" class="math-copy-btn" aria-label="LaTeX をコピー" title="LaTeX をコピー">' +
+        MATH_COPY_ICON +
+        '</button>' +
+        '<textarea class="math-latex-source" readonly aria-hidden="true" tabindex="-1">' +
+        safe +
+        '</textarea>' +
+        '<div class="math-block-body">' +
+        tex +
+        '</div></div>'
+      );
+    }
+
+    function restoreMath(html, store) {
+      return html.replace(/\\uE000MATH(\\d+)\\uE001/g, (_, i) => {
+        const tex = store[Number(i)];
+        const trimmed = tex.trim();
+        if (/^\\$\\$[\\s\\S]+\\$\\$$/.test(trimmed)) {
+          const inner = trimmed.slice(2, -2).trim();
+          return wrapDisplayMathBlock(tex, inner);
+        }
+        if (/^\\\\\\[[\\s\\S]+\\\\\\]$/.test(trimmed)) {
+          const inner = trimmed.slice(2, -2).trim();
+          return wrapDisplayMathBlock(tex, inner);
+        }
+        return tex;
+      });
+    }
+
+    function bindMathCopyButtons(root) {
+      root.addEventListener("click", (e) => {
+        const btn = e.target.closest(".math-copy-btn");
+        if (!btn || !root.contains(btn)) return;
+        const wrap = btn.closest(".math-block-wrap");
+        const src = wrap && wrap.querySelector(".math-latex-source");
+        if (!src) return;
+        const text = src.value;
+        const onCopied = () => {
+          btn.classList.add("copied");
+          const prev = btn.getAttribute("title");
+          btn.setAttribute("title", "コピーしました");
+          window.setTimeout(() => {
+            btn.classList.remove("copied");
+            if (prev) btn.setAttribute("title", prev);
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(onCopied).catch(() => {
+            src.select();
+            document.execCommand("copy");
+            onCopied();
+          });
+        } else {
+          src.select();
+          document.execCommand("copy");
+          onCopied();
+        }
+      });
+    }
+
+    function promoteMermaidBlocks(root) {
+      root.querySelectorAll("pre code.language-mermaid").forEach((code) => {
+        const pre = code.parentElement;
+        if (!pre) return;
+        const div = document.createElement("div");
+        div.className = "mermaid";
+        div.textContent = code.textContent;
+        pre.replaceWith(div);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
       const raw = document.getElementById("md-source").textContent;
-      if (window.marked && raw) {{
-        marked.setOptions({{
+      if (window.marked && raw) {
+        const { md: mdProtected, store: mathStore } = protectMath(raw);
+
+        // Customize marked table renderer for mobile overflow isolation
+        const renderer = new marked.Renderer();
+        const origTable = renderer.table.bind(renderer);
+        renderer.table = function(header, body) {
+          const html = origTable(header, body);
+          return '<div class="table-wrap">' + html + '</div>';
+        };
+
+        marked.setOptions({
           gfm: true,
-          breaks: true
-        }});
-        document.getElementById("content").innerHTML = marked.parse(raw);
-      }}
-    }});
+          breaks: true,
+          renderer: renderer
+        });
+
+        let html = marked.parse(mdProtected);
+        html = restoreMath(html, mathStore);
+
+        const contentEl = document.getElementById("content");
+        contentEl.innerHTML = html;
+
+        bindMathCopyButtons(contentEl);
+        promoteMermaidBlocks(contentEl);
+
+        // Automatically rewrite relative .md links to .html
+        contentEl.querySelectorAll("a").forEach((a) => {
+          const href = a.getAttribute("href");
+          if (href && !href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("#")) {
+            if (href.endsWith(".md")) {
+              a.setAttribute("href", href.replace(/\\.md$/, ".html"));
+            } else if (href.includes(".md#")) {
+              a.setAttribute("href", href.replace(/\\.md#/, ".html#"));
+            }
+          }
+        });
+
+        // Render Mermaid & MathJax
+        const typesetMath = () => {
+          if (window.MathJax && window.MathJax.typesetPromise) {
+            return window.MathJax.typesetPromise([contentEl]).catch((err) => console.error("MathJax error:", err));
+          }
+          return Promise.resolve();
+        };
+
+        const runMermaid = () => {
+          if (!window.mermaid) return Promise.resolve();
+          window.mermaid.initialize({
+            startOnLoad: false,
+            theme: "dark",
+            securityLevel: "loose",
+            flowchart: { useMaxWidth: true, htmlLabels: true },
+            sequence: { useMaxWidth: true }
+          });
+          return window.mermaid.run({ nodes: contentEl.querySelectorAll(".mermaid") });
+        };
+
+        runMermaid()
+          .catch(() => {})
+          .then(() => {
+            if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+              return window.MathJax.startup.promise.then(typesetMath);
+            }
+            return typesetMath();
+          });
+      }
+    });
   </script>
 </body>
 </html>
@@ -260,13 +774,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, str]:
     title = default_title
     eyebrow = "Document · Knowledge Base"
-    
-    # 1. Search for first # Header
+
     m_h1 = re.search(r"^#\s+(.+)$", md_text, flags=re.MULTILINE)
     if m_h1:
         title = m_h1.group(1).strip()
-    
-    # 2. Check for hints in text
+
     lower = md_text.lower()
     if "seminar" in lower or "就活" in lower or "面接" in lower or "インターン" in lower:
         eyebrow = "Career & Application · Tactical Sheet"
@@ -274,6 +786,8 @@ def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, st
         eyebrow = "Life Events & Communication · Protocol"
     elif "finance" in lower or "資産" in lower or "sim" in lower:
         eyebrow = "Finance & Life Planning"
+    elif "quantum" in lower or "量子" in lower:
+        eyebrow = "Quantum Information & Research Note"
 
     return title, eyebrow
 
@@ -282,10 +796,7 @@ def auto_detect_theme(md_text: str) -> str:
     lower = md_text.lower()
     if "雑談" in lower or "幸福" in lower or "アジェンダ" in lower or "生活" in lower:
         return "sepia"
-    if "seminar" in lower or "ヒアリング" in lower or "タイムキープ" in lower or "逆質問" in lower:
-        return "tactical"
     return "tactical"
-
 
 
 def open_in_browser(target_path: Path):
@@ -309,7 +820,6 @@ def open_in_browser(target_path: Path):
 
     dest = url or target_str
 
-    # Prioritize MBA via ssh
     res = subprocess.run(
         ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=3", "mba", f"open '{dest}'"],
         capture_output=True,
@@ -318,7 +828,6 @@ def open_in_browser(target_path: Path):
         print(f"Opened on MBA: {dest}")
         return
 
-    # Fallback to local open
     print("ssh mba failed or unreachable. Falling back to local open...")
     if sys.platform == "darwin":
         subprocess.run(["open", target_str])
@@ -335,10 +844,10 @@ def compile_markdown_to_html(
 ) -> Path:
     if not src_path.exists():
         raise FileNotFoundError(f"Source file not found: {src_path}")
-    
+
     if dst_path is None:
         dst_path = src_path.with_suffix(".html")
-        
+
     md_text = src_path.read_text(encoding="utf-8")
     title, eyebrow = extract_title_and_eyebrow(md_text, default_title=src_path.stem)
     if custom_title:
@@ -346,32 +855,34 @@ def compile_markdown_to_html(
 
     if theme_name == "auto" or theme_name not in THEMES:
         theme_name = auto_detect_theme(md_text)
-    
+
     theme_cfg = THEMES[theme_name]
+    css_vars = "\n".join(f"      --{k.replace('_', '-')}: {v};" for k, v in theme_cfg.items())
+
     safe_md = md_text.replace("</script>", "<\\/script>")
 
-    html_content = HTML_TEMPLATE.format(
-        title=title,
-        eyebrow=eyebrow,
-        src_filename=src_path.name,
-        dst_filename=dst_path.name,
-        src_relpath=src_path.name,
-        markdown_raw=safe_md,
-        **theme_cfg,
+    html_content = (
+        HTML_TEMPLATE.replace("__CSS_VARS__", css_vars)
+        .replace("__TITLE__", title)
+        .replace("__EYEBROW__", eyebrow)
+        .replace("__SRC_FILENAME__", src_path.name)
+        .replace("__DST_FILENAME__", dst_path.name)
+        .replace("__SRC_RELPATH__", src_path.name)
+        .replace("__MARKDOWN_RAW__", safe_md)
     )
-    
+
     dst_path.write_text(html_content, encoding="utf-8")
     print(f"Generated ({theme_name}): {dst_path}")
-    
+
     if open_browser:
         open_in_browser(dst_path)
-            
+
     return dst_path
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Compile any Markdown into a standalone, print-ready, responsive HTML."
+        description="Compile any Markdown into a modern responsive, print-ready HTML."
     )
     parser.add_argument("input", help="Path to input Markdown file (.md)")
     parser.add_argument("-o", "--output", help="Path to output HTML file (.html)")
