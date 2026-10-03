@@ -216,6 +216,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | V + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | IDE代表枠（旧VSCode枠） |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
 | G + optionalAny | kana_pressed = 1 | Open: Grok Bot (トグル)                                                                | Grok デスクトップクライアント |
+| T + optionalAny | kana_pressed = 1 | Open: T3 Code (トグル)                                                                 | AIエージェント統御盤 |
 | P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint (サイクル)                                                 | 起動中は Cmd+[     |
 | R + optionalAny | kana_pressed = 1 | Open: Preview (サイクル)                                                              | 起動中は Cmd+[     |
 | C + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+4 (常時Calendarタブへ)                                                | Calendarタブへジャンプ |
