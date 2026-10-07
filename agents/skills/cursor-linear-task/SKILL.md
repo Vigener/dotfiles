@@ -1,15 +1,32 @@
 ---
 name: cursor-linear-task
 description: >-
-  Linear にタスク・チケット・Issue を追加・登録・起票する。
-  Gemini (agy) など Linear MCP に直接アクセスできないエージェント環境から、ローカルの cursor-agent CLI を経由して Linear にタスクを登録し、now/TODO.md へ反映する。
-  「Linearにタスク追加」「Linearのチケット作成」「Linearに起票」「Linear add task」「Linear issue」「add task in Linear」などで発動。
+  Linear にタスク・チケット・Issue を【追加・登録・起票】する（書き込み専用）。
+  agy (Gemini等) からローカルの cursor-agent CLI を経由して Linear にタスクを登録し、now/TODO.md へ反映する。
+  【重要・ハイブリッド規律】
+  - 追加・起票（Write）: 本スキルを発動し、cursor-agent (--model auto) に隔離委譲する。
+  - 参照・確認（Read）: 「Linearのタスク確認」「未完了一覧」「期日確認」等の読み取りは本スキルを使わず、agy 内蔵の Linear MCP を直接叩いて即時回答する。
+  「Linearにタスク追加」「Linearのチケット作成」「Linearに起票」「Linear add task」「Linear issue作成」「add task in Linear」などで発動。
   ※注意: 数学・物理・機械学習等の文脈（線形代数・線形回帰・linear regression 等）における "linear" は対象外。
 ---
 
 # cursor-linear-task
 
-Gemini (agy) など Linear への直接アクセス権限（API / MCP）を持たない環境から、Cursor のローカル CLI (`cursor-agent`) を呼び出して Linear にタスク（Issue）を作成し、`now/TODO.md` にチケットリンクを反映する委譲パイプライン。
+Linear へのタスク（Issue）作成と `now/TODO.md` へのリンク反映を、Cursor のローカル CLI (`cursor-agent --model auto`) に丸投げ委譲するパイプライン。
+
+---
+
+## 運用方針（ハイブリッド構成: Read agy / Write Cursor）
+
+agy（Gemini / Claude）と Cursor の長所を組み合わせ、安定性とコンテキスト効率を両立したハイブリッド運用をとる。
+
+| 操作種別 | 担当エージェント | 実行手段 | 理由・メリット |
+|---|---|---|---|
+| **参照 (Read)**<br>一覧・ステータス・期日確認 | **agy (直接)** | 内蔵 Linear MCP<br>(`list_issues`, `get_issue` 等) | **最速（0.5秒で即答）**。別プロセスを起動するオーバーヘッドをゼロにし、会話のリズムを崩さない。 |
+| **起票 (Write)**<br>新規追加・チケット作成 | **Cursor (委譲)**<br>※本スキル | `cursor-agent`<br>(`--model auto`) | **コンテキスト隔離 ＆ 安定性**。<br>1. agy の MCP は公式提供ではなく書き込み時の挙動が不安定になるリスクをヘッジ。<br>2. 「起票 → ID/URL取得 → `now/TODO.md` 更新」の泥臭い往復を別プロセスへ隔離し、メインチャットのトークンを汚さない。<br>3. Cursor Pro の余剰枠（Auto モデル）を有効活用する。 |
+
+> [!NOTE]
+> ユーザーから「Linearのタスク一覧見せて」「LIFE-12 の期日っていつだっけ？」などの **参照（Read）** を求められた場合は、本スキルを起動せず agy 自身の内蔵 MCP ツールで直接回答すること。
 
 ---
 
@@ -32,7 +49,7 @@ Gemini (agy) など Linear への直接アクセス権限（API / MCP）を持�
 
 ## 基本実行コマンド
 
-Gemini (agy) などの呼び出し元エージェントは、Bash コマンドを用いて非対話モードで `cursor-agent` を実行する。
+agy などの呼び出し元エージェントは、Bash コマンドを用いて非対話モードで `cursor-agent` を実行する。
 
 ```bash
 cursor-agent -p --force --approve-mcps --trust --model auto "プロンプト..."
@@ -52,14 +69,14 @@ cursor-agent -p --force --approve-mcps --trust --model auto "プロンプト..."
 
 ---
 
-## 標準ワークフロー
+## 標準ワークフロー（起票時）
 
 ### 1. 前提設定の確認（初回または未設定時）
 
 `~/.cursor/mcp.json` に `plugin-linear-linear` が存在するか確認する。
 
 ```bash
-grep -q "plugin-linear-linear" ~/.cursor/mcp.json 2>/dev/null || cat << 'EOF' > ~/.cursor/mcp.json
+grep -q "plugin-linear-linear" ~/.cursor/mcp.json 2>/dev/null || cat << "JSON_EOF" > ~/.cursor/mcp.json
 {
   "mcpServers": {
     "plugin-linear-linear": {
@@ -67,7 +84,7 @@ grep -q "plugin-linear-linear" ~/.cursor/mcp.json 2>/dev/null || cat << 'EOF' > 
     }
   }
 }
-EOF
+JSON_EOF
 ```
 
 ### 2. プロンプトの組み立て
@@ -102,3 +119,4 @@ cursor-agent -p --force --approve-mcps --trust --model auto "$(cat prompt.txt)"
 - `add-to-todo`: `now/TODO.md` への直接追記スキル（Linear を使わない場合）
 - 設定正本: `~/.cursor/mcp.json`
 - 認証トークン: `~/.cursor/projects/.../mcp-auth.json`
+- agy 内蔵 MCP 設定: `~/.gemini/config/mcp_config.json`（Read 用）
