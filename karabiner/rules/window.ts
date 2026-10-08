@@ -9,6 +9,27 @@ const ifRaycastMode = [
   ifApp("^com\\.raycast\\.macos$"),
 ];
 
+// =====================================================================
+// [WINDOW] 両親指レイヤー (英数 + かな + HJKL)
+// ※ 最優先で評価させるため、index.ts で editRules より前に配置する
+// =====================================================================
+export const dualThumbRules = [
+  rule("【WINDOW】両親指レイヤー (英数+かな+HJKL: スペース・ウィンドウ操作)").manipulators([
+    map("h", "optionalAny")
+      .to("left_arrow", "control")
+      .condition(ifVar("eisuu_pressed", 1), ifVar("kana_pressed", 1)), // 左のスペース
+    map("l", "optionalAny")
+      .to("right_arrow", "control")
+      .condition(ifVar("eisuu_pressed", 1), ifVar("kana_pressed", 1)), // 右のスペース
+    map("j", "optionalAny")
+      .to("h", "command")
+      .condition(ifVar("eisuu_pressed", 1), ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
+    map("k", "optionalAny")
+      .to("return_or_enter", ["left_control", "left_option"])
+      .condition(ifVar("eisuu_pressed", 1), ifVar("kana_pressed", 1)), // 最大化（Rectangle / Raycast）
+  ]),
+];
+
 export const windowRules = [
   // =====================================================================
   // [WINDOW] タブ・ウィンドウ操作 (グローバル)
@@ -24,15 +45,19 @@ export const windowRules = [
       // -------...---------
       // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
       // -------...---------
-      map("h", "optionalAny")
+      // 【フォールバック】かな + 矢印キー
+      map("left_arrow", "optionalAny")
         .to("left_arrow", "control")
         .condition(ifVar("kana_pressed", 1)), // 左のスペース
-      map("l", "optionalAny")
+      map("right_arrow", "optionalAny")
         .to("right_arrow", "control")
         .condition(ifVar("kana_pressed", 1)), // 右のスペース
-      map("j", "optionalAny")
+      map("down_arrow", "optionalAny")
         .to("h", "command")
         .condition(ifVar("kana_pressed", 1)), // 隠す (Cmd+H)
+      map("up_arrow", "optionalAny")
+        .to("return_or_enter", ["left_control", "left_option"])
+        .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle / Raycast）
       // Shift 付きを optionalAny より前。残った Shift で最大化が吸われないように左右を分けて必須化する。
       map("k", "left_shift", "any")
         .to("f", ["control", "command"])

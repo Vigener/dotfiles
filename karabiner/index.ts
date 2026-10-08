@@ -4,7 +4,7 @@ import { azikRules } from "./rules/azik";
 import { editRules } from "./rules/edit";
 import { launcherRules } from "./rules/launcher";
 import { sysRules } from "./rules/sys";
-import { windowRules } from "./rules/window";
+import { dualThumbRules, windowRules } from "./rules/window";
 
 writeToProfile(
   {
@@ -18,6 +18,7 @@ writeToProfile(
     // ---------------------------------------------------------------------
     ...appRules,
     ...sysRules,
+    ...dualThumbRules,
     ...editRules,
     ...windowRules,
     ...launcherRules,

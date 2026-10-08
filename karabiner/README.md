@@ -150,15 +150,27 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 
 
+### WINDOW（両親指レイヤー: 英数 + かな）
+
+#### スペース・ウィンドウ操作 (最優先評価)
+
+| 入力            | 条件                                 | 出力            | 想定アクション                          |
+| --------------- | ------------------------------------ | --------------- | --------------------------------------- |
+| H + optionalAny | eisuu_pressed = 1 かつ kana_pressed = 1 | Ctrl+Left       | 左のスペース                            |
+| L + optionalAny | eisuu_pressed = 1 かつ kana_pressed = 1 | Ctrl+Right      | 右のスペース                            |
+| J + optionalAny | eisuu_pressed = 1 かつ kana_pressed = 1 | Cmd+H           | 隠す                                    |
+| K + optionalAny | eisuu_pressed = 1 かつ kana_pressed = 1 | Ctrl+Opt+Return | 最大化（Rectangle / Raycast）           |
+
 ### WINDOW（かなレイヤー）
 
 #### ウィンドウ配置・スペース・ディスプレイ
 
 | 入力                  | 条件                                                                 | 出力               | 想定アクション                          |
 | --------------------- | -------------------------------------------------------------------- | ------------------ | --------------------------------------- |
-| H + optionalAny       | kana_pressed = 1                                                     | Ctrl+Left          | 左のスペース                            |
-| L + optionalAny       | kana_pressed = 1                                                     | Ctrl+Right         | 右のスペース                            |
-| J + optionalAny       | kana_pressed = 1                                                     | Cmd+H              | 隠す                                    |
+| Left Arrow + optionalAny | kana_pressed = 1                                                  | Ctrl+Left          | 【フォールバック】左のスペース          |
+| Right Arrow + optionalAny| kana_pressed = 1                                                  | Ctrl+Right         | 【フォールバック】右のスペース          |
+| Down Arrow + optionalAny | kana_pressed = 1                                                  | Cmd+H              | 【フォールバック】隠す                  |
+| Up Arrow + optionalAny   | kana_pressed = 1                                                  | Ctrl+Opt+Return    | 【フォールバック】最大化                |
 | K + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。Shift 付きを先に評価    |
 | K + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化（Rectangle / Raycast）           |
 | , + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Left      | 左半分（Rectangle）                     |
@@ -211,7 +223,10 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   | サブ端末            |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
-| B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          |                     |
+| B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | 移行用（H推奨）     |
+| H + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | ブラウザ一等地      |
+| J + optionalAny | kana_pressed = 1 | Open: T3 Code (トグル)                                                                | メイン作業環境（最頻出） |
+| L + optionalAny | kana_pressed = 1 | Open: LINE (トグル)                                                                   | コミュニケーション  |
 | N + optionalAny | kana_pressed = 1 | Open: Dia / Cmd+2 (アクティブ時)                                                      | 思考ハブ (Tab 2)    |
 | V + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | IDE代表枠（旧VSCode枠） |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |

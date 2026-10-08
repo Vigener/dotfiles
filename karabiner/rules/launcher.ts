@@ -24,6 +24,7 @@ const APP_REGISTRY: Record<string, string> = {
   Slack: "^com\\.tinyspeck\\.slackmacgap$",
   Mail: "^com\\.apple\\.mail$",
   "zoom.us": "^us\\.zoom\\.xos$",
+  LINE: "^jp\\.naver\\.line\\.mac$",
   // --- システム ---
   Finder: "^com\\.apple\\.finder$",
   // --- ドキュメント ---
@@ -181,6 +182,9 @@ export const launcherRules = [
     ...toggleApp("w", "Warp"),
     ...toggleApp("e", "Mail"),
     ...toggleApp("b", "Google Chrome"),
+    ...toggleApp("h", "Google Chrome"),
+    ...toggleApp("j", "T3 Code (Alpha)"),
+    ...toggleApp("l", "LINE"),
 
     // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
     ...toggleAppOrSendKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),
