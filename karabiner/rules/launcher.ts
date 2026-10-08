@@ -182,9 +182,8 @@ export const launcherRules = [
     ...toggleApp("w", "Warp"),
     ...toggleApp("e", "Mail"),
     ...toggleApp("b", "Google Chrome"),
-    ...toggleApp("h", "Google Chrome"),
     ...toggleApp("j", "T3 Code (Alpha)"),
-    ...toggleApp("l", "LINE"),
+    ...toggleApp("l", "Google Chrome"),
 
     // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
     ...toggleAppOrSendKey("n", MAIN_BROWSER, BROWSER_HUB_TAB, ["command"]),

@@ -223,10 +223,9 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   | サブ端末            |
 | E + optionalAny | kana_pressed = 1 | Open: Mail (トグル)                                                                   |                     |
-| B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | 移行用（H推奨）     |
-| H + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | ブラウザ一等地      |
-| J + optionalAny | kana_pressed = 1 | Open: T3 Code (トグル)                                                                | メイン作業環境（最頻出） |
-| L + optionalAny | kana_pressed = 1 | Open: LINE (トグル)                                                                   | コミュニケーション  |
+| B + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | 移行用（L推奨）     |
+| J + optionalAny | kana_pressed = 1 | Open: T3 Code (トグル)                                                                | メイン作業環境（画面左） |
+| L + optionalAny | kana_pressed = 1 | Open: Google Chrome (トグル)                                                          | メインブラウザ（画面右） |
 | N + optionalAny | kana_pressed = 1 | Open: Dia / Cmd+2 (アクティブ時)                                                      | 思考ハブ (Tab 2)    |
 | V + optionalAny | kana_pressed = 1 | Open: Cursor (トグル)                                                                 | IDE代表枠（旧VSCode枠） |
 | F + optionalAny | kana_pressed = 1 | Open: Finder (トグル)                                                                 |                     |
