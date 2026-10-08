@@ -167,6 +167,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力                  | 条件                                                                 | 出力               | 想定アクション                          |
 | --------------------- | -------------------------------------------------------------------- | ------------------ | --------------------------------------- |
+| H + optionalAny       | kana_pressed = 1                                                     | Cmd+H              | 隠す（Hide・右手完結）                  |
 | Left Arrow + optionalAny | kana_pressed = 1                                                  | Ctrl+Left          | 【フォールバック】左のスペース          |
 | Right Arrow + optionalAny| kana_pressed = 1                                                  | Ctrl+Right         | 【フォールバック】右のスペース          |
 | Down Arrow + optionalAny | kana_pressed = 1                                                  | Cmd+H              | 【フォールバック】隠す                  |

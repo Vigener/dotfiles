@@ -45,6 +45,11 @@ export const windowRules = [
       // -------...---------
       // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
       // -------...---------
+      // かな + H: アプリ非表示 (Cmd+H / Hide) - 右手完結の最速退避
+      map("h", "optionalAny")
+        .to("h", "command")
+        .condition(ifVar("kana_pressed", 1)),
+
       // 【フォールバック】かな + 矢印キー
       map("left_arrow", "optionalAny")
         .to("left_arrow", "control")
