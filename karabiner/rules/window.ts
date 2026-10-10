@@ -3,7 +3,7 @@ import { ifApp, ifDevice, ifVar, map, mapPointingButton, rule } from "karabiner.
 // =====================================================================
 // 🛡️ 条件定義: RaycastのSwitch Windowsモード中であること
 // =====================================================================
-// Raycastが前面にある時のみ発火させることで、変数が残り続けた際の暴発を完全に防ぐ
+// Raycastが前面にある時のみ発火させることで、変数が残り続けた際の誤発を完全に防ぐ
 const ifRaycastMode = [
   ifVar("raycast_window_mode", 1),
   ifApp("^com\\.raycast\\.macos$"),
@@ -42,9 +42,9 @@ export const windowRules = [
   // =====================================================================
   rule("【WINDOW】かなレイヤー (Rectangle & Mac標準ウィンドウ操作)").manipulators(
     [
-      // -------...---------
+      // ----------------
       // 1. ウィンドウ配置・スペース・ディスプレイ（かなレイヤー）
-      // -------...---------
+      // ----------------
       // かな + H: アプリ非表示 (Cmd+H / Hide) - 右手完結の最速退避
       map("h", "optionalAny")
         .to("h", "command")
@@ -73,6 +73,10 @@ export const windowRules = [
       map("k", "optionalAny")
         .to("return_or_enter", ["left_control", "left_option"])
         .condition(ifVar("kana_pressed", 1)), // 最大化（Rectangle / Raycast）
+      // Reasonable Size: Raycast Window Management (Preset: Ctrl+Opt+Cmd+R)
+      map("r", "optionalAny")
+        .to("r", ["left_control", "left_option", "left_command"])
+        .condition(ifVar("kana_pressed", 1)),
       map("comma", "optionalAny")
         .to("left_arrow", ["left_control", "left_option"])
         .condition(ifVar("kana_pressed", 1)), // 左半分（Rectangle）
@@ -116,9 +120,9 @@ export const windowRules = [
         .to("d", ["left_control", "left_option", "left_command", "left_shift"])
         .condition(ifVar("kana_pressed", 1)),
 
-      // -------...---------
+      // ----------------
       // 3. アプリ/ウィンドウ切替
-      // -------...---------
+      // ----------------
       // かな+Right Cmd → Raycast Switch Windows（Cmd+Opt+Tab）
       // 英数+Tab → AltTab。Opt のホールドは sys.ts の to_if_other_key_pressed が担う
       // （ここは Tab / Shift+Tab のみ送り、英数離しまで UI を維持する）
@@ -197,6 +201,8 @@ export const windowRules = [
       .condition(ifVar("eisuu_pressed", 1)),
     // Option+kでウィンドウを最大化（Rectangle: Ctrl+Opt+Return）
     map("k", "option").to("return_or_enter", ["left_control", "left_option"]),
+    // Option+rでウィンドウをReasonable Sizeに配置（Raycast: Ctrl+Opt+Cmd+R）
+    map("r", "option").to("r", ["left_control", "left_option", "left_command"]),
     // Option+nでNext Displayへ移動(Cmd+Opt+Control+n)
     // map("n", "option").to("n", ["left_command", "left_option", "left_control"]),
   ]),

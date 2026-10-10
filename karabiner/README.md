@@ -7,7 +7,7 @@
 
 ## 検討中の点
 
-- MacBook Air内臓キーボードと、HHKB Studioの`Cmd`, `Opt`が逆問題を解決する。
+- MacBook Air内蔵キーボードと、HHKB Studioの`Cmd`, `Opt`が逆問題を解決する。
   - おそらく、内蔵キーボードに合わせる方が自然な気がする。
   - ただし、デバイス毎に設定を分けることで、両立できると考えられるため、実装検討中。
 
@@ -18,8 +18,13 @@
   - 初期立ち上げウィンドウは消す運用なので、PowerPoint のようなウィンドウサイクルは不要。既存の `toggleApp`（前面なら Cmd+H、それ以外は起動）でトグルする。
   - 起動名は `zoom.us`（`open -a Zoom` は失敗する）。Zed の Bundle ID はレジストリに残す。
 
+- **Reasonable Size を「かな＋R」「Option＋R」にした理由**
+  - 従来「かな＋R」に割り当てていた Preview（プレビュー）は、Finder や Slack 等のファイルを開く動作から立ち上がることが大半で、キーボードから直接単体起動するユースケースが皆無だった（Bundle ID は資産としてレジストリに温存）。
+  - 一方で、ウィンドウを適切なサイズに中央配置する Raycast の "Reasonable Size" は日常的に高頻度で実行しており、これまで「Raycast起動 → re とタイピング → 実行」という手数を踏んでいた。
+  - Raycast の Preset(Rectangle) では公式に `^⌥⌘R` (Ctrl+Opt+Cmd+R) が割り当てられており、Karabiner のかなレイヤー（K:最大化, ,:左半分, .:右半分, ;:Next Display, D:Display Preset）とウィンドウ操作の文脈が完全に一致し、「R = Reasonable Size」として記憶負荷なく直感的に叩けるため採用。併せて `Option+R` でも発火可能とした。
+
 - **YouTube Music（ブラウザ5番目のタブ）を「かな＋8」にした理由**
-  - 音量系操作（U:アップ、I:ダウン、Y:ミュート）との近さと、音楽という絶対的サブタスク（バックグラウンド用）であることから、できればノールックで瞬間的に押したい作業であるため。
+  - 音量系操作（U:アップ、I:ダウン、Y:ミュート）との近さと、音楽という絶対的サブタスク（バックグラウンド用）であることから、できればノーlookで瞬間的に押したい作業であるため。
   - ノー・ルックで押しやすいキーを考慮すると、右手の中指と薬指を自然と伸ばした先にある「8」と「0」が候補として残った。その上で、UとIの上にある「8」を採用した。
   - 今後「かなキー＋数字」の割り当てが増える場合、基本的には「メインブラウザの先頭から何番目のタブにあるか」に数字キーを関連付けるのが無難。しかし、右手で押しづらい「1〜5」については、アルファベットキーに割り当てる方針とする（現に1〜4番目のタブはGemini, Hub, Slack, Calendarとしてアルファベットに割り当て済みであり、残り1つ程度であればアルファベットで賄えるはずであるため）。
 
@@ -163,7 +168,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 ### WINDOW（かなレイヤー）
 
-#### ウィンドウ配置・スペース・ディスプレイ
+#### ウインドウ配置・スペース・ディスプレイ
 
 | 入力                  | 条件                                                                 | 出力               | 想定アクション                          |
 | --------------------- | -------------------------------------------------------------------- | ------------------ | --------------------------------------- |
@@ -174,6 +179,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | Up Arrow + optionalAny   | kana_pressed = 1                                                  | Ctrl+Opt+Return    | 【フォールバック】最大化                |
 | K + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。Shift 付きを先に評価    |
 | K + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Return    | 最大化（Rectangle / Raycast）           |
+| R + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Cmd+R     | Reasonable Size（Raycast）               |
 | , + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Left      | 左半分（Rectangle）                     |
 | . + optionalAny       | kana_pressed = 1                                                     | Ctrl+Opt+Right     | 右半分（Rectangle）                     |
 | / + left_shift / right_shift | kana_pressed = 1                                                | Ctrl+Cmd+F         | フルスクリーン。K の Shift と同じ       |
@@ -200,6 +206,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | Opt+, | なし | Ctrl+Opt+Left      | 左半分配置（Rectangle。英数+, も同じ） |
 | Opt+. | なし | Ctrl+Opt+Right     | 右半分配置（Rectangle。英数+. も同じ） |
 | Opt+K | なし | Ctrl+Opt+Return    | 最大化（Rectangle）                    |
+| Opt+R | なし | Ctrl+Opt+Cmd+R     | Reasonable Size（Raycast）       |
 | Opt+N | なし | （コメントアウト） | Next Display。かな + ; が正。未使用 |
 
 ### APP（かなレイヤー）
@@ -233,7 +240,6 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | G + optionalAny | kana_pressed = 1 | Open: Grok Bot (トグル)                                                                | Grok デスクトップクライアント |
 | T + optionalAny | kana_pressed = 1 | Open: T3 Code (トグル)                                                                 | AIエージェント統御盤 |
 | P + optionalAny | kana_pressed = 1 | Open: Microsoft PowerPoint (サイクル)                                                 | 起動中は Cmd+[     |
-| R + optionalAny | kana_pressed = 1 | Open: Preview (サイクル)                                                              | 起動中は Cmd+[     |
 | C + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+4 (常時Calendarタブへ)                                                | Calendarタブへジャンプ |
 | 8 + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+5 (常時Musicタブへ)                                                   | YouTube Musicタブへジャンプ |
 

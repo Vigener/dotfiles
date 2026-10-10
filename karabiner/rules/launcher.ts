@@ -65,7 +65,7 @@ function togglePwa(key: FromKeyParam, processName: string, appPath: string) {
 }
 
 // =====================================================================
-// 🛠️ ヘルパー関数3: キー送信付きアプリトグル (ラグ回避シークエンス内包)
+// 🛠️ ヘルパー関数3: キー送信付きアプリトグル (ラグ回避シーケンス内包)
 //    - アクティブ時は Cmd+[tabKey] でピン留めタブへジャンプ
 //    - 非アクティブ時はシェルコマンドでラグ回避しつつ起動＋キー送信
 // =====================================================================
@@ -214,12 +214,5 @@ export const launcherRules = [
         ifVar("kana_pressed", 1),
         ifApp(bundleId("Microsoft PowerPoint")).unless(),
       ),
-
-    map("r", "optionalAny")
-      .to("open_bracket", "left_command")
-      .condition(ifVar("kana_pressed", 1), ifApp(bundleId("Preview"))),
-    map("r", "optionalAny")
-      .toApp("Preview")
-      .condition(ifVar("kana_pressed", 1), ifApp(bundleId("Preview")).unless()),
   ]),
 ];
