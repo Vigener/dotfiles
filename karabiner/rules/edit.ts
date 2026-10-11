@@ -1,4 +1,4 @@
-import { ifVar, map, rule } from "karabiner.ts";
+import { ifApp, ifVar, map, rule } from "karabiner.ts";
 
 export const editRules = [
   // =====================================================================
@@ -205,7 +205,7 @@ export const editRules = [
       .condition(ifVar("eisuu_pressed", 1)), // Toggle Comment
 
     // スクリーンショット系 (保存あり / クリップボードのみ)
-    // ※ 英数+1..9 より先に置く（Shift+3/4 が agent focus に吸われないように）
+    // ※ 英数+1..9 より先に置く（Shift+3/4 が agent focus / tab switch に吸われないように）
     map("4", ["left_control", "left_shift"], "any")
       .to("4", ["left_command", "left_shift", "left_control"])
       .condition(ifVar("eisuu_pressed", 1)),
@@ -219,10 +219,20 @@ export const editRules = [
       .to("3", ["left_command", "left_shift"])
       .condition(ifVar("eisuu_pressed", 1)),
 
-    // herdr focus_agent (ctrl+alt+1..9)。pane 系の直バインドと同系の出力に寄せる
+    // 【Ghostty前面時】 herdr focus_agent (ctrl+alt+1..9)
     ...(["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const).map((n) =>
       map(n, "optionalAny")
         .to(n, ["left_control", "left_option"])
+        .condition(
+          ifVar("eisuu_pressed", 1),
+          ifApp("^com\\.mitchellh\\.ghostty$"),
+        ),
+    ),
+
+    // 【全般 (T3 Code / ブラウザ等)】 タブ・スレッド切り替え (Cmd+1..9)
+    ...(["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const).map((n) =>
+      map(n, "optionalAny")
+        .to(n, "command")
         .condition(ifVar("eisuu_pressed", 1)),
     ),
   ]),
