@@ -33,6 +33,10 @@
   - 元々、英数レイヤーは「Cmdショートカットの模倣（Cmd+C/V/W/T/Z等）」を基本思想としているため、Mac標準や主要ブラウザ（Dia, Chrome, Zen 等）のタブ切り替え（Cmd+1..9）とも完全に挙動が一致し、直感的。
   - なお、従来の herdr (Ghostty) 用の `focus_agent` (Ctrl+Alt+1..9) は、Ghostty が前面にあるときのみ優先発火するようオーバーライドし、以前の操作性も損なわずに維持した。
 
+- **Option＋J を Cmd+J にした理由（ターミナル／パネルトグル）**
+  - T3 Code、VSCode、Cursor 等の画面下部ターミナル（パネル）の開閉（Cmd+J）を、HHKB Studio の親指クラスタ（Cmdと英数の間にあるOption）からホームポジション（右手人差し指 J）のまま最小の負荷で実行できるようにするため。
+  - 英数＋J（カーソル下移動）の一等地を侵害せず、macOS 標準の Option+J（特殊文字 ∆）を有効活用している。英数レイヤー中（英数＋Opt＋J）は段落移動が優先される。
+
 ## マッピング表
 
 対象: karabiner/index.ts の現行有効ルール（コメントアウト行は除外）
@@ -211,6 +215,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | Opt+. | なし | Ctrl+Opt+Right     | 右半分配置（Rectangle。英数+. も同じ） |
 | Opt+K | なし | Ctrl+Opt+Return    | 最大化（Rectangle）                    |
 | Opt+R | なし | Ctrl+Opt+Cmd+R     | Reasonable Size（Raycast）       |
+| Opt+J | eisuu_pressed ≠ 1 | Cmd+J | ターミナル/パネル開閉（T3 Code / VSCode 等） |
 | Opt+N | なし | （コメントアウト） | Next Display。かな + ; が正。未使用 |
 
 ### APP（かなレイヤー）

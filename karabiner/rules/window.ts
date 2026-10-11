@@ -103,46 +103,41 @@ export const windowRules = [
       map("delete_forward", "optionalAny")
         .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(ifVar("kana_pressed", 1)),
-      // Conductor MB1（L 右隣）: かな中のみ Next Display。device_if で Mac トラックパッド・HHKB ポインティングを除外。
-      // VID/PID は ZMK 既定 USB (0x1D50/0x615E)。実機の Conductor 表記が違えば差し替え。BLE は USB ID と一致しない可能性あり（未確認・未所持）。
       mapPointingButton("button1")
         .to("right_arrow", ["left_control", "left_option", "left_command"])
         .condition(
           ifVar("kana_pressed", 1),
           ifDevice({ vendor_id: 0x1d50, product_id: 0x615e }),
         ),
-      // Mission Control (Ctrl+Up): かな+: (JISのコロン / quote)
+      // Switch Display Preset (Cmd+Opt+Ctrl+Shift+D)
+      map("d", "optionalAny")
+        .to("d", ["left_command", "left_option", "left_control", "left_shift"])
+        .condition(ifVar("kana_pressed", 1)),
+      // Mission Control (Ctrl+Up)
       map("quote", "optionalAny")
         .to("up_arrow", "control")
         .condition(ifVar("kana_pressed", 1)),
-      // Switch Display Preset (Raycast Display Placer: Cmd+Opt+Ctrl+Shift+d)
-      map("d", "optionalAny")
-        .to("d", ["left_control", "left_option", "left_command", "left_shift"])
-        .condition(ifVar("kana_pressed", 1)),
 
       // ----------------
-      // 3. アプリ/ウィンドウ切替
+      // 2. ウィンドウ / アプリ切替（かなレイヤー）
       // ----------------
-      // かな+Right Cmd → Raycast Switch Windows（Cmd+Opt+Tab）
-      // 英数+Tab → AltTab。Opt のホールドは sys.ts の to_if_other_key_pressed が担う
-      // （ここは Tab / Shift+Tab のみ送り、英数離しまで UI を維持する）
+      // かな + Right Cmd: Raycast Switch Windows
       map("right_command", "optionalAny")
-        .to("tab", ["left_command", "left_option"])
+        .to("tab", ["command", "option"])
         .toVar("raycast_window_mode", 1)
         .condition(ifVar("kana_pressed", 1)),
-      // Shift 付きを先に評価（optionalAny より前）
-      map("tab", "left_shift", "any")
-        .to("tab", "left_shift")
-        .condition(ifVar("eisuu_pressed", 1)),
-      map("tab", "right_shift", "any")
-        .to("tab", "left_shift")
+
+      // ======= AltTab（英数ホールドで前後送り）=======
+      // 英数を離すまで UI を維持。OS 標準 Cmd+Tab は潰さない。
+      map("tab", ["left_shift"], "any")
+        .to("tab", ["left_shift"])
         .condition(ifVar("eisuu_pressed", 1)),
       map("tab", "optionalAny")
         .to("tab")
         .condition(ifVar("eisuu_pressed", 1)),
 
       // ======= Raycast Switch Windows モード中の Vim風キーバインド =======
-      // ※ 修飾キーなしの単押しのみ許可し、予期せぬ暴発を防ぐ
+      // ※ 修飾キーなしの単押しのみ許可し、予期せぬ誤発を防ぐ
       map("j")
         .to("down_arrow")
         .condition(...ifRaycastMode),
@@ -203,6 +198,11 @@ export const windowRules = [
     map("k", "option").to("return_or_enter", ["left_control", "left_option"]),
     // Option+rでウィンドウをReasonable Sizeに配置（Raycast: Ctrl+Opt+Cmd+R）
     map("r", "option").to("r", ["left_control", "left_option", "left_command"]),
+    // Option+jでターミナル/パネルをトグル（Cmd+J）
+    // ※ 英数レイヤー（英数+Opt+J: 段落移動）と競合しないよう、eisuu_pressed != 1 の時のみ発火
+    map("j", "option")
+      .to("j", "command")
+      .condition(ifVar("eisuu_pressed", 1).unless()),
     // Option+nでNext Displayへ移動(Cmd+Opt+Control+n)
     // map("n", "option").to("n", ["left_command", "left_option", "left_control"]),
   ]),
