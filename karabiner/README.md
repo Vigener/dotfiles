@@ -20,6 +20,11 @@
   - 音量系（U:アップ, I:ダウン, Y:ミュート）のマッスルメモリーを一切破壊せず、右手Enter周辺に「AIエージェントへの送信系」を綺麗に集約。
   - 日本語入力中（IME ON）でも誤作動しないよう、キー送信シーケンスの先頭に `japanese_eisuu`（英数キー）を挟むことで、全角未確定にならず確実に半角で送信できるようにした。
 
+- **右パネル開閉（Cmd+Opt+B）を「Shift＋英数＋B」にした理由**
+  - T3 Code や VSCode において、左サイドバー（Cmd+B）は「英数＋B」でトグルできるが、補助サイドバー / 右パネル（PRレビュー、差分表示など）を開く「Cmd+Opt+B」は3キー同時押しで運指が窮屈だった。
+  - 「英数＋B ＝ 左サイドバー」、「Shift＋英数＋B ＝ 右パネル」として B キー周辺にパネル開閉を集約。
+  - なお、Mac標準の物理ショートカット `Cmd+Shift+B`（Chrome等のブックマークバー表示）は物理キーでそのまま機能するため、既存の操作感を損なわない。
+
 - **Zoom を「かな＋Z」にした理由**
   - Zed は使用頻度が月0回になり、必要時も Cursor で足りる。一方 Zoom は週1のチームMTGで必ず使い、その 1.5〜2 時間だけ他アプリとの行き来が頻発する。
   - 初期立ち上げウィンドウは消す運用なので、PowerPoint のようなウィンドウサイクルは不要。既存の `toggleApp`（前面なら Cmd+H、それ以外は起動）でトグルする。
@@ -108,6 +113,8 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | Ctrl+S (+ any) | eisuu_pressed = 1 | Cmd+Up        | 文頭へ              |
 | Ctrl+F (+ any) | eisuu_pressed = 1 | Cmd+Down      | 文末へ              |
 | Ctrl+O (+ any) | eisuu_pressed = 1 | Opt+Backspace | 単語削除            |
+| Ctrl+B (+ any) | eisuu_pressed = 1 | Cmd+Opt+B     | セカンダリサイドバー開閉 |
+| Shift+B (+ any)| eisuu_pressed = 1 | Cmd+Opt+B     | 右パネル / 補助サイドバー開閉（T3 Code / VSCode等） |
 | Ctrl+@ (+ any) | eisuu_pressed = 1 | Opt+Forward Delete | 次の単語削除（JIS: open_bracket） |
 | Shift+Enter (+ any) | eisuu_pressed = 1 | Cmd+Shift+Enter | 送信・確定系（小指負担軽減） |
 | Ctrl+[ (+ any) | eisuu_pressed = 1 | Cmd+Ctrl+[ | cmux 前ワークスペース等（JIS: close_bracket） |
@@ -148,7 +155,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | Ctrl+T (+ any)  | eisuu_pressed = 1 | Cmd+Opt+T | New Tab in Group |
 | T + optionalAny | eisuu_pressed = 1 | Cmd+T | New Tab         |
 | P + optionalAny | eisuu_pressed = 1 | Cmd+P | Print / Palette |
-| B + optionalAny | eisuu_pressed = 1 | Cmd+B | Toggle Primary Sidebar |
+| B + optionalAny | eisuu_pressed = 1 | Cmd+B | Toggle Primary Sidebar（左サイドバー） |
 | U + optionalAny | eisuu_pressed = 1 | Cmd+U | Underline 等（Shift併用で Cmd+Shift+U） |
 | [ + optionalAny | eisuu_pressed = 1 | Cmd+[ | 戻る等（JIS key_code: close_bracket。Ctrl併用で Cmd+Ctrl+[） |
 | ] + optionalAny | eisuu_pressed = 1 | Cmd+] | 進む等（JIS key_code: non_us_pound。Ctrl併用で Cmd+Ctrl+]） |

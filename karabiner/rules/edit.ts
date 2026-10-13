@@ -63,8 +63,14 @@ export const editRules = [
       .to("delete_or_backspace", "left_option")
       .condition(ifVar("eisuu_pressed", 1)),
 
-    // VSCode: 英数+Control+B でセカンダリサイドバー開閉
+    // T3 Code / VSCode: 英数+Control+B または 英数+Shift+B でセカンダリサイドバー（右パネル）開閉 (Cmd+Opt+B)
     map("b", "left_control", "any")
+      .to("b", ["left_command", "left_option"])
+      .condition(ifVar("eisuu_pressed", 1)),
+    map("b", "left_shift", "any")
+      .to("b", ["left_command", "left_option"])
+      .condition(ifVar("eisuu_pressed", 1)),
+    map("b", "right_shift", "any")
       .to("b", ["left_command", "left_option"])
       .condition(ifVar("eisuu_pressed", 1)),
 
