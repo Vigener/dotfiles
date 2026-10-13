@@ -50,11 +50,10 @@ md-to-html input.md --open
 1. **正本は絶対にMarkdownのまま維持する**:
    - 内容の加筆・修正・削除は必ず `.md` ファイルに対して行う。
    - `.html` はビルド成果物（使い捨て・自動再生成可能）として扱う。
-2. **生成後のブラウザ確認（MBA優先ルール）**:
-   - 作業ホストは Mac mini、ユーザーが実際に見ている手元マシンは **MacBook Air (MBA)** である。
-   - ブラウザで開くときは、常に **`ssh mba "open '...'"` を最優先**で実行する（Tailscaleの配信URL `http://<TS_IP>:8770/...` または MBA上の同一パス）。
-   - `ssh mba` が失敗した（またはMBAがオフラインの）場合のみ、フォールバックとして Mac mini ローカル側で `open` してよい。
-   - 汎用CLI `md-to-html --open` はこの「MBA優先→ローカルフォールバック」を自動実行する。
+2. **生成後のブラウザ確認（open-artifact連携）**:
+   - 作業ホストは Mac mini（`:8766` 配信）、ユーザーの手元マシンは **MacBook Air (MBA)** である。
+   - 生成したHTMLを開く・確認する際は、スキル `open-artifact` のフローに完全委譲する（URL組み立て → `ssh mac "~/dotfiles/bin/chrome-open-or-reload '$URL'"`）。
+   - 古い `:8770` ポートや直接の `ssh mba "open ..."` は使用せず、`open-artifact` を唯一の正本経路とする。
 3. **印刷対応**:
    - `tactical` テーマ等は `@media print` に対応しているため、ブラウザ印刷（Cmd+P）で即座にA4用紙やクリップボード用の白黒レイアウトになる。
 
