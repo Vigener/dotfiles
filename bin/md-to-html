@@ -21,20 +21,25 @@ from pathlib import Path
 
 THEMES = {
     "tactical": {
-        "bg": "#0f141c",
-        "paper": "#161c26",
-        "paper_card": "#1d2533",
+        "bg": "#0d1117",
+        "paper": "#161b22",
+        "paper_card": "#1f242c",
         "ink": "#e6edf3",
         "muted": "#8b949e",
         "accent": "#58a6ff",
         "teal": "#3fb950",
+        "cyan": "#38bdf8",
+        "purple": "#bc8cff",
         "warn": "#d29922",
         "line": "#30363d",
         "code_bg": "#111620",
+        "h1_bg": "linear-gradient(90deg, rgba(88,166,255,.14) 0%, rgba(88,166,255,.02) 85%, transparent 100%)",
+        "h2_bg": "linear-gradient(90deg, rgba(56,189,248,.10) 0%, rgba(56,189,248,.01) 85%, transparent 100%)",
+        "strong_bg": "rgba(88,166,255,.14)",
         "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
         "serif": '"Literata", "Hiragino Mincho ProN", serif',
         "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, Menlo, monospace',
-        "radial": "radial-gradient(800px 400px at 10% -5%, rgba(88,166,255,.08), transparent 55%), radial-gradient(600px 300px at 90% 15%, rgba(63,185,80,.06), transparent 50%)",
+        "radial": "radial-gradient(900px 450px at 15% -5%, rgba(88,166,255,.12), transparent 60%), radial-gradient(700px 350px at 85% 15%, rgba(56,189,248,.09), transparent 55%)",
     },
     "sepia": {
         "bg": "#14110e",
@@ -44,13 +49,18 @@ THEMES = {
         "muted": "#a89888",
         "accent": "#e08a4a",
         "teal": "#5cb8a8",
+        "cyan": "#48a9a6",
+        "purple": "#c27ba0",
         "warn": "#d4a04a",
         "line": "#3a322a",
         "code_bg": "#0e0c0a",
+        "h1_bg": "linear-gradient(90deg, rgba(224,138,74,.16) 0%, rgba(224,138,74,.02) 85%, transparent 100%)",
+        "h2_bg": "linear-gradient(90deg, rgba(92,184,168,.12) 0%, rgba(92,184,168,.01) 85%, transparent 100%)",
+        "strong_bg": "rgba(224,138,74,.15)",
         "font_body": '"Noto Sans JP", "Literata", "Hiragino Mincho ProN", serif',
         "serif": '"Literata", "Hiragino Mincho ProN", serif',
         "mono": '"IBM Plex Mono", ui-monospace, monospace',
-        "radial": "radial-gradient(700px 380px at 15% -5%, rgba(224,138,74,.12), transparent 55%), radial-gradient(600px 320px at 90% 10%, rgba(92,184,168,.08), transparent 50%)",
+        "radial": "radial-gradient(700px 380px at 15% -5%, rgba(224,138,74,.14), transparent 55%), radial-gradient(600px 320px at 90% 10%, rgba(92,184,168,.10), transparent 50%)",
     },
     "minimal": {
         "bg": "#ffffff",
@@ -60,9 +70,14 @@ THEMES = {
         "muted": "#656d76",
         "accent": "#0969da",
         "teal": "#1a7f37",
+        "cyan": "#0550ae",
+        "purple": "#8250df",
         "warn": "#9a6700",
         "line": "#d0d7de",
         "code_bg": "#f6f8fa",
+        "h1_bg": "linear-gradient(90deg, rgba(9,105,218,.08) 0%, transparent 100%)",
+        "h2_bg": "linear-gradient(90deg, rgba(26,127,55,.06) 0%, transparent 100%)",
+        "strong_bg": "rgba(9,105,218,.08)",
         "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
         "serif": '"Hiragino Mincho ProN", serif',
         "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, monospace',
@@ -162,12 +177,22 @@ __CSS_VARS__
       border-left: 2px solid var(--line);
     }
     .toc-item {
-      padding-left: 0.75rem;
+      padding-left: 0.65rem;
       position: relative;
     }
+    .toc-item.h1 {
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+    .toc-item.h2 {
+      padding-left: 1.1rem;
+      font-size: 0.81rem;
+    }
     .toc-item.h3 {
-      padding-left: 1.4rem;
-      font-size: 0.78rem;
+      padding-left: 1.7rem;
+      font-size: 0.76rem;
+      color: var(--muted);
     }
     .toc-link {
       color: var(--muted);
@@ -254,12 +279,15 @@ __CSS_VARS__
 
     h1.page-title {
       font-family: var(--serif);
-      font-size: clamp(1.4rem, 3.6vw, 2.1rem);
+      font-size: clamp(1.5rem, 3.8vw, 2.25rem);
       font-weight: 700;
       line-height: 1.35;
       margin-bottom: 0.75rem;
-      color: var(--ink);
+      background: linear-gradient(135deg, var(--ink) 45%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       word-break: break-word;
+      letter-spacing: -0.015em;
     }
     .meta-bar {
       font-family: var(--mono);
@@ -288,39 +316,71 @@ __CSS_VARS__
       margin-top: 1rem;
       word-break: break-word;
     }
-    #content h1:first-child { display: none; } /* Page title already rendered */
-    #content h2 {
-      font-size: 1.4rem;
-      margin: 2.5rem 0 0.85rem;
+    #content.hide-first-h1 > h1:first-child { display: none; } /* Page title already rendered */
+    #content h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin: 3.2rem 0 1.2rem;
       color: var(--accent);
+      border-left: 5px solid var(--accent);
+      padding: 0.55rem 0.95rem;
+      background: var(--h1-bg);
+      border-radius: 0 8px 8px 0;
       border-bottom: 1px solid var(--line);
-      padding-bottom: 0.45rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+      letter-spacing: -0.01em;
+    }
+    #content h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 2.6rem 0 1rem;
+      color: var(--cyan);
+      border-left: 4px solid var(--cyan);
+      padding: 0.45rem 0.85rem;
+      background: var(--h2-bg);
+      border-radius: 0 6px 6px 0;
+      border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
     #content h3 {
       font-size: 1.15rem;
-      margin: 1.8rem 0 0.5rem;
+      font-weight: 600;
+      margin: 1.9rem 0 0.6rem;
       color: var(--teal);
+      border-left: 3px solid var(--teal);
+      padding-left: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
     #content h4 {
-      font-size: 1rem;
-      margin: 1.3rem 0 0.4rem;
-      color: var(--ink);
+      font-size: 1.02rem;
+      font-weight: 600;
+      margin: 1.4rem 0 0.45rem;
+      color: var(--purple);
+      border-left: 2px solid var(--purple);
+      padding-left: 0.5rem;
     }
     #content p {
       margin-bottom: 1.15rem;
+      line-height: 1.72;
     }
     #content ul, #content ol {
-      margin: 0 0 1.2rem 1.4rem;
+      margin: 0 0 1.25rem 1.4rem;
+      line-height: 1.68;
     }
     #content li {
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
     }
     #content strong {
-      color: var(--ink);
+      color: #ffffff;
       font-weight: 700;
+      background: var(--strong-bg);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      border-bottom: 1px solid rgba(88, 166, 255, 0.35);
     }
     #content a {
       color: var(--accent);
@@ -712,7 +772,7 @@ __CSS_VARS__
     </div>
 
     <!-- Rendered Content Container -->
-    <main id="content">
+    <main id="content" class="__CONTENT_CLASS__">
       <p class="muted">Loading content from markdown source...</p>
     </main>
 
@@ -859,7 +919,13 @@ __MARKDOWN_RAW__
 
         // Build dynamic Sticky TOC for sidebar
         (function initStickyTOC() {
-          const headings = contentEl.querySelectorAll("h2, h3");
+          const allHeadings = Array.from(contentEl.querySelectorAll("h1, h2, h3"));
+          const headings = allHeadings.filter((h, idx) => {
+            if (h.tagName.toLowerCase() === "h1" && idx === 0 && h.previousElementSibling === null) {
+              return false;
+            }
+            return true;
+          });
           const tocNav = document.getElementById("toc-nav");
           const tocSidebar = document.getElementById("toc-sidebar");
 
@@ -966,13 +1032,15 @@ __MARKDOWN_RAW__
 """
 
 
-def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, str]:
+def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, str, bool]:
     title = default_title
     eyebrow = "Document · Knowledge Base"
 
-    m_h1 = re.search(r"^#\s+(.+)$", md_text, flags=re.MULTILINE)
-    if m_h1:
-        title = m_h1.group(1).strip()
+    h1_matches = re.findall(r"^#\s+(.+)$", md_text, flags=re.MULTILINE)
+    has_single_h1 = False
+    if len(h1_matches) == 1:
+        title = h1_matches[0].strip()
+        has_single_h1 = True
 
     lower = md_text.lower()
     if "quantum" in lower or "量子" in lower:
@@ -984,7 +1052,7 @@ def extract_title_and_eyebrow(md_text: str, default_title: str) -> tuple[str, st
     elif "finance" in lower or "資産" in lower or re.search(r"\bsim\b", lower):
         eyebrow = "Finance & Life Planning"
 
-    return title, eyebrow
+    return title, eyebrow, has_single_h1
 
 
 def auto_detect_theme(md_text: str) -> str:
@@ -1081,7 +1149,7 @@ def compile_markdown_to_html(
         dst_path = src_path.with_suffix(".html")
 
     md_text = src_path.read_text(encoding="utf-8")
-    title, eyebrow = extract_title_and_eyebrow(md_text, default_title=src_path.stem)
+    title, eyebrow, has_single_h1 = extract_title_and_eyebrow(md_text, default_title=src_path.stem)
     if custom_title:
         title = custom_title
 
@@ -1093,11 +1161,13 @@ def compile_markdown_to_html(
 
     escaped_md = escape_pipes_in_table_inline_math(md_text)
     safe_md = escaped_md.replace("</script>", "<\\/script>")
+    content_class = "hide-first-h1" if has_single_h1 else ""
 
     html_content = (
         HTML_TEMPLATE.replace("__CSS_VARS__", css_vars)
         .replace("__TITLE__", title)
         .replace("__EYEBROW__", eyebrow)
+        .replace("__CONTENT_CLASS__", content_class)
         .replace("__SRC_FILENAME__", src_path.name)
         .replace("__DST_FILENAME__", dst_path.name)
         .replace("__SRC_RELPATH__", src_path.name)
