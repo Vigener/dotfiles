@@ -161,6 +161,23 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // AIエージェント操作 / 定型文入力
     // -------------------------------------------------------------
+    // 【最優先】Shift + かな + Enter: "yes" を入力して Enter 送信（ゲート審査・承認GO）
+    // ※ optionalAny の通常 Enter より先に評価して確実に拾う
+    map("return_or_enter", "left_shift", "any")
+      .to("japanese_eisuu")
+      .to("y")
+      .to("e")
+      .to("s")
+      .to("return_or_enter")
+      .condition(ifVar("kana_pressed", 1)),
+    map("return_or_enter", "right_shift", "any")
+      .to("japanese_eisuu")
+      .to("y")
+      .to("e")
+      .to("s")
+      .to("return_or_enter")
+      .condition(ifVar("kana_pressed", 1)),
+
     // かな + Enter: "continue" を入力して Enter 送信（直前に英数キーを挟んでIMEの全角化を防止）
     map("return_or_enter", "optionalAny")
       .to("japanese_eisuu")

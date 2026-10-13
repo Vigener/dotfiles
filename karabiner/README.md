@@ -13,10 +13,12 @@
 
 ## メモ（キー割り当ての決定経緯など）
 
-- **AIエージェントへの "continue" 送信を「かな＋Enter」にした理由**
-  - T3 Code、Antigravity、Cursor、Ghostty / cmux などのAIエージェント環境において、処理継続を促す "continue" の送信頻度が極めて高い。
-  - 右親指（かなキー）＋ 右小指（Enterキー）という右手完結の最小運指でノールック送信可能。
-  - 日本語入力中（IME ON）でも誤作動しないよう、キー送信シーケンスの先頭に `japanese_eisuu`（英数キー）を挟むことで、全角未確定にならず確実に半角 `continue` ＋ `Enter` を送信できるようにした。
+- **AIエージェントへの "continue" / "yes" 送信を「かな＋Enter」「Shift＋かな＋Enter」にした理由**
+  - T3 Code、Antigravity、Cursor、Ghostty / cmux などのAIエージェント環境において、処理継続を促す "continue" や、ゲート審査・危険操作確認に対する "yes" の送信頻度が極めて高い。
+  - **通常送信（前進）**: 右親指（かなキー）＋ 右小指（Enterキー）で `continue` をノールック送信。
+  - **修飾付き送信（承認・一段強いGO）**: 右親指（かなキー）＋ 右小指（Shift & Enter同時押し）で `yes` を送信。
+  - 音量系（U:アップ, I:ダウン, Y:ミュート）のマッスルメモリーを一切破壊せず、右手Enter周辺に「AIエージェントへの送信系」を綺麗に集約。
+  - 日本語入力中（IME ON）でも誤作動しないよう、キー送信シーケンスの先頭に `japanese_eisuu`（英数キー）を挟むことで、全角未確定にならず確実に半角で送信できるようにした。
 
 - **Zoom を「かな＋Z」にした理由**
   - Zed は使用頻度が月0回になり、必要時も Cursor で足りる。一方 Zoom は週1のチームMTGで必ず使い、その 1.5〜2 時間だけ他アプリとの行き来が頻発する。
@@ -229,6 +231,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力 | 条件 | 出力 | 備考 |
 | --- | --- | --- | --- |
+| Shift+Enter + any | kana_pressed = 1 | 英数 → "yes" → Enter | AIエージェントへの承認・許可送信（最優先評価） |
 | Enter + optionalAny | kana_pressed = 1 | 英数 → "continue" → Enter | AIエージェントへの続行送信（IME全角化防止付き） |
 
 #### メディア操作
