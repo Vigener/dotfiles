@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
+# Python
+__pycache__/
+*.pyc
+
 # Nested dump (own .git; not a submodule)
 autohotkey/win-env/
 
@@ -34,4 +38,3 @@ herdr/.config/herdr/*.sock
 rtk/filters.toml
 rtk/**/*.db
 rtk/tee/
-
