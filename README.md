@@ -26,6 +26,8 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 - `google-ime/azik_romantable.txt`: Google 日本語入力の AZIK ローマ字表。symlink しない。IME 設定からインポート。
 - `autohotkey/main.ahk`: Windows 専用の AutoHotkey v2 キーバインド設定。Mac の Karabiner-Elements と同一の操作感を Windows 上に完全再現。（Windows のみ）
 - `chrome/README.md`: ローカル Chrome 拡張機能（パッケージ化されていない拡張機能）の管理カタログ。新端末での環境再現用。
+- `raycast/README.md`: 新端末で Window Management の Preset を Rectangle にする手順。ホットキーだけを揃え、窓の動きは Raycast。
+- `cmux/settings.json`: 2026-09-30 にアンインストールした cmux の設定スナップショット。symlink しない。
 
 ### リンク方針（Stow について）
 

@@ -1,0 +1,42 @@
+{
+  "captured": "2026-09-30",
+  "source": "MBA ~/Library/Preferences/com.cmuxterm.app.plist",
+  "note": "~/.config/cmux/cmux.json はコメントだけの初期テンプレ。設定本体はこちら。",
+  "appearanceMode": "system",
+  "confirmQuit": "never",
+  "warnBeforeQuitShortcut": false,
+  "closeWorkspaceOnLastSurfaceShortcut": false,
+  "preferredEditorCommand": "zed",
+  "paneFirstClickFocus.enabled": true,
+  "terminal.focusTextBoxOnNewTerminals": false,
+  "terminal.showTextBoxOnNewTerminals": false,
+  "fileExplorer.isVisible": false,
+  "fileExplorer.width": 276.0,
+  "rightSidebar.mode": "files",
+  "workspacePresentationMode": "standard",
+  "sidebarPreset": "nativeSidebar",
+  "sidebarState": "followWindow",
+  "sidebarBlendMode": "withinWindow",
+  "sidebarMaterial": "sidebar",
+  "sidebarBlurOpacity": 1.0,
+  "sidebarCornerRadius": 0.0,
+  "sidebarTintHex": "#000000",
+  "sidebarTintOpacity": 0.18,
+  "sessionIndex.grouping": "directory",
+  "sessionIndex.agentOrder": [
+    "claude",
+    "codex",
+    "grok",
+    "opencode",
+    "rovodev",
+    "hermes-agent",
+    "antigravity"
+  ],
+  "sessionIndex.directoryOrder": [
+    "/Users/mikoto/dev/brain",
+    "/Users/mikoto/dev/brain/research-brain",
+    "/Users/mikoto/univ/2026_spring/selected_topics_in_quantum_algorithms",
+    "/Users/mikoto/dev/brain/research-brain/context"
+  ],
+  "workspaceCustomTitle": "~"
+}
