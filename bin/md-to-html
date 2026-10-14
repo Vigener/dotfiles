@@ -85,6 +85,32 @@ THEMES = {
         "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, monospace',
         "radial": "radial-gradient(900px 450px at 15% -5%, rgba(251,191,36,.08), transparent 60%), radial-gradient(700px 350px at 85% 15%, rgba(52,211,153,.07), transparent 55%)",
     },
+        "obsidian_v2": {
+        "bg": "#12121b",
+        "paper": "#1a1a26",
+        "paper_card": "#222234",
+        "ink": "#f3f1fa",
+        "muted": "#9c9ab0",
+        "accent": "#b794f4",
+        "h2_color": "#60a5fa",
+        "h3_color": "#38bdf8",
+        "h4_color": "#34d399",
+        "teal": "#34d399",
+        "cyan": "#38bdf8",
+        "purple": "#c084fc",
+        "warn": "#f59e0b",
+        "line": "#303046",
+        "code_bg": "#0e0e16",
+        "h1_bg": "linear-gradient(90deg, rgba(183,148,244,.28) 0%, rgba(183,148,244,.05) 80%, transparent 100%)",
+        "h2_bg": "linear-gradient(90deg, rgba(96,165,250,.18) 0%, rgba(96,165,250,.02) 80%, transparent 100%)",
+        "strong_bg": "rgba(245,158,11,.18)",
+        "strong_border": "rgba(245,158,11,.55)",
+        "strong_ink": "#fffbeb",
+        "font_body": '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif',
+        "serif": '"Literata", "Hiragino Mincho ProN", serif',
+        "mono": '"IBM Plex Mono", "SFMono-Regular", Consolas, monospace',
+        "radial": "radial-gradient(900px 450px at 15% -5%, rgba(183,148,244,.18), transparent 60%), radial-gradient(700px 350px at 85% 15%, rgba(96,165,250,.12), transparent 55%)",
+    },
     "obsidian": {
         "bg": "#13131c",
         "paper": "#1b1b28",
@@ -547,12 +573,12 @@ __CSS_VARS__
       border-bottom: 1px solid var(--line);
     }
     th {
-      background: var(--paper_card);
+      background: var(--th-bg, var(--paper_card));
       color: var(--accent);
       font-family: var(--mono);
       font-size: 0.82rem;
       font-weight: 600;
-      border-bottom: 2px solid var(--line);
+      border-bottom: 2px solid var(--accent);
       white-space: nowrap;
     }
     tr:last-child td { border-bottom: none; }
@@ -1085,7 +1111,18 @@ __MARKDOWN_RAW__
             theme: "dark",
             securityLevel: "loose",
             flowchart: { useMaxWidth: true, htmlLabels: true },
-            sequence: { useMaxWidth: true }
+            sequence: { useMaxWidth: true },
+            gantt: { useMaxWidth: true, fontSize: 13, barHeight: 24, topPadding: 30 },
+            themeVariables: {
+              darkMode: true,
+              background: "transparent",
+              primaryColor: "#222234",
+              primaryBorderColor: "#a78bfa",
+              primaryTextColor: "#f3f1fa",
+              lineColor: "#60a5fa",
+              secondaryColor: "#1a1a26",
+              tertiaryColor: "#12121b"
+            }
           });
           return window.mermaid.run({ nodes: contentEl.querySelectorAll(".mermaid") });
         };
@@ -1266,7 +1303,7 @@ def main():
     parser.add_argument(
         "-t",
         "--theme",
-        choices=["auto", "tactical", "obsidian", "sonnet", "grok", "sepia", "minimal"],
+        choices=["auto", "tactical", "obsidian", "obsidian_v2", "sonnet", "grok", "sepia", "minimal"],
         default="auto",
         help="Visual theme (default: auto detect based on content)",
     )
