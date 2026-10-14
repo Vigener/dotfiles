@@ -155,11 +155,11 @@ const BROWSER_MUSIC_TAB = "5"; // かな+8: YouTube Musicタブ
 
 export const launcherRules = [
   // =====================================================================
-  // [APP] かなコンビネーション (メディア操作・アプリ起動・AI操作)
+  // [APP] かなコンビネーション (メディア操作・アプリ起動・AI操作・音声入力)
   // =====================================================================
-  rule("【APP】かなレイヤー (アプリ起動・メディア操作・AI操作)").manipulators([
+  rule("【APP】かなレイヤー (アプリ起動・メディア操作・AI操作・音声入力)").manipulators([
     // -------------------------------------------------------------
-    // AIエージェント操作 / 定型文入力
+    // AIエージェント操作 / 音声入力 / 定型文入力
     // -------------------------------------------------------------
     // 【最優先】Shift + かな + Enter: "yes" を入力して Enter 送信（ゲート審査・承認GO）
     // ※ optionalAny の通常 Enter より先に評価して確実に拾う
@@ -192,6 +192,11 @@ export const launcherRules = [
       .to("return_or_enter")
       .condition(ifVar("kana_pressed", 1)),
 
+    // かな + M: 音声入力（fnキー送出。Push-to-Talk / 2回タップでトグル録音）
+    // ※ HHKB Studio 等の外付けキーボードでも MBA 内蔵 fn と同じ挙動を右手片手で実現
+    // ※ 密集地帯（Enter, :, ;）から離れたMキーに置くことで、誤爆や手遊びによる音声認識の暴発を防止
+    map("m", "optionalAny").to("fn").condition(ifVar("kana_pressed", 1)),
+
     // -------------------------------------------------------------
     // メディア操作
     // -------------------------------------------------------------
@@ -209,7 +214,6 @@ export const launcherRules = [
     // -------------------------------------------------------------
     ...toggleApp("o", "Obsidian"),
     ...toggleApp("a", "Antigravity"),
-    ...toggleApp("m", "Ghostty"),
     ...toggleApp("z", "zoom.us"),
     // 🚀 Sキー: メインブラウザを呼び出し、Cmd+[BROWSER_SLACK_TAB] でタブへジャンプ
     ...toggleAppWithKey("s", MAIN_BROWSER, BROWSER_SLACK_TAB, ["command"]),

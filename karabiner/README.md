@@ -13,6 +13,15 @@
 
 ## メモ（キー割り当ての決定経緯など）
 
+- **音声入力を「かな＋M」にした理由（Push-to-Talk / トグル録音）**
+  - Wispr Flow などの音声入力ツールを、HHKB Studio 等の外付けキーボード（Apple固有の fn/Globe キーのシグナルが送出されない環境）でも MacBook Air 内蔵と同等に片手操作できるようにするため。
+  - **密集地帯（誤爆高コスト地帯）の回避**: Enter, `:`, `;` 周辺は「continue 送信」「Mission Control」「Next Display」等の頻出操作が密集しており、音声入力のような「誤爆するとUIが立ち上がり周囲の音を拾って勝手にテキストをねじ込む」処理を置くにはリスクが高かった。
+  - **脱力しすぎない絶妙なポジション**: 右親指（かな）を置いたまま、右手人差し指を少し曲げて下段の `M` を押す運指は、脱力時や手遊びによる誤タップが起きず、「今から話すぞ」と意識したときにだけ確実にホールドできる。
+  - **Push-to-Talk とトグルの両立**:
+    - 短文・囁き: `かな＋M` を長押し（ホールド）して喋る（離せば即停止・確定）。
+    - 長文: `かな` を押したまま `M` を素早く「トントン」と2回叩くことで、Wispr Flow の仕様によりハンズフリー録音を開始可能（喋り終わったら `かな＋M` を1回叩いて終了）。
+  - メイン作業環境が T3 Code（`かな＋J`）に移行したことで、Ghostty（旧 `かな＋M`）の優先度が低下したため、右手一等地のキーを最頻出の音声入力に最適化した。
+
 - **AIエージェントへの "continue" / "yes" 送信を「かな＋Enter」「Shift＋かな＋Enter」にした理由**
   - T3 Code、Antigravity、Cursor、Ghostty / cmux などのAIエージェント環境において、処理継続を促す "continue" や、ゲート審査・危険操作確認に対する "yes" の送信頻度が極めて高い。
   - **通常送信（前進）**: 右親指（かなキー）＋ 右小指（Enterキー）で `continue` をノールック送信。
@@ -234,7 +243,7 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 ### APP（かなレイヤー）
 
-#### AIエージェント操作・定型文
+#### AIエージェント操作・音声入力・定型文
 
 | 入力 | 条件 | 出力 | 備考 |
 | --- | --- | --- | --- |
@@ -256,7 +265,6 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | --------------- | ---------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | O + optionalAny | kana_pressed = 1 | Open: Obsidian (トグル)                                                               |                     |
 | A + optionalAny | kana_pressed = 1 | Open: Antigravity (トグル)                                                            | AI駆動開発メイン |
-| M + optionalAny | kana_pressed = 1 | Open: Ghostty (トグル)                                                                | 最頻出ターミナル（右手最短の一等地） |
 | Z + optionalAny | kana_pressed = 1 | Open: zoom.us (トグル)                                                                 | 週次MTG中の行き来用 |
 | S + optionalAny | kana_pressed = 1 | Open: Dia + Cmd+3 (常時Slackタブへ)                                                   | Slackタブへジャンプ |
 | W + optionalAny | kana_pressed = 1 | Open: Warp (トグル)                                                                   | サブ端末            |
