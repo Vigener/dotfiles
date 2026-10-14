@@ -81,10 +81,16 @@ link_file "$DOTFILES/agents/rules/cursorrules" "$HOME/.cursorrules"
 
 mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
+link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
 
 mkdir -p "$HOME/bin"
 link_file "$DOTFILES/bin/repo-http-serve" "$HOME/bin/repo-http-serve"
 link_file "$DOTFILES/bin/chrome-open-or-reload" "$HOME/bin/chrome-open-or-reload"
+
+mkdir -p "$HOME/Library/LaunchAgents"
+if [[ -f "$DOTFILES/launchd/com.vigener.ai-usage.plist" ]]; then
+  link_file "$DOTFILES/launchd/com.vigener.ai-usage.plist" "$HOME/Library/LaunchAgents/com.vigener.ai-usage.plist"
+fi
 
 mkdir -p "$HOME/.gemini/config/skills"
 link_file "$DOTFILES/agents/skills/md-to-html" "$HOME/.gemini/config/skills/md-to-html"
