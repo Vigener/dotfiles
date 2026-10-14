@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 実体の cursor-agent バイナリを検索（最新バージョン）
+REAL_BIN=$(find /Users/mikoto/.local/share/cursor-agent/versions -name cursor-agent -type f -perm +111 2>/dev/null | sort -V | tail -n 1)
+
+if [ -z "$REAL_BIN" ]; then
+  echo "❌ [QUOTA GUARD ERROR] Real cursor-agent binary not found in ~/.local/share/cursor-agent/versions!" >&2
+  exit 1
+fi
+
+target_model=""
+is_model_flag=0
+
+# 引数をパースして --model / -m を検出
+for arg in "$@"; do
+  if [ $is_model_flag -eq 1 ]; then
+    target_model="$arg"
+    is_model_flag=0
+    continue
+  fi
+
+  case "$arg" in
+    --model|-m)
+      is_model_flag=1
+      ;;
+    --model=*)
+      target_model="${arg#--model=}"
+      ;;
+    -m=*)
+      target_model="${arg#-m=}"
+      ;;
+  esac
+done
+
+# 小文字に正規化
+target_model_lower=$(echo "$target_model" | tr '[:upper:]' '[:lower:]')
+
+# ガード1: Gemini モデル呼び出しの完全遮断（人間・エージェント問わず）
+if [[ "$target_model_lower" =~ gemini ]]; then
+  echo "" >&2
+  echo "========================================================================" >&2
+  echo "❌ [QUOTA GUARD BLOCKED] Execution forbidden!" >&2
+  echo "   Command         : $(basename "$0")" >&2
+  echo "   Attempted model : $target_model" >&2
+  echo "   Reason          : Invoking Gemini models via cursor-agent wastes valuable" >&2
+  echo "                     Cursor usage (Fable quota). This is blocked at system level." >&2
+  echo "   How to use agy  : Use the Antigravity CLI instead (free & quota-safe):" >&2
+  echo "                     agy -p --model gemini-3.8-flash-high \"<prompt>\"" >&2
+  echo "========================================================================" >&2
+  exit 126
+fi
+
+# ガード2: Antigravity エージェント環境下からの呼び出し検査
+# Antigravity からの実行時は ANTIGRAVITY_AGENT=1 がセットされる
+if [ -n "${ANTIGRAVITY_AGENT:-}" ]; then
+  # 許可モデル（ホワイトリスト）:
+  # 1. auto (Linear起票用)
+  # 2. grok* (スタミナ枠・司令塔)
+  # 3. composer* (実装枠)
+  is_allowed_antigravity=0
+
+  if [ "$target_model_lower" = "auto" ] || [[ "$target_model_lower" =~ ^grok ]] || [[ "$target_model_lower" =~ ^composer ]]; then
+    is_allowed_antigravity=1
+  fi
+
+  # 4. 高額モデル（Fable / Opus / Sonnet / Sol 等）の一時的明示許可:
+  # CURSOR_ALLOW_EXPENSIVE_MODEL=1 が付与されている場合はエージェントからの呼び出しを許可
+  if [ "${CURSOR_ALLOW_EXPENSIVE_MODEL:-0}" = "1" ]; then
+    is_allowed_antigravity=1
+  fi
+
+  if [ $is_allowed_antigravity -ne 1 ]; then
+    echo "" >&2
+    echo "========================================================================" >&2
+    echo "❌ [QUOTA GUARD BLOCKED] Antigravity unauthorized cursor-agent invocation!" >&2
+    echo "   Command         : $(basename "$0")" >&2
+    echo "   Attempted model : ${target_model:-<not specified>}" >&2
+    echo "   Reason          : Antigravity is only permitted to invoke 'auto', 'grok*', and 'composer*'." >&2
+    echo "                     High-cost models (Fable, Opus, etc.) are protected to prevent quota waste." >&2
+    echo "   How to permit   : Run with 'CURSOR_ALLOW_EXPENSIVE_MODEL=1 cursor-agent ...' when explicitly authorized." >&2
+    echo "========================================================================" >&2
+    exit 126
+  fi
+fi
+
+# 再帰ループ防止フラグを付与して実体へ委任
+export CURSOR_GUARD_CHECKED=1
+exec -a "$0" "$REAL_BIN" "$@"

@@ -83,6 +83,15 @@ mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
 
+# Cursor Quota Guard (Gemini誤爆・高額モデル暴走防止)
+mkdir -p "$HOME/.local/share/cursor-agent"
+mkdir -p "$HOME/.cargo/bin"
+link_file "$DOTFILES/bin/cursor-agent-guard" "$HOME/.local/share/cursor-agent/cursor-agent-guard"
+link_file "$DOTFILES/bin/cursor-agent-guard" "$HOME/.cargo/bin/cursor-agent"
+link_file "$DOTFILES/bin/cursor-agent-guard" "$HOME/.cargo/bin/agent"
+link_file "$DOTFILES/bin/cursor-agent-guard" "$HOME/.local/bin/cursor-agent"
+link_file "$DOTFILES/bin/cursor-agent-guard" "$HOME/.local/bin/agent" 
+
 mkdir -p "$HOME/bin"
 link_file "$DOTFILES/bin/repo-http-serve" "$HOME/bin/repo-http-serve"
 link_file "$DOTFILES/bin/chrome-open-or-reload" "$HOME/bin/chrome-open-or-reload"
