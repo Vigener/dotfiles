@@ -172,19 +172,44 @@ def format_progress_bar(percentage, length=10):
     return "█" * filled + "░" * (length - filled)
 
 
+def classify_agy_group(group_name):
+    """Classify Antigravity quota group: 'argon', 'gemini', or 'claude'."""
+    if "Argon" in group_name:
+        return "argon"
+    elif "Gemini" in group_name:
+        return "gemini"
+    else:
+        return "claude"
+
+
 def build_runcat_payload(agy, cursor, deepseek):
     metrics = []
     agy_g5h = None
+    agy_ar = None
     agy_c5h = None
 
     if "groups" in agy:
         for g in agy["groups"]:
             g_name = g.get("name", "")
-            is_gemini = "Gemini" in g_name
-            label_prefix = "Agy Gemini" if is_gemini else "Agy Claude"
+            g_type = classify_agy_group(g_name)
+            if g_type == "argon":
+                label_prefix = "Agy Argon"
+            elif g_type == "gemini":
+                label_prefix = "Agy Gemini"
+            else:
+                label_prefix = "Agy Claude"
+
+            b_dict = {b.get("window"): b for b in g.get("buckets", [])}
+            w_bucket = b_dict.get("weekly", {})
+            w_rem_pct = int(round(float(w_bucket.get("remaining_fraction", 1.0)) * 100)) if w_bucket else 100
+            weekly_is_zero = (w_rem_pct <= 0)
+
             for b in g.get("buckets", []):
-                rem_frac = float(b.get("remaining_fraction", 0.0))
                 win = b.get("window", "")
+                rem_frac = float(b.get("remaining_fraction", 0.0))
+                # weekly が 0 の場合、5h の実質残量も 0% として扱う
+                if win == "5h" and weekly_is_zero:
+                    rem_frac = 0.0
                 rem_time = format_time_remaining(b.get("reset_time", ""))
                 time_str = f" ({rem_time}後)" if rem_time else ""
                 metrics.append({
@@ -192,9 +217,13 @@ def build_runcat_payload(agy, cursor, deepseek):
                     "formattedValue": f"{rem_frac * 100:.0f}%{time_str}",
                     "normalizedValue": round(rem_frac, 3),
                 })
-                if is_gemini and win == "5h":
+                if g_type == "gemini" and win == "5h":
                     agy_g5h = int(round(rem_frac * 100))
-                elif not is_gemini and win == "5h":
+                elif g_type == "argon":
+                    # Argon は現状 weekly のみ。もし 5h が追加されたら 5h 優先
+                    if win == "5h" or agy_ar is None:
+                        agy_ar = int(round(rem_frac * 100))
+                elif g_type == "claude" and win == "5h":
                     agy_c5h = int(round(rem_frac * 100))
 
     cursor_str = None
@@ -251,6 +280,8 @@ def build_runcat_payload(agy, cursor, deepseek):
     bar_parts = []
     if agy_g5h is not None:
         bar_parts.append(f"G:{agy_g5h}%")
+    if agy_ar is not None:
+        bar_parts.append(f"Ar:{agy_ar}%")
     if agy_c5h is not None:
         bar_parts.append(f"C:{agy_c5h}%")
     if cursor_str is not None:
@@ -272,39 +303,63 @@ def build_runcat_payload(agy, cursor, deepseek):
 def format_inline(agy, cursor, deepseek):
     parts = []
     if "groups" in agy:
-        agy_parts = []
+        group_strings = {}
         for g in agy["groups"]:
-            is_gemini = "Gemini" in g.get("name", "")
+            g_name = g.get("name", "")
+            g_type = classify_agy_group(g_name)
             b_dict = {b.get("window"): b for b in g.get("buckets", [])}
-            h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
-            h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
 
-            w_bucket = b_dict.get("weekly", {})
-            w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
-            w_time = format_time_remaining(w_bucket.get("reset_time", ""))
+            if g_type == "argon":
+                # Argon は週枠のみ（将来 5h が追加されたら 5h 優先）
+                bucket = b_dict.get("5h") or b_dict.get("weekly", {})
+                rem_pct = int(round(float(bucket.get("remaining_fraction", 0.0)) * 100))
+                rem_time = format_time_remaining(bucket.get("reset_time", ""))
+                ar_str = f"Ar:{rem_pct}%"
+                if rem_pct <= ALERT_THRESHOLD and rem_time:
+                    ar_str += f":{rem_time}"
+                group_strings["argon"] = ar_str
 
-            if is_gemini:
+            elif g_type == "gemini":
                 # Gemini は週枠が滅多に尽きないため 5h 枠メイン
-                # ピンチ（<= ALERT_THRESHOLD）の時だけリセットまでの時間を付与
+                h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
+                h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
+                w_bucket = b_dict.get("weekly", {})
+                w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
+                w_time = format_time_remaining(w_bucket.get("reset_time", ""))
+
+                if w_rem <= 0:
+                    h_rem = 0
+
                 g_str = f"G:{h_rem}%"
-                if h_rem <= ALERT_THRESHOLD and h_time:
+                if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
                     g_str += f":{h_time}"
                 if w_rem <= ALERT_THRESHOLD and w_time:
                     g_str += f"(W{w_rem}%:{w_time})"
-                agy_parts.append(g_str)
-            else:
+                group_strings["gemini"] = g_str
+
+            else:  # claude
                 # Claude / GPT は週枠がボトルネックになるため常に W% を併記
-                # 週枠がピンチ（<= ALERT_THRESHOLD）の時はリセット残り時間（例: 3d6h）を自動表示！
+                h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
+                h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
+                w_bucket = b_dict.get("weekly", {})
+                w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
+                w_time = format_time_remaining(w_bucket.get("reset_time", ""))
+
+                if w_rem <= 0:
+                    h_rem = 0
+
                 c_5h_str = f"C:{h_rem}%"
-                if h_rem <= ALERT_THRESHOLD and h_time:
+                if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
                     c_5h_str += f":{h_time}"
 
                 if w_rem <= ALERT_THRESHOLD and w_time:
-                    agy_parts.append(f"{c_5h_str}(W{w_rem}%:{w_time})")
+                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%:{w_time})"
                 else:
-                    agy_parts.append(f"{c_5h_str}(W{w_rem}%)")
-        if agy_parts:
-            parts.append(" ".join(agy_parts))
+                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%)"
+
+        ordered_parts = [group_strings[k] for k in ["gemini", "argon", "claude"] if k in group_strings]
+        if ordered_parts:
+            parts.append(" ".join(ordered_parts))
     elif "error" in agy:
         parts.append("Agy:Err")
 
@@ -339,15 +394,31 @@ def format_markdown(agy, cursor, deepseek):
     lines.append("## Antigravity (agy)")
     if "groups" in agy:
         for g in agy["groups"]:
-            lines.append(f"### {g.get('name')}")
+            g_name = g.get("name", "")
+            g_desc = g.get("description", "")
+            lines.append(f"### {g_name}")
+            if g_desc:
+                lines.append(f"> _{g_desc}_\n")
+
+            b_dict = {b.get("window"): b for b in g.get("buckets", [])}
+            w_bucket = b_dict.get("weekly", {})
+            w_rem_pct = int(round(float(w_bucket.get("remaining_fraction", 1.0)) * 100)) if w_bucket else 100
+            weekly_is_zero = (w_rem_pct <= 0)
+
             for b in g.get("buckets", []):
+                win = b.get("window", "")
                 rem_frac = float(b.get("remaining_fraction", 0.0))
                 pct = rem_frac * 100
-                bar = format_progress_bar(pct, length=12)
                 desc = b.get("description", "")
                 rem_time = format_time_remaining(b.get("reset_time", ""))
                 time_badge = f" `[リセットまで {rem_time}]`" if rem_time else ""
-                lines.append(f"- **{b.get('name')}**: `{pct:.1f}%` `[{bar}]`{time_badge}")
+
+                if win == "5h" and weekly_is_zero:
+                    bar = format_progress_bar(0, 12)
+                    lines.append(f"- **{b.get('name')}**: `0.0% (実効0% / 5h生値: {pct:.1f}%)` `[{bar}]`{time_badge}")
+                else:
+                    bar = format_progress_bar(pct, length=12)
+                    lines.append(f"- **{b.get('name')}**: `{pct:.1f}%` `[{bar}]`{time_badge}")
                 if desc:
                     lines.append(f"  - _{desc}_")
             lines.append("")
