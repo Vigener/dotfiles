@@ -112,3 +112,24 @@ Ghostty CLI / Herdr 環境での閲覧性、および SMB 経由（MBA）での 
    - 必ず **相対パス（例: `./path/to/file.md`、`../notes/file.md`）** または **Obsidian の WikiLink 記法（`[[filename]]`）** を使用すること（MBA 側から SMB 共有経由で開いた際にファイルが存在せずリンク破損・外部警告が出るのを防ぐため）。
 </RULE[link_portability_and_cli_format]>
 
+
+<RULE[subagent_isolation_and_cli_fallback]>
+# サブエージェント委譲の隔離原則と CLI フォールバック規律（2026-10-16 制定）
+
+1. **委譲の目的（コンテキスト汚染防止と役割分離の死守）**:
+   - ユーザーがサブエージェント委譲を指示・意図する本質は、**「親エージェントのコンテキスト汚染（大量の打鍵・ログ・ツール実行による Context Rot）を防止すること」**、および **「司令塔（Commander）と作業役（Worker）の関心事を厳密に分離すること」** にある。
+2. **インライン引き受けの絶対禁止（親が自前実行してはならない）**:
+   - プラットフォーム（T3 Code ハーネス等）の `invoke_subagent` がエラー（`PlatformClient is nil` 等）で失敗した際、**親エージェントが「失敗したから親が直接インラインでツールを実行する」と親のチャット内で連打して引き受けることは厳禁**。
+   - 親が引き受けると、ユーザーがせっかく意図して設計したコンテキスト分離・役割分担がすべて破綻する。
+3. **Bash / CLI 外部プロセスへの自動フォールバック**:
+   - `invoke_subagent` が利用不能な場合は、直ちに `run_command`（Bash）経由で外部 CLI エージェントを起動し、**完全に別プロセスでタスクを実行・隔離** させる。
+   - **フォールバック先選定（モデルルーティング準拠）**:
+     - **打鍵・スキャフォールディング・探索（無料・Google AI Pro 枠）**:
+       `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "プロンプト"`
+     - **コーディング・実装・テスト修正（Cursor Pro 定額枠）**:
+       `cursor-agent --model composer-2.5 "プロンプト"` または `--model grok`
+     - **超高度設計・数理仕様化・敵対的監査（Argon 週枠バーンダウン）**:
+       `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "プロンプト"`
+4. **親エージェントの振る舞い**:
+   - CLI プロセスを実行し、標準出力から「完了ステータス・生成成果物のコミットハッシュ・要約」のみを抽出して親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。
+</RULE[subagent_isolation_and_cli_fallback]>

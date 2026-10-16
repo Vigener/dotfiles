@@ -31,3 +31,11 @@
 
 ## Markdown 編集・検証ルール
 - **Markdown 編集時**: テーブル変更時は `mise exec -- npx -y markdownlint-cli2 "<file>"` (exit 0)、リンク変更時は `! git grep -nE "file:///|/Users/|/home/" "<file>"` (0件) で機械的検証を行うこと。
+
+## サブエージェント委譲・CLIフォールバック規律 (2026-10-16 制定)
+- **委譲の目的**: 親コンテキスト汚染防止と司令塔・作業役の分離。
+- **インライン引き受け禁止**: サブエージェント呼び出し失敗時、親が直接自前実行してコンテキストを汚染してはならない。
+- **Bash CLI 外部プロセスへのフォールバック**:
+  - スキャフォールディング・探索: `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "..."`
+  - 打鍵・実装: `cursor-agent --model composer-2.5 "..."`
+  - 設計・敵対監査: `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "..."`
