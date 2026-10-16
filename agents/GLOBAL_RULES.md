@@ -39,14 +39,23 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 </RULE[artifact_handoff_html]>
 
 <RULE[model_and_hpc_gates]>
-# モデル呼び出しと HPC 境界（2026-07-31／2026-08-07 補訂）
+# モデル呼び出しと HPC 境界（2026-10-16 確定改定）
 
-1. **agy Opus 原則禁止**（Google AI Pro が即 5h limit）。発想の同等が必要なら Cursor Sonnet 5 の許可を求める。
-2. **要許可**: Cursor Sonnet 5（発想・方針） / GPT-5.6 Terra（レビュー分析・計画の穴）。同役で並べない。無許可で可: agy(Gemini Flash/Pro, Sonnet 4.6, GPT-OSS)、Grok 4.7 / 4.6、Composer 2.5（実装役）。**OpenCode Go 未契約のため `pi`（`opencode-go/*`）は使わない。** 実装は `research-brain/wiki/ai-engineering/implementer.md` の model_id に自動委譲（差し替えはその表だけ。2026-09-22 現在 Composer 2.5 / `agent`）。司令塔は Grok 4.7、実装は Composer。同一 Cursor Models 枠なので Grok でコード量産しない。
-3. **Fable 5（Other）**: 長時間駆動・夜間放置連鎖はしない。**短時間の発想・問い切り・教員説明の穴・仮説1本の BRIEF は積極利用してよい**（司令塔 Grok が独断で「温存」して止めない）。テーマ全探索・Bレーン風呂敷再開・実装長文は渡さない。Sol は敵対・操作定義の穴向け（Fable と同日同問にしない）。
-4. **HPC**: 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
-5. **ゴール固定**: 長作業の開始時はスキル `goal`。敵対レビューはスキル `adversarial-review`（T3 は許可時 Terra。stop hook に載せない）。
-6. 前提の賞味期限: `research-brain/wiki/ai-engineering/ops_assumptions.md`。
+正本: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`（横断ルーティング正本）および `subscription_and_api_playbook_2026-10.md`。
+
+1. **Gemini 4 Argon 最優先 ＆ 週次バーンダウン規律（agy 独立週枠）**:
+   - agy に Google AI Pro 契約者向けの「Argon 独立週枠（100%別枠）」が正式常備。
+   - 週枠は繰り越されないため **「Use it or lose it（毎週100%使い切る）」**。温存心理を撤廃し、**日常4大門番（①実装前仕様化、②Diff敵対監査、③意地悪境界値テスト生成、④批判的文献読解）** に最優先で投入する。
+   - agy 側の週枠消化後は、Google AI Pro 付属の Web 版 Argon（無料）へフォールバックして使い倒す。
+2. **Cursor Pro（残り6.4%）クォータ防護と Composer 打鍵特化**:
+   - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
+   - **Cursor からの Fable 5.1 / Opus 5.5 の呼び出しは厳禁（核ボタン・1発25%/$5蒸発事故の教訓）**。
+3. **Anthropic 公式 API（Claude Code CLI）スポット配備**:
+   - Claude Sonnet 5.5（ターミナル `claude`、Prompt Caching 5分自動延長）は、無料の Argon 枠消化後や、Claude 特有の自走が必要な局面での「Tier 3 有料スポット最終兵器（$5デポジット・Auto-reload OFF）」として温存。
+4. **HPC**:
+   - 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
+5. **ゴール固定・敵対レビュー**:
+   - 長作業の開始時はスキル `goal`。敵対的監査は agy Argon を優先し、必要に応じてスキル `adversarial-review` を使用。
 </RULE[model_and_hpc_gates]>
 
 <RULE[adversarial_scope]>

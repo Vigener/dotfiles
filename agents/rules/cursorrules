@@ -1,8 +1,10 @@
 # Cursor Agent Rules
 
-## 役割・モデル構成
-- 司令塔: Sonnet 5 (API) ➔ サブ Grok 4.5
-- 実装役: 1st Composer 2.5 (Standard) ➔ 2nd DeepSeek V4 Pro ➔ 3rd Gemini 3.6 Flash
+## 役割・モデル構成 (2026-10-16 改定)
+- 司令塔・高難度設計: agy Gemini 4 Argon（独立週枠・定額バーンダウン） ➔ サブ: Claude Sonnet 5.5 (APIスポット) / Grok 4.7
+- 実装役（打鍵・量産）: Composer 2.5 (`agent --model composer-2.5`)
+- ※Cursor Pro クォータ防護: Grok 4.7 への日常の設計・思考丸投げを停止し、agy Argon に仕様化・敵対的監査を委譲。Cursor側は Composer 打鍵に特化。
+- 正本メンタルモデル: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`
 
 ## グローバルスキル
 - 一元管理先: `~/dotfiles/agents/skills/`（`~/.cursor/skills` から参照）
@@ -29,5 +31,3 @@
 
 ## Markdown 編集・検証ルール
 - **Markdown 編集時**: テーブル変更時は `mise exec -- npx -y markdownlint-cli2 "<file>"` (exit 0)、リンク変更時は `! git grep -nE "file:///|/Users/|/home/" "<file>"` (0件) で機械的検証を行うこと。
-
-
