@@ -260,3 +260,14 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 - macOS標準の非表示は `Cmd+H` (Hide)。
 - 両親指（英数+かな+J）でも隠す操作は可能だが、日常的に「今見ているウィンドウを即座にサッと隠したい」場面は頻繁に発生するため、右手親指（かな）＋右手人差し指（H）という**右手完結・1アクション**で隠せる操作性を復活。
 - `H = Hide` で頭文字・認知的一致も完璧であり、空いていた H キーの超一等地を理想的な形で活用。
+
+## 2026年10月16日: T3 Code の Beta アップデートに伴うアプリ名追従 (T3 Code (Beta))
+
+### 背景と課題
+- T3 Code が Alpha から Beta へアップデートされたことに伴い、macOS 上のアプリケーション名が `T3 Code (Alpha).app` から `T3 Code (Beta).app` に変更された。
+- これにより、Karabiner の `toApp("T3 Code (Alpha)")` がアプリケーションを見つけられず、`かな + J` および `かな + T` での起動・トグル呼び出しが失敗する状態となっていた。
+
+### 対応内容
+- `karabiner/rules/launcher.ts`:
+  - `APP_REGISTRY` に `"T3 Code (Beta)": "^com\\.t3tools\\.t3code$"` を追加（旧バージョンの `"T3 Code (Alpha)"` も資産として温存）。
+  - `launcherRules` 内の `かな + J` および `かな + T` の起動対象を `"T3 Code (Beta)"` に更新。

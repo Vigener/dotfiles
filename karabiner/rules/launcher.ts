@@ -20,6 +20,7 @@ const APP_REGISTRY: Record<string, string> = {
   Ghostty: "^com\\.mitchellh\\.ghostty$",
   "Grok Bot": "^com\\.anysphere\\.sand$",
   "T3 Code (Alpha)": "^com\\.t3tools\\.t3code$",
+  "T3 Code (Beta)": "^com\\.t3tools\\.t3code$",
   // --- コミュニケーション ---
   Slack: "^com\\.tinyspeck\\.slackmacgap$",
   Mail: "^com\\.apple\\.mail$",
@@ -220,7 +221,7 @@ export const launcherRules = [
     ...toggleApp("w", "Warp"),
     ...toggleApp("e", "Mail"),
     ...toggleApp("b", "Google Chrome"),
-    ...toggleApp("j", "T3 Code (Alpha)"),
+    ...toggleApp("j", "T3 Code (Beta)"),
     ...toggleApp("l", "Google Chrome"),
 
     // 🧠 Nキー: メインブラウザ (アクティブ時はCmd+[BROWSER_HUB_TAB]、非アクティブ時は起動)
@@ -229,7 +230,7 @@ export const launcherRules = [
     ...toggleApp("v", "Cursor"),
     ...toggleApp("f", "Finder"),
     ...toggleApp("g", "Grok Bot"),
-    ...toggleApp("t", "T3 Code (Alpha)"),
+    ...toggleApp("t", "T3 Code (Beta)"),
 
     // 🚀 Cキー: メインブラウザを呼び出し、Cmd+[BROWSER_CALENDAR_TAB] でタブへジャンプ
     ...toggleAppWithKey("c", MAIN_BROWSER, BROWSER_CALENDAR_TAB, ["command"]),
