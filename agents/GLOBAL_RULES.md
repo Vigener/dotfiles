@@ -41,7 +41,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
 <RULE[model_and_hpc_gates]>
 # モデル呼び出しと HPC 境界（2026-10-16 確定改定）
 
-正本: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`（横断ルーティング正本）および `subscription_and_api_playbook_2026-10.md`。
+正本: `research-brain/wiki/ai-engineering/user_model_routing_mental_model.md`（各環境スナップショット: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`）および `subscription_and_api_playbook_2026-10.md`。
 
 1. **Gemini 4 Argon 最優先 ＆ 週次バーンダウン規律（agy 独立週枠）**:
    - agy に Google AI Pro 契約者向けの「Argon 独立週枠（100%別枠）」が正式常備。

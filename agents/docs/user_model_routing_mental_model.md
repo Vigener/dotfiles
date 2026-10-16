@@ -1,7 +1,7 @@
 # AI Model Routing & Mental Model (2026-10-14)
 
-**正本（SSOT）**: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`（各マシン・全リポジトリ共通の横断モデルルーティング正本）  
-**シンボリックリンク**: `research-brain/wiki/ai-engineering/user_model_routing_mental_model.md`  
+**正本（SSOT）**: `research-brain/wiki/ai-engineering/user_model_routing_mental_model.md`  
+**本ファイル**: 各環境・特設リポ展開用の基準スナップショット（2026-10-16 同期）  
 **記録日**: 2026年10月1日（2026年10月16日改定）  
 **目的**: 五十嵐尊人の研究・日常における AI モデル選定・使い分けのメンタルモデル（サブスク契約、コスト感、実効性能、および agy / cursor-agent の特性差）を永続化する。  
 **関連ドキュメント**:

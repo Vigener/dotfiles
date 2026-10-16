@@ -4,7 +4,7 @@
 - 司令塔・高難度設計: agy Gemini 4 Argon（独立週枠・定額バーンダウン） ➔ サブ: Claude Sonnet 5.5 (APIスポット) / Grok 4.7
 - 実装役（打鍵・量産）: Composer 2.5 (`agent --model composer-2.5`)
 - ※Cursor Pro クォータ防護: Grok 4.7 への日常の設計・思考丸投げを停止し、agy Argon に仕様化・敵対的監査を委譲。Cursor側は Composer 打鍵に特化。
-- 正本メンタルモデル: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`
+- 正本メンタルモデル: `research-brain/wiki/ai-engineering/user_model_routing_mental_model.md`（基準スナップショット: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`）
 
 ## グローバルスキル
 - 一元管理先: `~/dotfiles/agents/skills/`（`~/.cursor/skills` から参照）
