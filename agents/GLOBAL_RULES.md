@@ -114,19 +114,24 @@ Ghostty CLI / Herdr 環境での閲覧性、および SMB 経由（MBA）での 
 
 
 <RULE[subagent_isolation_and_cli_fallback]>
-# サブエージェント委譲の隔離原則と CLI フォールバック規律（2026-10-16 制定）
+# サブエージェント委譲の隔離原則と使い分け規律（2026-10-16 確定改定）
 
 1. **委譲の目的（コンテキスト汚染防止と役割分離の死守）**:
    - ユーザーがサブエージェント委譲を指示・意図する本質は、**「親エージェントのコンテキスト汚染（大量の打鍵・ログ・ツール実行による Context Rot）を防止すること」**、および **「司令塔（Commander）と作業役（Worker）の関心事を厳密に分離すること」** にある。
 2. **インライン引き受けの絶対禁止（親が自前実行してはならない）**:
-   - プラットフォーム（T3 Code ハーネス等）の `invoke_subagent` がエラー（`PlatformClient is nil` 等）で失敗した際、**親エージェントが「失敗したから親が直接インラインでツールを実行する」と親のチャット内で連打して引き受けることは厳禁**。
+   - サブエージェント起動や委譲がエラー（`PlatformClient is nil` 等）で失敗した際、**親エージェントが「失敗したから親が直接インラインでツールを実行する」と親のチャット内で連打して引き受けることは厳禁**。
    - 親が引き受けると、ユーザーがせっかく意図して設計したコンテキスト分離・役割分担がすべて破綻する。
-3. **T3 内蔵サブエージェント呼び出しの重要テクニック (`Model: inherit`)**:
-   - T3 Code 環境において `invoke_subagent` で `Model: "flash"` 等の明示的モデル名を指定すると `PlatformClient is nil` エラーで失敗する。
-   - **`Model: "inherit"` を指定すると正常に親モデル（Flash）を継承してネイティブ起動できる**。
-   - サブエージェント委譲時はまず **`Model: "inherit"`** で内蔵サブエージェント起動を試みる。
-4. **Bash / CLI 外部プロセスへの自動フォールバック**:
-   - 内蔵サブエージェントがそれでも利用不能な場合は、直ちに `run_command`（Bash）経由で外部 CLI エージェント（`agy` / `cursor-agent`）を起動し、**完全に別プロセスでタスクを実行・隔離** させる。
+3. **T3 Code 環境における委譲ツールの2大系統と使い分け**:
+   - **系統A: T3 MCP オーケストレータ (`delegate_task`) 【親と異なるモデル・クロスプロバイダ】**:
+     - **用途**: 親と異なるモデル（例: **Gemini 4 Argon**）への委譲、クロスプロバイダ委譲、T3 ネイティブ子タスク起票。親（Flash 等）から上位思考モデル（Argon 等）へのエスカレーション設計に必須。
+     - **呼び出し方**: `call_mcp_tool` で `ServerName: "t3-code"`, `ToolName: "delegate_task"`, `Arguments: { target: { providerInstanceId: "antigravity", model: "gemini-4-argon-high" }, mode: "wait" (または "async"), role: "design", task: "..." }`
+     - **特徴**: T3 側のライブカタログ（`orchestrator_capabilities`）を参照して独立した子スレッドを起票するため、Argon を思考高（`gemini-4-argon-high`）で正常実行可能（初回設計で実証済）。
+   - **系統B: Antigravity ネイティブサブエージェント (`invoke_subagent`) 【親と同種モデル・高速並行】**:
+     - **用途**: 親と同じモデル（Flash 等）での軽量・超高速並行処理、Context Rot 防止の作業員委譲。
+     - **呼び出し方**: `invoke_subagent` で **必ず `Model: "inherit"` を指定** する。
+     - **注意点**: `Model: "flash"` や `"pro"` 等の明示文字列を渡すとローカル ACP ハーネスの `PlatformClient is nil` でクラッシュする。`"inherit"` を渡せば名前解決サービスをスキップして親構成をそのまま安全に複製できる（親と異なるモデルへの変更は不可）。
+4. **外部 CLI フォールバック (`agy` / `cursor-agent`)**:
+   - プラットフォーム内蔵委譲が環境制約等で利用不能な場合、またはターミナルから外部プロセスとして直叩きする場合、直ちに `run_command`（Bash）経由で外部 CLI エージェントを起動し、**完全に別プロセスでタスクを実行・隔離** させる。
    - **フォールバック先選定（モデルルーティング準拠）**:
      - **打鍵・スキャフォールディング・探索（無料・Google AI Pro 枠）**:
        `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "プロンプト"`
@@ -141,7 +146,6 @@ Ghostty CLI / Herdr 環境での閲覧性、および SMB 経由（MBA）での 
        - `composer` 指定時 ➔ 必ず `cursor-agent --model composer-2.5`
        - `argon` 指定時 ➔ 必ず `agy --model gemini-4-argon-high`
      - 指定モデルの枠（クォータ・コスト）を 100% 守る。
-
 5. **親エージェントの振る舞い**:
-   - CLI プロセスを実行し、標準出力から「完了ステータス・生成成果物のコミットハッシュ・要約」のみを抽出して親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。
+   - 子エージェント（`delegate_task` / `invoke_subagent` / CLI）の完了ステータス、生成成果物のコミットハッシュ、要約のみを親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。
 </RULE[subagent_isolation_and_cli_fallback]>
