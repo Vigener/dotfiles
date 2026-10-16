@@ -39,3 +39,4 @@
   - スキャフォールディング・探索: `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "..."`
   - 打鍵・実装: `cursor-agent --model composer-2.5 "..."`
   - 設計・敵対監査: `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "..."`
+- **モデル同一性の厳格遵守**: 指定されたモデル以外（Flash指定なのに勝手にArgon/Composer等）への委託は論外・厳禁。完全一致するモデルを指定すること。

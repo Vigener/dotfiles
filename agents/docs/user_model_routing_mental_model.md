@@ -193,5 +193,9 @@ Flag: — | Private | Search | Orchestration
        `cursor-agent --model composer-2.5 "プロンプト"` または `--model grok`
     3. **超高度設計・数理仕様化・敵対的監査（Argon 週枠バーンダウン）**:
        `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "プロンプト"`
+* **モデル同一性の厳格遵守（Strict Model Fidelity）**:
+  * 最初にT3サブエージェントとして指定・意図されたモデル（例: `flash`）から、**勝手に別のモデル（Argon や Composer や Opus 等）へ変更・昇格/降格して委託することは論外・厳禁**。
+  * `flash` 指定なら必ず `agy --model gemini-3.8-flash-high`、`composer` 指定なら必ず `cursor-agent --model composer-2.5` のように、指定されたモデルと完全に一致する CLI コマンドを呼び出し、ユーザーが意図したコスト・知能境界を 100% 保証する。
+
 * **親エージェントの振る舞い**:
   * CLI プロセスを実行し、標準出力から「完了ステータス・生成成果物のコミットハッシュ・要約」のみを抽出して親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。

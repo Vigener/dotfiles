@@ -130,6 +130,14 @@ Ghostty CLI / Herdr 環境での閲覧性、および SMB 経由（MBA）での 
        `cursor-agent --model composer-2.5 "プロンプト"` または `--model grok`
      - **超高度設計・数理仕様化・敵対的監査（Argon 週枠バーンダウン）**:
        `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "プロンプト"`
+   - **【モデル同一性の厳格遵守（Strict Model Fidelity）】**:
+     - 最初にT3サブエージェントとして指定・意図されたモデル（例: `flash`）と**全く同一のモデル**を CLI 引数に指定すること。
+     - 勝手に別のモデル（Argon や Composer や Opus 等）へ変更・昇格/降格することは**論外・厳禁**。
+       - `flash` 指定時 ➔ 必ず `agy --model gemini-3.8-flash-high`
+       - `composer` 指定時 ➔ 必ず `cursor-agent --model composer-2.5`
+       - `argon` 指定時 ➔ 必ず `agy --model gemini-4-argon-high`
+     - 指定モデルの枠（クォータ・コスト）を 100% 守る。
+
 4. **親エージェントの振る舞い**:
    - CLI プロセスを実行し、標準出力から「完了ステータス・生成成果物のコミットハッシュ・要約」のみを抽出して親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。
 </RULE[subagent_isolation_and_cli_fallback]>
