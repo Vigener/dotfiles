@@ -73,6 +73,9 @@ Claude Sonnet 4.6 または Gemini 3.1 Pro または DeepSeek V4 Pro
 
 #### 6. リモート環境への接続とファイル同期 (SSH/Rsync)
 - **SSHホスト名**: ログインノードへの接続や `rsync` を行う際は、単なる `miyabi` ではなく、必ず **`miyabi-g`**（Miyabi-G用）または **`miyabi-c`**（Miyabi-C用）のいずれかのエイリアスを明示的に指定すること。
+- **一方向同期規律（results/ アーティファクトのアップロード絶対禁止）**:
+  - ローカルからクラスタへ同期（`sync_to_miyabi.sh` 等）する際は、必ず `--exclude 'results/'`, `--exclude 'docs/logs/'`, `--exclude '*.svg'`, `--exclude '*.png'`, `--exclude '*.log'` などの除外設定を施すこと。
+  - クラスタ側で生成された最新の実験データやログがローカルの古いファイルで上書き破壊される重大事故を防ぎ、無駄な画像ファイルを計算ノード領域に散乱させないこと。
 - **リモートのパス構造**: ローカルの `research-brain` リポジトリ内のディレクトリ構造は、リモートの作業領域 (`/work/xg26i048/x10752/`) 内でも正確にミラーリング（維持）すること。
   - ❌ `miyabi-g:/work/xg26i048/x10752/hairdesc-gpu-exp/` (階層の欠落)
   - ⭕️ `miyabi-g:/work/xg26i048/x10752/projects/hairdesc-gpu-exp/` (正しい階層)
