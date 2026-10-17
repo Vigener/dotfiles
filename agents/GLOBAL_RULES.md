@@ -56,17 +56,9 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
    - 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
    - ジョブスクリプト作成、スケーリング実験計画、クラスタ投入準備を行う際は、必ず事前にスキル `hpc-job-guardrails`（`~/dotfiles/agents/skills/hpc-job-guardrails/SKILL.md`）を読み込んでその規律（ノード分離・2ノード関門・ログインノード完結・Fail-Fast）を遵守すること。
 5. **ゴール固定・敵対レビュー**:
-   - 長作業の開始時はスキル `goal`。敵対的監査・意地悪テスト生成は `<RULE[maker_breaker_cross_family]>` に従い、必要に応じてスキル `adversarial-review` を使用。
+   - 長作業の開始時はスキル `goal`。
+   - 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。選定と詳細手順はスキル `adversarial-review`（`~/dotfiles/agents/skills/adversarial-review/SKILL.md`）および `model-route` を参照。
 </RULE[model_and_hpc_gates]>
-
-<RULE[maker_breaker_cross_family]>
-# Maker-Breaker 異種ファミリー分離原則
-
-1. **2極分離（3者分離の禁止）**: 実装と基本テスト（正常系）は同一モデル（Maker）が一括作成する。テストモデル・実装モデル・レビューモデルの3者完全分離はオーバーヘッド過大のため行わない。
-2. **異種ファミリー対峙**: 意地悪境界値テスト生成および敵対的レビュー（Breaker）には、自己盲点（Sycophancy）を物理排除するため、**Maker（親オーケストレータ）とは異なるモデルファミリー／プロバイダ**を充てる。
-3. **選定の動的解決**: レビュアーモデルはハードコードせず、ユーザー指定またはスキル `/model-route` の判定に従う（日常の軽量異種クロス対峙 vs 節目・難所の大規模エスカレーション）。
-4. **コンテキスト完全隔離**: レビューおよび意地悪テスト生成を依頼する際は、親スレッドの会話履歴を一切渡さない独立タスク（別スレッド／CLI呼び出し）で実行する。
-</RULE[maker_breaker_cross_family]>
 
 <RULE[adversarial_scope]>
 # 敵対レビューのスコープ（2026-08-07）
