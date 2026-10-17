@@ -189,16 +189,17 @@ __CSS_VARS__
     }
     /* Layout & Responsive Container */
     .layout-container {
-      max-width: 1180px;
+      max-width: 1560px;
       margin: 0 auto;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       gap: 2.5rem;
       position: relative;
+      padding: 0 1rem;
     }
     .wrap {
-      max-width: 840px;
+      max-width: 1200px;
       margin: 0;
       width: 100%;
       min-width: 0;
@@ -628,11 +629,16 @@ __CSS_VARS__
       background: var(--paper_card);
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 1rem;
+      padding: 1.25rem 1rem;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      margin: 1.4rem 0;
+      margin: 1.5rem 0;
       text-align: center;
+    }
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+      display: inline-block;
     }
 
     /* GitHub-style Alerts */
