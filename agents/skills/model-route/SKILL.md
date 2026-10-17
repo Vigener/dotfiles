@@ -24,10 +24,15 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 ## 判定ロジック（Task × Flag マッピング）
 
 ### 1. タスク分類（Task）
-- **Task: Design（設計・数理・方針・論理構造・敵対レビュー・仕様化）**:
-  - **第1推奨**: `agy: Gemini 4 Argon`（Google AI Pro 独立週枠。日常門番として週100%バーンダウン対象）
+- **Task: Design / Adversarial Audit（設計・数理・敵対レビュー・意地悪テスト生成）**:
+  - **日常敵対レビュー＆意地悪テスト（Maker-Breaker 異種クロスファミリー）**:
+    - 親が Google系（Gemini 3.8 Flash等）: `Cursor: Grok 4.7`（第1候補）
+    - 親が xAI系（Grok 4.7等）: `agy: Gemini 3.8 Flash`（第1候補）
+    - 候補拡張: `Claude Sonnet 5.5`, `DeepSeek V4 Pro / V4.1 Flash`
+    - ※テスト作成役とレビュー役を分ける（3者分離）のではなく、「Breaker役」として1つの独立タスクに集約委譲。
+  - **勝負所・節目・週枠バーンダウン**: `agy: Gemini 4 Argon`（Google AI Pro 独立週枠）
     - 初回仕様策定・超難所アーキテクチャ: `thinking: high`
-    - 2往復目以降の微調整・通常レビュー: `thinking: medium`
+    - 2往復目以降の微調整・重要レビュー: `thinking: medium`
   - **巨視的ブレスト・論文通読**: `Web版 Gemini (Argon)`（agy週枠温存・無尽蔵無料）
   - **多角セカンドオピニオン（Claude視点）**: `agy: Claude Opus 5.5 (Thinking)`
   - **根本的行き詰まり・ゼロベースブレイクスルー**: `Cursor: Claude Fable 5.1`（特別顧問、Cursor温存枠）
