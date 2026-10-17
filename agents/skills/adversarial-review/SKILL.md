@@ -15,8 +15,10 @@ description: >-
   - 日常例: 親が Google系（Gemini 3.8 Flash等）なら Breaker は xAI系（Grok 4.7 等）／親が xAI系（Grok 4.7）なら Breaker は Google系（Flash等）。節目・難所は Argon / Sonnet 5.5 / DeepSeek V4 系へエスカレーション。迷ったら `/model-route` で決定。
   - レビューモデルとテスト作成モデルを細分化（3者分離）せず、Breaker への1回の委譲で「Diff敵対監査 ＋ 意地悪境界値テスト生成」を一括依頼する。
 - **コンテキスト完全隔離**: 親スレッドの会話履歴を一切渡さず、Diff と前提仕様のみを渡す（独立タスク/別スレッド/CLI）。
-- **read-only**: レビュアーに編集させない
-- **diff 優先**: 全文は T3 のみ
+- **read-only ＆ 探索許可**: レビュアーにファイル編集はさせないが、前提文脈や関連モジュールの**自律的なファイル閲覧・grep探索（Read-only tools）は積極的に許可**する（Diff単体で文脈誤認するのを防ぐ）。
+- **建設的批判（Constructive Critique / 代替案の義務化）**:
+  - 単なる難癖・却下（REJECT）・重箱の隅突きで終わらせず、**「よりシンプル・堅牢・エレガントになる具体的代替案（Alternative Proposal）や上位互換の設計」** を積極的に提示させる。
+- **diff 優先**: 入力の主軸は git diff とするが、探索が必要なら関連ファイルも参照させる。
 - **トリガー駆動**: 毎ターン回さない
 - **agy Opus 禁止**（Google AI Pro が即 5h limit）
 - **要許可モデルは呼ぶ前に確認**: Cursor Sonnet 5 / GPT-5.6 Terra
@@ -74,11 +76,13 @@ pi --model opencode-go/kimi-k3 --thinking medium --no-tools -p "$(cat <<'EOF'
 1. 反例を1つ以上（なければ「なし」）
 2. 暗黙の前提と崩れる条件
 3. 研究なら: 結論がデータから導けるか、再現コマンド、言ってよい/ダメ逸脱
-出力のみ:
+出力フォーマット:
 - severity: blocker|major|minor|nit
 - location:
-- claim / evidence / suggested_fix
-総評禁止。
+- claim / evidence: 欠陥の指摘と論理的根拠
+- suggested_fix: 修正案
+- better_alternative: （あれば）よりシンプル・堅牢になる根本的代替案・上位互換の設計アイデア
+総評・お世辞禁止。
 EOF
 )
 $(cat /tmp/adv-review.diff)"
