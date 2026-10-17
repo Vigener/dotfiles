@@ -636,9 +636,16 @@ __CSS_VARS__
       text-align: center;
     }
     .mermaid svg {
-      max-width: 100% !important;
+      max-width: min(100%, 780px) !important;
       height: auto !important;
-      display: inline-block;
+      display: block;
+      margin: 0 auto;
+    }
+    /* Wide diagrams such as Gantt chart or detailed topologies can expand up to 100% */
+    .mermaid.wide svg,
+    .mermaid:has(svg[id^="gantt-"]) svg,
+    .mermaid:has(.section) svg {
+      max-width: 100% !important;
     }
 
     /* GitHub-style Alerts */

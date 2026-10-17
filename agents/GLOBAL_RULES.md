@@ -54,6 +54,7 @@ Thinkpad環境（agy cli等）で作業を行なう際のエージェントは�
    - Claude Sonnet 5.5（ターミナル `claude`、Prompt Caching 5分自動延長）は、無料の Argon 枠消化後や、Claude 特有の自走が必要な局面での「Tier 3 有料スポット最終兵器（$5デポジット・Auto-reload OFF）」として温存。
 4. **HPC**:
    - 生 `sbatch`/`qsub` および Miyabi/Pegasus/Sirius への `ssh`/`scp`/`rsync` は Cursor hook `hpc-shell-gate` が deny。必ず `ppx_harness` / `miyabi_harness --dry-run`。実ログインは人間。
+   - ジョブスクリプト作成、スケーリング実験計画、クラスタ投入準備を行う際は、必ず事前にスキル `hpc-job-guardrails`（`~/dotfiles/agents/skills/hpc-job-guardrails/SKILL.md`）を読み込んでその規律（ノード分離・2ノード関門・ログインノード完結・Fail-Fast）を遵守すること。
 5. **ゴール固定・敵対レビュー**:
    - 長作業の開始時はスキル `goal`。敵対的監査は agy Argon を優先し、必要に応じてスキル `adversarial-review` を使用。
 </RULE[model_and_hpc_gates]>
