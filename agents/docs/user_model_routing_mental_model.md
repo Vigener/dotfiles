@@ -273,3 +273,32 @@ Flag: — | Private | Search | Orchestration
   * T3 Code の `delegate_task` に Antigravity 枠の Claude は露出しない。
   * したがって、**`opus 5.5 in agy` や `sonnet 5.5 in agy` を呼び出す際は、T3 Code の委譲ツールではなく、Bash CLI（`agy` コマンド）から直接呼び出す**。
   * `agy --model claude-opus-5-5-high -p "..."` / `agy --model claude-sonnet-5-5-high -p "..."`
+
+#### 5. ユーザーの記法マッピングと呼び出し手段早見表（案C 実装正本）
+ユーザーの自然な指示記法「`[モデル名] in [環境]`」と、エージェント側の実行手段・契約枠の完全対応表。
+
+| ユーザーの指定例 | 意図する契約・枠 | エージェントの実行アクション | 禁止事項・誤爆防止 |
+| :--- | :--- | :--- | :--- |
+| **`opus 5.5 in agy`**<br>**`sonnet 5.5 in agy`** | **Google AI Pro**<br>（`3p-weekly` 週枠） | **Bash CLI 直接実行（完全隔離）**:<br>`agy --model claude-opus-5-5-high -p "..."`<br>`agy --model claude-sonnet-5-5-high -p "..."` | ❌ `delegate_task` で `claudeAgent` を呼ぶ（従量課金誤爆）<br>❌ `settings.json` をいじる（クラッシュ事故）<br>❌ 勝手に Cursor 枠に回す |
+| **`argon in agy`**<br>**`gemini-4-argon in agy`** | **Google AI Pro**<br>（Argon 独立週枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`antigravity` / `gemini-4-argon-high`)<br>・CLI: `agy --model gemini-4-argon-high -p "..."` | ❌ `thinking: high` でだらだらマルチターン往復（思考トークン急減防止） |
+| **`flash in agy`**<br>**`gemini-3.8-flash in agy`** | **Google AI Pro**<br>（実質無料スタミナ枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`antigravity` / `gemini-3.8-flash-high`)<br>・CLI: `agy --model gemini-3.8-flash-high -p "..."` | （超高速・1Mトークン・最も安全） |
+| **`composer in cursor`**<br>**`composer 2.5 in cursor`** | **Cursor Pro 定額枠**<br>（打鍵作業員） | **Bash CLI 直接実行**:<br>`cursor-agent --model composer-2.5 "..."` | ❌ 設計や意思決定を丸投げする（品質低下） |
+| **`grok in cursor`**<br>**`grok 4.7 in cursor`** | **Cursor Pro 定額枠**<br>（日常思考・監査） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`cursor` / `grok-4.7`)<br>・CLI: `cursor-agent --model grok-4.7 "..."` | ❌ Cursor枠枯渇時に無駄撃ちする |
+| **`opus 5.5 in cursor`**<br>**`sonnet 5.5 in cursor`** | **Cursor Pro 定額枠**<br>（Cursor側のClaude枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`cursor` / `claude-opus-5-5`)<br>・CLI: `cursor-agent --model claude-opus-5-5 "..."` | ❌ agy に枠があるのに優先して Cursor 枠を削る |
+| **`opus in claude`**<br>「公式APIを使って」<br>「claudeAgent で実行」 | **Anthropic 公式 API**<br>（従量課金・スポット） | **T3 サブエージェント または Claude Code CLI**:<br>・T3内: `delegate_task` (`claudeAgent` / `claude-opus-5-5`)<br>・CLI: `claude -p "..."` | ❌ **ユーザーから明示指示がない限り、絶対に選ばない** |
+
+#### 6. 環境名（`in ...`）省略時のフォールバック優先順位
+ユーザーが「Opus 5.5 で敵対レビューして」のように環境を省略して指示した場合：
+1. **第1優先（`in agy`）**: Google AI Pro 週枠を優先。T3 内では `delegate_task` を使わず、Bash CLI（`agy` コマンド）で実行。
+2. **第2優先（`in cursor`）**: agy の Claude 週枠が枯渇している場合のみ、Cursor Pro 枠へフォールバック。
+3. **第3優先（`in claude` / 公式API）**: 自動フォールバックは絶対禁止。ユーザーから「公式APIで」と明示指示がある場合のみ許可。
+
+#### 7. サブエージェント (inherit) 継承規律
+ユーザーから「**サブエージェント(inherit)を呼び出して**」と指示された場合：
+* **原則**: 親エージェントが現在動作しているモデル・プロバイダと**完全に同一のモデルを厳格に継承**して起動する。
+  * 親が Gemini 3.8 Flash（agy） $\to$ 子も Gemini 3.8 Flash（`invoke_subagent(Model="inherit")` または `agy --model gemini-3.8-flash-high`）
+  * 親が Gemini 4 Argon（agy） $\to$ 子も Gemini 4 Argon（`agy --model gemini-4-argon-high`）
+  * 親が Grok 4.7（Cursor） $\to$ 子も Grok 4.7（T3: `cursor/grok-4.7` 委譲、CLI: `cursor-agent --model grok-4.7`）
+* **Grok family 継承時の唯一の注意点**:
+  * Grok のサブエージェント増殖は Cursor Pro 枠（月枠）を消費する。
+  * タスクが「大量のファイル走査・ログ抽出（Task: Extract）」である場合は、Grok 枠の無駄遣いを防ぐため、「探索タスクのため、Cursor 枠を温存して無料の Flash で回しますか？」と確認を挟むことを推奨する。

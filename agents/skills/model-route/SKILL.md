@@ -99,6 +99,27 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 - **Claude Opus 5.5 (agy)**:
   - 1タスクあたり **約 10%**（重要意思決定・最終関所用）
 
+
+### 6. 指示記法マッピングと呼び出し手段（案C・認知ズレ防止正本）
+ユーザーの自然な指示記法「`[モデル名] in [環境]`」および「`サブエージェント(inherit)`」を受け取った際のエージェント側の実行アクション規律。
+
+| ユーザーの指定記述 | 意図する契約・枠 | エージェントの実行アクション | 禁止事項・誤爆防止 |
+| :--- | :--- | :--- | :--- |
+| **`opus 5.5 in agy`**<br>**`sonnet 5.5 in agy`** | **Google AI Pro**<br>（`3p-weekly` 週枠） | **Bash CLI 直接実行（完全隔離）**:<br>`agy --model claude-opus-5-5-high -p "..."`<br>`agy --model claude-sonnet-5-5-high -p "..."` | ❌ `delegate_task` で `claudeAgent` を呼ぶ（従量課金誤爆）<br>❌ `settings.json` をいじる（クラッシュ事故）<br>❌ 勝手に Cursor 枠に回す |
+| **`argon in agy`**<br>**`gemini-4-argon in agy`** | **Google AI Pro**<br>（Argon 独立週枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`antigravity` / `gemini-4-argon-high`)<br>・CLI: `agy --model gemini-4-argon-high -p "..."` | ❌ `thinking: high` でだらだらマルチターン往復（思考トークン急減防止） |
+| **`flash in agy`**<br>**`gemini-3.8-flash in agy`** | **Google AI Pro**<br>（実質無料スタミナ枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`antigravity` / `gemini-3.8-flash-high`)<br>・CLI: `agy --model gemini-3.8-flash-high -p "..."` | （超高速・1Mトークン・最も安全） |
+| **`composer in cursor`**<br>**`composer 2.5 in cursor`** | **Cursor Pro 定額枠**<br>（打鍵作業員） | **Bash CLI 直接実行**:<br>`cursor-agent --model composer-2.5 "..."` | ❌ 設計や意思決定を丸投げする（品質低下） |
+| **`grok in cursor`**<br>**`grok 4.7 in cursor`** | **Cursor Pro 定額枠**<br>（日常思考・監査） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`cursor` / `grok-4.7`)<br>・CLI: `cursor-agent --model grok-4.7 "..."` | ❌ Cursor枠枯渇時に無駄撃ちする |
+| **`opus 5.5 in cursor`**<br>**`sonnet 5.5 in cursor`** | **Cursor Pro 定額枠**<br>（Cursor側のClaude枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`cursor` / `claude-opus-5-5`)<br>・CLI: `cursor-agent --model claude-opus-5-5 "..."` | ❌ agy に枠があるのに優先して Cursor 枠を削る |
+| **`サブエージェント(inherit)`**<br>「サブエージェント(inherit)を呼び出して」 | **親エージェントと同一枠**<br>（完全モデル継承） | **親のモデルと完全に同一のモデルを起動**:<br>・親が Flash: 子も Flash<br>・親が Argon: 子も Argon<br>・親が Grok: 子も Grok | ❌ 探索タスク等で Grok 枠を無駄撃ちしない（必要時 Flash 推奨確認） |
+| **`opus in claude`**<br>「公式APIを使って」<br>「claudeAgent で実行」 | **Anthropic 公式 API**<br>（従量課金・スポット） | **T3 サブエージェント または Claude Code CLI**:<br>・T3内: `delegate_task` (`claudeAgent` / `claude-opus-5-5`)<br>・CLI: `claude -p "..."` | ❌ **ユーザーから明示指示がない限り、絶対に選ばない** |
+
+#### 環境名（`in ...`）省略時のフォールバック優先順位
+ユーザーが「Opus 5.5 で敵対レビューして」のように環境を省略して指示した場合：
+1. **第1優先（`in agy`）**: Google AI Pro 週枠を優先。T3 内では `delegate_task` を使わず、Bash CLI（`agy` コマンド）で実行。
+2. **第2優先（`in cursor`）**: agy の Claude 週枠が枯渇している場合のみ、Cursor Pro 枠へフォールバック。
+3. **第3優先（`in claude` / 公式API）**: 自動フォールバックは絶対禁止。ユーザーから「公式APIで」と明示指示がある場合のみ許可。
+
 ## 出力フォーマット（厳格なコンパクト即答ルール）
 
 長文の講釈は避け、ユーザーが即決できるように以下のフォーマット（4項目）で即答すること。
