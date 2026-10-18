@@ -302,3 +302,25 @@ Flag: — | Private | Search | Orchestration
 * **Grok family 継承時の唯一の注意点**:
   * Grok のサブエージェント増殖は Cursor Pro 枠（月枠）を消費する。
   * タスクが「大量のファイル走査・ログ抽出（Task: Extract）」である場合は、Grok 枠の無駄遣いを防ぐため、「探索タスクのため、Cursor 枠を温存して無料の Flash で回しますか？」と確認を挟むことを推奨する。
+
+---
+
+## 7. Anthropic 5.x 世代モデル（Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5）実戦運用規律（2026-10-18 確定）
+
+Anthropic 公式の Context Engineering ガイドラインおよび 5.x 世代仕様に基づく、五十嵐尊人の研究・開発パイプラインにおける Claude モデル選定・運用の完全正本。
+
+### ① モデル別役割分担と配置ルール
+
+| モデル | 主な役割 | 推奨パラメータ | ルーティング原則 |
+|:---|:---|:---|:---|
+| **Claude Sonnet 5.5**<br>(`claude-sonnet-5-5`) | **自律ループ主力機（Workhorse）**<br>日常コーディング、リファクタ、pytest 自動修復ループ | `effort: "medium"`<br>`thinking: {"type": "between_tools"}` | スコープを厳格に限定し、DoD（テスト通過）まで自律完遂させる。`effort: high` の乱用は避け `medium` を基準とする。 |
+| **Claude Opus 5.5**<br>(`claude-opus-5-5`) | **旗艦推論 ＆ ゼロトラスト敵対的監査**<br>数理不変量検証、コンパイラ健全性、論文査読耐性監査 | `effort: "high"`<br>`thinking: Adaptive` | 手順を細かく指示せず「不変条件（Invariants）」と DoD を渡す。Sycophancy（自己欺瞞）を排した冷徹な Red Teaming 門番として配置。 |
+| **Claude Fable 5.1**<br>(`claude-fable-5-1`) | **Mythos クラス直系（特別顧問）**<br>未踏の数理証明、数万行の大規模リファクタ、数日間の完全自律エージェント | `effort: "high"`<br>Append-Only 履歴 | 思考をマイクロマネジメントせず、DoD のみを与えて大域探索を委譲。日常使用は禁止し、根本的ブレイクスルー時のみ召喚。 |
+| **Claude Haiku 5.5**<br>(`claude-haiku-5-5`) | **（原則ルーティング非推奨）**<br>軽量配管・ログパース | `effort: "low"` | **配管・ログパースなら `Gemini 3.8 Flash` で十分（100K 課金急騰の壁もなく無料・高速）。** Haiku に Claude クレジットを割くのは非推奨。 |
+
+### ② 5.x 世代における API 即死（HTTP 400）防止規律
+- ❌ **`thinking: {"type": "disabled"}` の完全廃止**: 思考オフは不可。軽量化したい場合は `effort: "low"` または `between_tools` を指定する。
+- ❌ **強制ツール選択 `tool_choice: {"type": "any" | "tool"}` の廃止**: `tool_choice: {"type": "auto"}` のみサポート。DoD で誘導する。
+- ❌ **`Think step-by-step` の完全不要化**: ネイティブ思考と干渉し、レイテンシとトークンを浪費するためプロンプトに書かない。
+- ❌ **Assistant Prefill の廃止**: `{"role": "assistant", "content": "{"}` 等による JSON 出力強制は 400 エラー。Tool Calling または XML タグで代替する。
+- ❌ **Haiku への `effort: max` 委託禁止**: 小型モデルに過度な思考力を与えると推論トークンが肥大化し、Sonnet 5.5 より遅く高く低品質になる逆転現象が発生する。
