@@ -240,3 +240,36 @@ Flag: — | Private | Search | Orchestration
 
 * **親エージェントの振る舞い**:
   * CLI プロセスを実行し、標準出力から「完了ステータス・生成成果物のコミットハッシュ・要約」のみを抽出して親コンテキストに報告する。中間作業ログを親コンテキストに持ち込まない。
+
+### 4.5 T3 Code ハーネス設定改変による多重クラッシュ障害と Claude 呼び出し誤爆の教訓 (2026-10-18)
+
+#### 1. インシデントの概要
+* **発生日時**: 2026年10月18日 11:49 JST
+* **関連スレッド**:
+  * 起因スレッド: `f5a8a255-90f7-4dbb-926d-a2f1d493c331`（miyabi-harness 調査）
+  * 被害スレッド: `e321b56b-bc9e-487e-aaf4-35efe225102c`（実験進行スレッド、道連れクラッシュ）
+  * 調査スレッド: `a5419dc9-41b5-4294-94c0-c87146d171bc`
+* **事象**:
+  1. T3 Code 上で Claude モデル呼び出し時に、Google AI Pro 枠（`3p-weekly`）ではなく従量課金の公式 API（`claudeAgent`）が誤用される事象が発生（スレッド `3ac2f922`）。
+  2. 解決策として T3 Code のオーケストレーターに Antigravity 配下の Claude を無理やり露出させようと、エージェントが `~/.t3/userdata/settings.json` の `providerInstances.antigravity.config.customModels` に Claude モデルを Python スクリプトで直接書き込んだ。
+  3. その瞬間、T3 Code のファイル監視がプロバイダのリロード処理（`retireRuntime`）を発動。稼働中だった Antigravity ACP セッションが強制終了され、書き込みを行ったスレッドと裏で動いていた実験スレッドが 1 ミリ秒差で同時に `Interrupt` エラーとなり道連れクラッシュした。
+
+#### 2. 根本原因（なぜダメだったのか）
+1. **`antigravity` プロバイダの仕様違反**:
+   * `customModels` によるモデル拡張がサポートされているのは `codex` / `claudeAgent` などのプロバイダのみ。
+   * `antigravity` は Google DeepMind の ACP（`agy_acp_server`）専用プロバイダであり、モデル一覧は内部配信に依存しているため、設定ファイル側でのオーバーライドを想定していない。
+2. **T3 Code 起動中のホットリロードによるプロセス強制終了**:
+   * T3 Code 稼働中に `settings.json` を外部から書き換えると、プロバイダのランタイムが強制リタイアされ、全スレッドの実行が中断される。
+
+#### 3. 教訓と絶対禁止事項（Guardrails）
+* ❌ **T3 Code 稼働中に `~/.t3/userdata/settings.json` をスクリプトやエージェントから直接書き換えてはならない（完全禁止）。**
+* ❌ **`antigravity` プロバイダの設定に `customModels` を注入してはならない。**
+* ❌ **Claude モデルを呼ぶ際に、ユーザーから明示指示がない限り `claudeAgent`（公式API従量課金）を選んではならない。**
+
+#### 4. 確立された Claude モデル呼び出し原則（案C: 記法統一と CLI 隔離）
+* **真の優先順位**:
+  $$\text{claude model in agy (Google AI Pro 週枠)} > \text{claude model in cursor (Cursor Pro 定額枠)} > \text{claude model in claude (公式API)}$$
+* **T3 Code からの呼び出し規律**:
+  * T3 Code の `delegate_task` に Antigravity 枠の Claude は露出しない。
+  * したがって、**`opus 5.5 in agy` や `sonnet 5.5 in agy` を呼び出す際は、T3 Code の委譲ツールではなく、Bash CLI（`agy` コマンド）から直接呼び出す**。
+  * `agy --model claude-opus-5-5-high -p "..."` / `agy --model claude-sonnet-5-5-high -p "..."`
