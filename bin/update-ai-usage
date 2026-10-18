@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 update-ai-usage
-Fetch usage and quota limits for Antigravity, Cursor, and DeepSeek,
+Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, and Anthropic/Claude,
 write RunCat Neo custom metrics JSON, and format output for Raycast / CLI.
 """
 
 import argparse
+import glob
 import json
 import os
 import shutil
@@ -13,11 +14,14 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
 # Threshold to trigger alert display (show reset countdown when quota <= this %)
 ALERT_THRESHOLD = 15
+# Threshold to show weekly quota warning in menu bar (<= 50%)
+WEEKLY_WARN_THRESHOLD = 50
 
 
 def find_agy_binary():
@@ -118,6 +122,90 @@ def fetch_deepseek_balance():
         return {"error": f"Failed to call DeepSeek API: {e}"}
 
 
+def fetch_anthropic_info():
+    """
+    Fetch Anthropic account and profile info via Claude Code OAuth token or API key.
+    Note: Anthropic does NOT provide a public API endpoint to query prepaid balance.
+    """
+    token = None
+    auth_type = "oauth"
+
+    # 1. Check Claude Code OAuth credentials
+    cred_path = os.path.expanduser("~/.config/anthropic/credentials/default.json")
+    if os.path.exists(cred_path):
+        try:
+            with open(cred_path, "r", encoding="utf-8") as f:
+                cred = json.load(f)
+            token = cred.get("access_token")
+        except Exception:
+            pass
+
+    # 2. Check ANTHROPIC_API_KEY env var as fallback
+    if not token:
+        token = os.environ.get("ANTHROPIC_API_KEY")
+        auth_type = "api_key"
+
+    if not token:
+        return {"error": "Anthropic credentials not found"}
+
+    result = {
+        "auth_type": auth_type,
+        "is_available": True,
+    }
+
+    if auth_type == "oauth":
+        try:
+            req = urllib.request.Request(
+                "https://api.anthropic.com/api/oauth/profile",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Accept": "application/json",
+                    "anthropic-version": "2023-06-01",
+                },
+                method="GET",
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                org = data.get("organization", {})
+                acc = data.get("account", {})
+                result["organization_name"] = org.get("name")
+                result["billing_type"] = org.get("billing_type")  # e.g., 'prepaid'
+                result["rate_limit_tier"] = org.get("rate_limit_tier")
+                result["email"] = acc.get("email")
+                result["status"] = "Connected (Prepaid)" if org.get("billing_type") == "prepaid" else "Connected"
+        except urllib.error.HTTPError as e:
+            result["error"] = f"HTTP {e.code}"
+        except Exception as e:
+            result["error"] = str(e)
+    else:
+        result["status"] = "API Key configured"
+
+    # Calculate local Claude Code spend from session logs if available
+    try:
+        total_local_spend = 0.0
+        session_count = 0
+        for path in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
+            session_cost = 0.0
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if '"totalCostUSD"' in line:
+                        try:
+                            d = json.loads(line)
+                            if "totalCostUSD" in d:
+                                session_cost = float(d["totalCostUSD"])
+                        except Exception:
+                            pass
+            if session_cost > 0:
+                total_local_spend += session_cost
+                session_count += 1
+        result["local_claude_spend_usd"] = round(total_local_spend, 4)
+        result["local_claude_sessions"] = session_count
+    except Exception:
+        pass
+
+    return result
+
+
 def format_time_remaining(reset_time_str):
     """Calculate remaining human-readable time from an ISO timestamp."""
     if not reset_time_str:
@@ -182,11 +270,13 @@ def classify_agy_group(group_name):
         return "claude"
 
 
-def build_runcat_payload(agy, cursor, deepseek):
+def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
     metrics = []
     agy_g5h = None
+    agy_gw = None
     agy_ar = None
     agy_c5h = None
+    agy_cw = None
 
     if "groups" in agy:
         for g in agy["groups"]:
@@ -217,14 +307,19 @@ def build_runcat_payload(agy, cursor, deepseek):
                     "formattedValue": f"{rem_frac * 100:.0f}%{time_str}",
                     "normalizedValue": round(rem_frac, 3),
                 })
-                if g_type == "gemini" and win == "5h":
-                    agy_g5h = int(round(rem_frac * 100))
+                if g_type == "gemini":
+                    if win == "5h":
+                        agy_g5h = int(round(rem_frac * 100))
+                    elif win == "weekly":
+                        agy_gw = int(round(rem_frac * 100))
                 elif g_type == "argon":
-                    # Argon は現状 weekly のみ。もし 5h が追加されたら 5h 優先
                     if win == "5h" or agy_ar is None:
                         agy_ar = int(round(rem_frac * 100))
-                elif g_type == "claude" and win == "5h":
-                    agy_c5h = int(round(rem_frac * 100))
+                elif g_type == "claude":
+                    if win == "5h":
+                        agy_c5h = int(round(rem_frac * 100))
+                    elif win == "weekly":
+                        agy_cw = int(round(rem_frac * 100))
 
     cursor_str = None
     if "planUsage" in cursor:
@@ -277,15 +372,46 @@ def build_runcat_payload(agy, cursor, deepseek):
             "normalizedValue": min(1.0, max(0.0, round(float(tot) / 10.0, 3))),
         })
 
+    # Anthropic / Claude section in RunCat details
+    if anthropic and anthropic.get("is_available"):
+        status_desc = anthropic.get("status", "Connected")
+        tier = anthropic.get("rate_limit_tier")
+        tier_str = f" ({tier})" if tier else ""
+        metrics.append({
+            "title": "Anthropic API (OAuth)",
+            "formattedValue": f"{status_desc}{tier_str}",
+            "normalizedValue": 1.0,
+        })
+        if "local_claude_spend_usd" in anthropic and anthropic["local_claude_spend_usd"] > 0:
+            metrics.append({
+                "title": "Claude Code Local Spend",
+                "formattedValue": f"${anthropic['local_claude_spend_usd']:.3f} ({anthropic.get('local_claude_sessions', 0)} sessions)",
+                "normalizedValue": 0.5,
+            })
+
     bar_parts = []
+    # Gemini: 週枠が 50% 以下に急減している場合はメニューバーでも (Wxx%) を目立たせる
     if agy_g5h is not None:
-        bar_parts.append(f"G:{agy_g5h}%")
+        if agy_gw is not None and agy_gw <= WEEKLY_WARN_THRESHOLD:
+            bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%)")
+        else:
+            bar_parts.append(f"G:{agy_g5h}%")
+
     if agy_ar is not None:
         bar_parts.append(f"Ar:{agy_ar}%")
+
     if agy_c5h is not None:
-        bar_parts.append(f"C:{agy_c5h}%")
+        if agy_cw is not None and agy_cw <= WEEKLY_WARN_THRESHOLD:
+            bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%)")
+        else:
+            bar_parts.append(f"C:{agy_c5h}%")
+
     if cursor_str is not None:
-        bar_parts.append(f"Cur:{cursor_str}")
+        plan = cursor.get("planUsage", {})
+        auto_left = int(round(max(0.0, 100.0 - float(plan.get("autoPercentUsed", 0.0)))))
+        api_left = int(round(max(0.0, 100.0 - float(plan.get("apiPercentUsed", 0.0)))))
+        bar_parts.append(f"Cur:{auto_left}%(O{api_left}%)")
+
     if ds_str is not None:
         bar_parts.append(f"DS:{ds_str}")
 
@@ -300,7 +426,7 @@ def build_runcat_payload(agy, cursor, deepseek):
     }
 
 
-def format_inline(agy, cursor, deepseek):
+def format_inline(agy, cursor, deepseek, anthropic=None):
     parts = []
     if "groups" in agy:
         group_strings = {}
@@ -320,7 +446,7 @@ def format_inline(agy, cursor, deepseek):
                 group_strings["argon"] = ar_str
 
             elif g_type == "gemini":
-                # Gemini は週枠が滅多に尽きないため 5h 枠メイン
+                # Gemini: 週枠（W%）を常時併記（週枠の急激な枯渇を防ぐため）
                 h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
                 h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
                 w_bucket = b_dict.get("weekly", {})
@@ -330,12 +456,14 @@ def format_inline(agy, cursor, deepseek):
                 if w_rem <= 0:
                     h_rem = 0
 
-                g_str = f"G:{h_rem}%"
+                g_5h_str = f"G:{h_rem}%"
                 if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
-                    g_str += f":{h_time}"
+                    g_5h_str += f":{h_time}"
+
                 if w_rem <= ALERT_THRESHOLD and w_time:
-                    g_str += f"(W{w_rem}%:{w_time})"
-                group_strings["gemini"] = g_str
+                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%:{w_time})"
+                else:
+                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%)"
 
             else:  # claude
                 # Claude / GPT は週枠がボトルネックになるため常に W% を併記
@@ -387,7 +515,7 @@ def format_inline(agy, cursor, deepseek):
     return " | ".join(parts) if parts else "No data"
 
 
-def format_markdown(agy, cursor, deepseek):
+def format_markdown(agy, cursor, deepseek, anthropic=None):
     lines = ["# 🧠 AI Quotas & Usage Summary\n"]
 
     # Antigravity section
@@ -454,6 +582,25 @@ def format_markdown(agy, cursor, deepseek):
         err = cursor.get("error", "Unknown error")
         lines.append(f"> ⚠️ Failed to fetch Cursor usage: `{err}`\n")
 
+    # Anthropic / Claude Code API section
+    lines.append("## Anthropic (Claude Code / API)")
+    if anthropic and anthropic.get("is_available"):
+        status = anthropic.get("status", "Connected")
+        org_name = anthropic.get("organization_name", "Individual Org")
+        b_type = anthropic.get("billing_type", "prepaid")
+        tier = anthropic.get("rate_limit_tier", "auto_trust_tier_a_low_spend")
+        lines.append(f"- **Status**: ✅ {status}")
+        lines.append(f"- **Organization**: `{org_name}` (Billing: `{b_type}`)")
+        lines.append(f"- **Rate Limit Tier**: `{tier}`")
+        if "local_claude_spend_usd" in anthropic and anthropic["local_claude_spend_usd"] > 0:
+            lines.append(f"- **Local Claude Code Spend**: `${anthropic['local_claude_spend_usd']:.4f}` ({anthropic.get('local_claude_sessions', 0)} sessions tracked)")
+        lines.append("> _Note: Anthropic does not provide a public API for prepaid credit balance. Check `platform.claude.com/settings/billing` for real-time balance._")
+        lines.append("")
+    elif anthropic and "error" in anthropic:
+        lines.append(f"> ⚠️ Anthropic API: `{anthropic.get('error')}`\n")
+    else:
+        lines.append("> _Not configured_\n")
+
     # DeepSeek section
     lines.append("## DeepSeek (OpenCode API)")
     if "balance_infos" in deepseek and deepseek["balance_infos"]:
@@ -508,8 +655,9 @@ def main():
     agy = fetch_antigravity_usage(agy_bin)
     cursor = fetch_cursor_usage()
     deepseek = fetch_deepseek_balance()
+    anthropic = fetch_anthropic_info()
 
-    runcat_payload = build_runcat_payload(agy, cursor, deepseek)
+    runcat_payload = build_runcat_payload(agy, cursor, deepseek, anthropic)
 
     if args.write_runcat:
         try:
@@ -518,11 +666,16 @@ def main():
             sys.stderr.write(f"Warning: Failed to write RunCat JSON: {e}\n")
 
     if args.format == "markdown":
-        print(format_markdown(agy, cursor, deepseek))
+        print(format_markdown(agy, cursor, deepseek, anthropic))
     elif args.format == "inline":
-        print(format_inline(agy, cursor, deepseek))
+        print(format_inline(agy, cursor, deepseek, anthropic))
     elif args.format == "json":
-        print(json.dumps({"antigravity": agy, "cursor": cursor, "deepseek": deepseek}, indent=2, ensure_ascii=False))
+        print(json.dumps({
+            "antigravity": agy,
+            "cursor": cursor,
+            "deepseek": deepseek,
+            "anthropic": anthropic,
+        }, indent=2, ensure_ascii=False))
     elif args.format == "runcat":
         print(json.dumps(runcat_payload, indent=2, ensure_ascii=False))
 
