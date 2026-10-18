@@ -2,6 +2,7 @@
 """
 update-ai-usage
 Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, and Anthropic/Claude,
+calculate weekly burn rates (pacing & depletion ETA), trigger desktop alerts,
 write RunCat Neo custom metrics JSON, and format output for Raycast / CLI.
 """
 
@@ -22,6 +23,10 @@ from datetime import datetime, timezone
 ALERT_THRESHOLD = 15
 # Threshold to show weekly quota warning in menu bar (<= 50%)
 WEEKLY_WARN_THRESHOLD = 50
+# Pacing thresholds
+BURN_RATE_WARN = 1.5      # >= 1.5x triggers warning (fire icon)
+BURN_RATE_CRITICAL = 2.0  # >= 2.0x triggers desktop notification if ETA <= 24h
+ALERT_COOLDOWN_SEC = 10800  # 3 hours cooldown between notifications per service
 
 
 def find_agy_binary():
@@ -254,6 +259,94 @@ def format_cursor_reset(cycle_end):
         return ""
 
 
+def calculate_weekly_pacing(rem_fraction, reset_time_str):
+    """
+    Calculate burn rate multiplier, depletion ETA, and safe daily budget
+    based on a 7-day rolling quota window.
+    """
+    if not reset_time_str or rem_fraction is None:
+        return None
+    try:
+        dt = datetime.fromisoformat(reset_time_str.replace("Z", "+00:00"))
+        now = datetime.now(timezone.utc)
+        remaining_sec = max(0, int((dt - now).total_seconds()))
+        cycle_total_sec = 7 * 86400  # 604800 seconds in 1 week
+        elapsed_sec = max(1, cycle_total_sec - remaining_sec)
+
+        rem_frac = max(0.0, min(1.0, float(rem_fraction)))
+        used_frac = max(0.0, 1.0 - rem_frac)
+
+        # Smooth early-cycle burst noise (clamp minimum elapsed evaluation window to 12h)
+        effective_elapsed_sec = max(12 * 3600, elapsed_sec)
+        effective_elapsed_frac = effective_elapsed_sec / cycle_total_sec
+
+        burn_rate = used_frac / effective_elapsed_frac if effective_elapsed_frac > 0 else 1.0
+
+        burn_per_sec = used_frac / elapsed_sec if elapsed_sec > 0 else 0
+        if burn_per_sec > 0 and rem_frac > 0:
+            time_to_empty_sec = rem_frac / burn_per_sec
+            time_to_empty_hr = time_to_empty_sec / 3600.0
+        elif rem_frac <= 0:
+            time_to_empty_hr = 0.0
+        else:
+            time_to_empty_hr = 9999.0
+
+        days_rem = max(0.1, remaining_sec / 86400.0)
+        safe_daily_pct = (rem_frac * 100.0) / days_rem
+
+        # Overburning: high burn rate AND quota already depleted below safe margin (<= 70%)
+        is_overburning = (burn_rate >= BURN_RATE_WARN and rem_frac <= 0.70)
+        is_critical = (burn_rate >= BURN_RATE_CRITICAL and time_to_empty_hr <= 24.0 and rem_frac <= 0.50)
+
+        return {
+            "burn_rate": burn_rate,
+            "time_to_empty_hr": time_to_empty_hr,
+            "safe_daily_pct": safe_daily_pct,
+            "remaining_hours": remaining_sec / 3600.0,
+            "is_overburning": is_overburning,
+            "is_critical": is_critical,
+        }
+    except Exception:
+        return None
+
+
+def send_quota_notification(service_name, burn_rate, time_to_empty_hr, rem_pct):
+    """Send macOS notification if alert cooldown has elapsed."""
+    cache_dir = os.path.expanduser("~/.cache/update-ai-usage")
+    os.makedirs(cache_dir, exist_ok=True)
+    stamp_file = os.path.join(cache_dir, f"last_alert_{service_name.lower().replace(' ', '_')}.timestamp")
+
+    now_ts = datetime.now().timestamp()
+    if os.path.exists(stamp_file):
+        try:
+            with open(stamp_file, "r") as f:
+                last_ts = float(f.read().strip())
+            if now_ts - last_ts < ALERT_COOLDOWN_SEC:
+                return  # Cooldown active
+        except Exception:
+            pass
+
+    title = f"⚠️ AI Quota Alert: {service_name}"
+    subtitle = f"消費ペースが危険水域です ({burn_rate:.1f}x)"
+    if time_to_empty_hr < 1.0:
+        eta_str = f"{int(time_to_empty_hr * 60)}分後"
+    else:
+        eta_str = f"約{int(round(time_to_empty_hr))}時間後"
+    body = f"週枠残り{rem_pct}%。このペースだと{eta_str}に枯渇します。他モデルへの分散を推奨します。"
+
+    cmd = [
+        "osascript",
+        "-e",
+        f'display notification "{body}" with title "{title}" subtitle "{subtitle}"',
+    ]
+    try:
+        subprocess.run(cmd, capture_output=True, timeout=5)
+        with open(stamp_file, "w") as f:
+            f.write(str(now_ts))
+    except Exception:
+        pass
+
+
 def format_progress_bar(percentage, length=10):
     clamped = max(0.0, min(100.0, float(percentage)))
     filled = int(round(clamped / 100 * length))
@@ -274,9 +367,14 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
     metrics = []
     agy_g5h = None
     agy_gw = None
+    agy_g_pacing = None
+
     agy_ar = None
+    agy_ar_pacing = None
+
     agy_c5h = None
     agy_cw = None
+    agy_c_pacing = None
 
     if "groups" in agy:
         for g in agy["groups"]:
@@ -293,6 +391,11 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
             w_bucket = b_dict.get("weekly", {})
             w_rem_pct = int(round(float(w_bucket.get("remaining_fraction", 1.0)) * 100)) if w_bucket else 100
             weekly_is_zero = (w_rem_pct <= 0)
+
+            # Weekly pacing calculation
+            w_pacing = None
+            if w_bucket:
+                w_pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
 
             for b in g.get("buckets", []):
                 win = b.get("window", "")
@@ -312,14 +415,32 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
                         agy_g5h = int(round(rem_frac * 100))
                     elif win == "weekly":
                         agy_gw = int(round(rem_frac * 100))
+                        agy_g_pacing = w_pacing
                 elif g_type == "argon":
                     if win == "5h" or agy_ar is None:
                         agy_ar = int(round(rem_frac * 100))
+                        agy_ar_pacing = w_pacing
                 elif g_type == "claude":
                     if win == "5h":
                         agy_c5h = int(round(rem_frac * 100))
                     elif win == "weekly":
                         agy_cw = int(round(rem_frac * 100))
+                        agy_c_pacing = w_pacing
+
+    # Add Pacing items to RunCat detailed dropdown
+    if agy_g_pacing and agy_g_pacing["is_overburning"]:
+        eta_h = agy_g_pacing["time_to_empty_hr"]
+        eta_desc = f"約{eta_h:.0f}h後" if eta_h < 72 else f"約{eta_h/24:.1f}日後"
+        metrics.append({
+            "title": "Gemini Pacing (Burn Rate)",
+            "formattedValue": f"🔥 {agy_g_pacing['burn_rate']:.1f}x (枯渇予測: {eta_desc})",
+            "normalizedValue": min(1.0, agy_g_pacing["burn_rate"] / 4.0),
+        })
+        metrics.append({
+            "title": "Gemini Safe Daily Target",
+            "formattedValue": f"~{agy_g_pacing['safe_daily_pct']:.1f}%/day",
+            "normalizedValue": min(1.0, agy_g_pacing["safe_daily_pct"] / 20.0),
+        })
 
     cursor_str = None
     if "planUsage" in cursor:
@@ -390,19 +511,32 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
             })
 
     bar_parts = []
-    # Gemini: 週枠が 50% 以下に急減している場合はメニューバーでも (Wxx%) を目立たせる
+    # Gemini: ペースが 1.5x を超えていればメニューバーにも 🔥 と倍率を表示
     if agy_g5h is not None:
-        if agy_gw is not None and agy_gw <= WEEKLY_WARN_THRESHOLD:
-            bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%)")
+        if agy_gw is not None:
+            if agy_g_pacing and agy_g_pacing["is_overburning"]:
+                bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%🔥{agy_g_pacing['burn_rate']:.1f}x)")
+            elif agy_gw <= WEEKLY_WARN_THRESHOLD:
+                bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%)")
+            else:
+                bar_parts.append(f"G:{agy_g5h}%")
         else:
             bar_parts.append(f"G:{agy_g5h}%")
 
     if agy_ar is not None:
-        bar_parts.append(f"Ar:{agy_ar}%")
+        if agy_ar_pacing and agy_ar_pacing["is_overburning"]:
+            bar_parts.append(f"Ar:{agy_ar}%🔥")
+        else:
+            bar_parts.append(f"Ar:{agy_ar}%")
 
     if agy_c5h is not None:
-        if agy_cw is not None and agy_cw <= WEEKLY_WARN_THRESHOLD:
-            bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%)")
+        if agy_cw is not None:
+            if agy_c_pacing and agy_c_pacing["is_overburning"]:
+                bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%🔥)")
+            elif agy_cw <= WEEKLY_WARN_THRESHOLD:
+                bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%)")
+            else:
+                bar_parts.append(f"C:{agy_c5h}%")
         else:
             bar_parts.append(f"C:{agy_c5h}%")
 
@@ -436,22 +570,25 @@ def format_inline(agy, cursor, deepseek, anthropic=None):
             b_dict = {b.get("window"): b for b in g.get("buckets", [])}
 
             if g_type == "argon":
-                # Argon は週枠のみ（将来 5h が追加されたら 5h 優先）
                 bucket = b_dict.get("5h") or b_dict.get("weekly", {})
                 rem_pct = int(round(float(bucket.get("remaining_fraction", 0.0)) * 100))
                 rem_time = format_time_remaining(bucket.get("reset_time", ""))
+                pacing = calculate_weekly_pacing(bucket.get("remaining_fraction"), bucket.get("reset_time"))
+
                 ar_str = f"Ar:{rem_pct}%"
-                if rem_pct <= ALERT_THRESHOLD and rem_time:
+                if pacing and pacing["is_overburning"]:
+                    ar_str += f"🔥{pacing['burn_rate']:.1f}x"
+                elif rem_pct <= ALERT_THRESHOLD and rem_time:
                     ar_str += f":{rem_time}"
                 group_strings["argon"] = ar_str
 
             elif g_type == "gemini":
-                # Gemini: 週枠（W%）を常時併記（週枠の急激な枯渇を防ぐため）
                 h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
                 h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
                 w_bucket = b_dict.get("weekly", {})
                 w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
                 w_time = format_time_remaining(w_bucket.get("reset_time", ""))
+                pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
 
                 if w_rem <= 0:
                     h_rem = 0
@@ -460,18 +597,21 @@ def format_inline(agy, cursor, deepseek, anthropic=None):
                 if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
                     g_5h_str += f":{h_time}"
 
+                # Pacing fire indicator & multiplier
+                pace_str = f"🔥{pacing['burn_rate']:.1f}x" if pacing and pacing["is_overburning"] else ""
+
                 if w_rem <= ALERT_THRESHOLD and w_time:
-                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%:{w_time})"
+                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%{pace_str}:{w_time})"
                 else:
-                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%)"
+                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%{pace_str})"
 
             else:  # claude
-                # Claude / GPT は週枠がボトルネックになるため常に W% を併記
                 h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
                 h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
                 w_bucket = b_dict.get("weekly", {})
                 w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
                 w_time = format_time_remaining(w_bucket.get("reset_time", ""))
+                pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
 
                 if w_rem <= 0:
                     h_rem = 0
@@ -480,10 +620,12 @@ def format_inline(agy, cursor, deepseek, anthropic=None):
                 if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
                     c_5h_str += f":{h_time}"
 
+                pace_str = f"🔥{pacing['burn_rate']:.1f}x" if pacing and pacing["is_overburning"] else ""
+
                 if w_rem <= ALERT_THRESHOLD and w_time:
-                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%:{w_time})"
+                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%{pace_str}:{w_time})"
                 else:
-                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%)"
+                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%{pace_str})"
 
         ordered_parts = [group_strings[k] for k in ["gemini", "argon", "claude"] if k in group_strings]
         if ordered_parts:
@@ -533,6 +675,11 @@ def format_markdown(agy, cursor, deepseek, anthropic=None):
             w_rem_pct = int(round(float(w_bucket.get("remaining_fraction", 1.0)) * 100)) if w_bucket else 100
             weekly_is_zero = (w_rem_pct <= 0)
 
+            # Calculate pacing for weekly bucket
+            w_pacing = None
+            if w_bucket:
+                w_pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
+
             for b in g.get("buckets", []):
                 win = b.get("window", "")
                 rem_frac = float(b.get("remaining_fraction", 0.0))
@@ -549,6 +696,15 @@ def format_markdown(agy, cursor, deepseek, anthropic=None):
                     lines.append(f"- **{b.get('name')}**: `{pct:.1f}%` `[{bar}]`{time_badge}")
                 if desc:
                     lines.append(f"  - _{desc}_")
+
+            if w_pacing:
+                burn_icon = "🔥" if w_pacing["is_overburning"] else "⏱️"
+                eta_h = w_pacing["time_to_empty_hr"]
+                eta_str = f"約{eta_h:.1f}時間後" if eta_h < 72 else f"約{eta_h/24:.1f}日後"
+                lines.append(f"- **Pacing Analysis**: {burn_icon} `{w_pacing['burn_rate']:.2f}x speed`")
+                if w_pacing["is_overburning"]:
+                    lines.append(f"  - ⚠️ **枯渇予測 (ETA to 0%)**: **{eta_str}** に全損予定（リセットまで残り {w_pacing['remaining_hours']/24:.1f}日）")
+                    lines.append(f"  - 🛡️ **推奨安全ペース**: 1日あたり **~{w_pacing['safe_daily_pct']:.1f}%** 以内に抑制")
             lines.append("")
     else:
         err = agy.get("error", "Unknown error")
@@ -638,6 +794,23 @@ def write_runcat_json(payload, dest_path):
         raise e
 
 
+def check_and_send_critical_notifications(agy):
+    """Check if any weekly quota is in a critical burn state and send notification."""
+    if "groups" not in agy:
+        return
+    for g in agy["groups"]:
+        g_name = g.get("name", "")
+        b_dict = {b.get("window"): b for b in g.get("buckets", [])}
+        w_bucket = b_dict.get("weekly")
+        if not w_bucket:
+            continue
+        rem_frac = float(w_bucket.get("remaining_fraction", 1.0))
+        rem_pct = int(round(rem_frac * 100))
+        pacing = calculate_weekly_pacing(rem_frac, w_bucket.get("reset_time"))
+        if pacing and pacing["is_critical"] and rem_pct > 0:
+            send_quota_notification(g_name, pacing["burn_rate"], pacing["time_to_empty_hr"], rem_pct)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Update and view AI quota metrics")
     parser.add_argument("--format", choices=["markdown", "inline", "json", "runcat"], default="markdown",
@@ -648,6 +821,10 @@ def main():
                         help="Do not write to RunCat Neo metrics file")
     parser.add_argument("--runcat-path", default="~/.config/runcat-neo/ai-usage.json",
                         help="Target file path for RunCat Neo JSON")
+    parser.add_argument("--notify", action="store_true", default=True,
+                        help="Check and trigger macOS notification for critical burn rates (default: True)")
+    parser.add_argument("--no-notify", dest="notify", action="store_false",
+                        help="Disable desktop notifications")
 
     args = parser.parse_args()
 
@@ -656,6 +833,9 @@ def main():
     cursor = fetch_cursor_usage()
     deepseek = fetch_deepseek_balance()
     anthropic = fetch_anthropic_info()
+
+    if args.notify:
+        check_and_send_critical_notifications(agy)
 
     runcat_payload = build_runcat_payload(agy, cursor, deepseek, anthropic)
 
