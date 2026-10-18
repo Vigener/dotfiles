@@ -493,22 +493,6 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
             "normalizedValue": min(1.0, max(0.0, round(float(tot) / 10.0, 3))),
         })
 
-    # Anthropic / Claude section in RunCat details
-    if anthropic and anthropic.get("is_available"):
-        status_desc = anthropic.get("status", "Connected")
-        tier = anthropic.get("rate_limit_tier")
-        tier_str = f" ({tier})" if tier else ""
-        metrics.append({
-            "title": "Anthropic API (OAuth)",
-            "formattedValue": f"{status_desc}{tier_str}",
-            "normalizedValue": 1.0,
-        })
-        if "local_claude_spend_usd" in anthropic and anthropic["local_claude_spend_usd"] > 0:
-            metrics.append({
-                "title": "Claude Code Local Spend",
-                "formattedValue": f"${anthropic['local_claude_spend_usd']:.3f} ({anthropic.get('local_claude_sessions', 0)} sessions)",
-                "normalizedValue": 0.5,
-            })
 
     bar_parts = []
     # Gemini: ペースが 1.5x を超えていればメニューバーにも 🔥 と倍率を表示
@@ -738,24 +722,6 @@ def format_markdown(agy, cursor, deepseek, anthropic=None):
         err = cursor.get("error", "Unknown error")
         lines.append(f"> ⚠️ Failed to fetch Cursor usage: `{err}`\n")
 
-    # Anthropic / Claude Code API section
-    lines.append("## Anthropic (Claude Code / API)")
-    if anthropic and anthropic.get("is_available"):
-        status = anthropic.get("status", "Connected")
-        org_name = anthropic.get("organization_name", "Individual Org")
-        b_type = anthropic.get("billing_type", "prepaid")
-        tier = anthropic.get("rate_limit_tier", "auto_trust_tier_a_low_spend")
-        lines.append(f"- **Status**: ✅ {status}")
-        lines.append(f"- **Organization**: `{org_name}` (Billing: `{b_type}`)")
-        lines.append(f"- **Rate Limit Tier**: `{tier}`")
-        if "local_claude_spend_usd" in anthropic and anthropic["local_claude_spend_usd"] > 0:
-            lines.append(f"- **Local Claude Code Spend**: `${anthropic['local_claude_spend_usd']:.4f}` ({anthropic.get('local_claude_sessions', 0)} sessions tracked)")
-        lines.append("> _Note: Anthropic does not provide a public API for prepaid credit balance. Check `platform.claude.com/settings/billing` for real-time balance._")
-        lines.append("")
-    elif anthropic and "error" in anthropic:
-        lines.append(f"> ⚠️ Anthropic API: `{anthropic.get('error')}`\n")
-    else:
-        lines.append("> _Not configured_\n")
 
     # DeepSeek section
     lines.append("## DeepSeek (OpenCode API)")
