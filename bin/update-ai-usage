@@ -332,7 +332,7 @@ def send_quota_notification(service_name, burn_rate, time_to_empty_hr, rem_pct):
         eta_str = f"{int(time_to_empty_hr * 60)}分後"
     else:
         eta_str = f"約{int(round(time_to_empty_hr))}時間後"
-    body = f"週枠残り{rem_pct}%。このペースだと{eta_str}に枯渇します。他モデルへの分散を推奨します。"
+    body = f"週枠残り{rem_pct}%。このペースだと{eta_str}に枯渇。他モデルへの分散を推奨。"
 
     cmd = [
         "osascript",
