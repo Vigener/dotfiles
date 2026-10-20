@@ -113,6 +113,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 | **`opus 5.5 in cursor`**<br>**`sonnet 5.5 in cursor`** | **Cursor Pro 定額枠**<br>（Cursor側のClaude枠） | **T3 サブエージェント または Bash CLI**:<br>・T3内: `delegate_task` (`cursor` / `claude-opus-5-5`)<br>・CLI: `cursor-agent --model claude-opus-5-5 "..."` | ❌ agy に枠があるのに優先して Cursor 枠を削る |
 | **`サブエージェント(inherit)`**<br>「サブエージェント(inherit)を呼び出して」 | **親エージェントと同一枠**<br>（完全モデル継承） | **親のモデルと完全に同一のモデルを起動**:<br>・親が Flash: 子も Flash<br>・親が Argon: 子も Argon<br>・親が Grok: 子も Grok | ❌ 探索タスク等で Grok 枠を無駄撃ちしない（必要時 Flash 推奨確認） |
 | **`opus in claude`**<br>「公式APIを使って」<br>「claudeAgent で実行」 | **Anthropic 公式 API**<br>（従量課金・スポット） | **T3 サブエージェント または Claude Code CLI**:<br>・T3内: `delegate_task` (`claudeAgent` / `claude-opus-5-5`)<br>・CLI: `claude -p "..."` | ❌ **ユーザーから明示指示がない限り、絶対に選ばない** |
+| **`deepseek in api`**<br>「DeepSeekでサブエージェント」「dsh-sub で」 | **DeepSeek 公式 API**<br>（従量課金・サブスク枠外） | **Bash CLI 直接実行**:<br>`dsh-sub --repo <dir> --prompt "..."`<br>契約: `agents/skills/deepseek-harness/SKILL.md` | ❌ 無料の `agy: Gemini 3.8 Flash` がある通常の抽出・実装で常用する<br>❌ 枠枯渇時に無断で大量並列 |
 
 #### 環境名（`in ...`）省略時のフォールバック優先順位
 ユーザーが「Opus 5.5 で敵対レビューして」のように環境を省略して指示した場合：
