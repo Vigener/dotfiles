@@ -28,6 +28,7 @@
 - 同一モデルでよい場合は `{ "providerInstanceId": "opencode", "model": "opencode/deepseek-v4.1-flash-free" }` を指定し、options を空にする（inherit 相当）。
 - T3 側のライブカタログ（`orchestrator_capabilities`）を参照して、独立した子スレッドを起票する。
 - 子は親の会話履歴を引き継がない。brief に前提・制約・完了条件を全部書く。
+- `target` は **(provider, model) の組**で選ぶ。モデル名がカタログにあっても、契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。例: Argon は `antigravity` のみ、cursor に `gemini-4-argon` が出ても選ばない）。
 - 同一モデルの軽い並列なら native `subagent` でもよい（T3 の子スレッドは作られない）。
 
 ### 追補・訂正・別ラウンドの使い分け

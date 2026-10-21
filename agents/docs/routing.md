@@ -85,6 +85,19 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | `deepseek 1017 in api` | DeepSeek 従量（1017 確定） | T3 `delegate_task` (`opencode` / `deepseek/deepseek-flash`) または `dsh-sub` |
 | `サブエージェント(inherit)` | 親と同一モデル | T3 `delegate_task` (`opencode` / 親モデル、options 空) または native `subagent` |
 
+**モデル→プロバイダは固定**（カタログに出ていても、契約が違うプロバイダでは選ばない）
+
+| モデル | 使うプロバイダ | 選ばない先 |
+|---|---|---|
+| Argon | `antigravity` のみ | cursor（`gemini-4-argon` が出るが選ばない） |
+| Sonnet 5.5 | `agy`（CLI）→ 無ければ `claudeAgent` | cursor |
+| Opus 5.5 | `claudeAgent`（CLI） | cursor、agy（週枠が余っているときのみ許可制） |
+| Fable 5.1 | `cursor` のみ | それ以外（Team には無い） |
+| Composer / Grok | `cursor` | それ以外 |
+| DeepSeek | `opencode` / `dsh-sub` | それ以外 |
+
+`delegate_task` の `target` は「そのプロバイダのカタログにある」ではなく「この表で許可されているか」で選ぶ。
+
 **環境省略時**:
 
 - **設計・探索**: ① agy（Argon / Gemini）→ ② Cursor → ③ Claude Team。
