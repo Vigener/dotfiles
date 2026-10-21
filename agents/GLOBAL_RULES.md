@@ -7,6 +7,7 @@
 
 - **HPC**: 生の `sbatch` / `qsub`、Miyabi / Pegasus / Sirius への `ssh` / `scp` / `rsync` は禁止。必ず harness 経由（`ppx_harness` / `miyabi_harness --dry-run`）。実ログインは人間。→ `rules/hpc.md`
 - **高額 API**: 明示指示なしに Anthropic / OpenAI の従量 API を使わない。サブスク枠を優先する。→ `rules/models.md`
+- **サブスク枠もタダではない**: 1回で 5h 枠の約 2% / 週枠の約 5% を超えうる呼び出しは、事前に1行宣言して許可を取る。→ `rules/models.md` 3.6
 - **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、明示指示があるときだけ。
 
 ## 2. 委譲

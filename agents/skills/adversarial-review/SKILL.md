@@ -21,7 +21,8 @@ description: >-
 - **diff 優先**: 入力の主軸は git diff とするが、探索が必要なら関連ファイルも参照させる。
 - **トリガー駆動**: 毎ターン回さない
 - **agy Opus 禁止**（Google AI Pro が即 5h limit）
-- **要許可モデルは呼ぶ前に確認**: Cursor Sonnet 5 / GPT-5.6 Terra
+- **要許可モデルは呼ぶ前に確認**: Sonnet 5 の `high` / Opus 5.5 / Fable 5.1（Sonnet 5 の medium は既定なので不要）
+- **effort は既定 medium**: ルーブリック・DoD・差分を渡せる監査と採点は medium で足りる。high は「何が良いか自体を決める」局面だけ（`rules/models.md` 3.5）。
 - **委譲チャネル**: 実装ループは `rules/delegation.md` の方針に従う。本スキル（敵対レビュー・採点）は Task / CLI 可。
 
 ## 役割分担（許可モデル）

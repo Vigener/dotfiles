@@ -3,6 +3,7 @@
 正本: 本ファイル（dotfiles）。
 タスク別の対応表: `docs/routing.md`。判定手順: スキル `model-route`。
 参考: `research-brain/wiki/ai-engineering/subscription_and_api_playbook_2026-10.md`。
+決定と教訓の履歴: `docs/user_model_routing_mental_model.md`（**非規範**。規範は本ファイルと `docs/routing.md`）。
 
 HPC 境界は `rules/hpc.md` を参照。
 
@@ -31,6 +32,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - **難所**: Sonnet 5.5（Team）。
 - Free は **期間限定・SLA なし・OpenCode 内限定**。有料 1017（`deepseek/deepseek-flash`）をフォールバックに置く。
 - Free の 1017 反映は **未確定**。動作で確認する。断定して書かない。
+- **DeepSeek API（`dsh-sub`）**: 従量 API だが、`bin/dsh-sub`（スキル `deepseek-harness`）というワンショット契約済みのハーネスを持つ。既定 `deepseek-flash` / effort `high`、難所は `deepseek-v4-pro` / `effort max`（常用禁止）。**従量なので 3.6 のゲート対象**（無料枠と混同しない）。
 
 
 ## 3. Claude（Team シート優先）
@@ -40,6 +42,26 @@ HPC 境界は `rules/hpc.md` を参照。
 - **API に切り替わる条件**: `ANTHROPIC_API_KEY` が設定されている、または `CLAUDE_CODE_SIMPLE=1` を使うと従量 API になる。使う前に `claude auth status` と環境変数を確認する。
 - **Team 枠を使い切った場合**: Anthropic 公式 API を検討してよいが、API を使うならまず安価な DeepSeek 等を優先する。
 - Claude 特有の自走が必要な局面では Sonnet 5.5 / Opus 5.5 を Team 枠で使う。`claudeAgent` は `binaryPath: claude` を叩くため、CLI と同じ認証を共有する。
+
+## 3.5 effort の既定値
+
+- 既定は **medium**。high は「成功条件が開いている」案件だけに使う。
+- 閉じている（ルーブリック・DoD・テスト・差分がある）: medium。
+- 開いている（何が良いか自体を決める）: high。
+- 機械的（整形・分類・抽出）: low。
+- モデルと effort は別軸。モデルを上げる前に effort を下げられないか考える。
+
+| provider | 無指定のときの effort | 対処 |
+|---|---|---|
+| claudeAgent の Sonnet | **high** | `options` で medium を明示する |
+| claudeAgent の Opus / Fable | medium | 明示不要。high にするときだけ書く |
+| antigravity の Argon | モデル ID で決まる | `gemini-4-argon-medium` を既定にする。high は明示的な判断としてのみ |
+
+### 3.6 サブスク枠のコストゲート
+
+- 1タスクで 5h 枠の約 2% 以上、または週枠の約 5% 以上を消費しうる呼び出しは、**事前に1行で宣言して許可を取る**。サブスク枠も対象。
+- 許可は呼び出し単位。「検証のため」は免除理由にならない。
+- 同じモデル・同じ役割の短時間の再呼び出しは、理由を1行書く。
 
 ## 4. ゴール固定・敵対レビュー
 

@@ -7,7 +7,7 @@
 
 ## 1. 判定順序
 
-1. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、残量ペースを無視して最高峰（Argon / Sonnet 5.5 / Opus 5.5）を投入する。
+1. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、残量ペースを無視して最高峰（Argon / Sonnet 5.5 / Opus 5.5）を投入する。ただし **モデルと effort は別軸**で、最高峰モデルを選ぶことは high effort を選ぶことを意味しない（`rules/models.md` 3.5）。
 2. **Task**: Design / Implement / Extract を判定。
 3. **Flag**: Private / Search / Orchestration を判定。
 4. **環境**: `in agy` / `in cursor` / `in claude` / `api` の指定を確認。省略時は下のフォールバック順。
@@ -31,13 +31,16 @@
 | 役割 | 第一候補 | 代替 | チャネル |
 |---|---|---|---|
 | 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
-| 設計・仕様化 | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
-| 敵対レビュー | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
+| 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 | agy / T3 |
+| 敵対レビュー | Argon (medium) + Sonnet 5.5 (medium) の2本立て | Opus 5.5（high・要許可） | agy / T3 / claudeAgent |
 | 実装ループ（W1） | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） / Sonnet 5.5 | opencode / cursor / T3 |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
 | 探索・量産（W2） | Gemini 3.8 Flash | DeepSeek Free（1M） | agy / opencode |
 | 裁定・袋小路 | Opus 5.5 | Fable 5.1（特別顧問） | agy / claude |
 | 機械的採点 | ローカル Python (pytest) | — | — |
+
+- effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` 3.5）。
+- 敵対レビューは **medium の2本立て**（別ファミリー）。high の同役二重は禁止。Sonnet 5 の high と Opus / Fable は要許可。
 
 ### Worker の分業
 
@@ -70,7 +73,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 
 | 記法 | 契約 | 実行 |
 |---|---|---|
-| `argon in agy` | Google AI Pro（Argon 独立週枠） | T3 `delegate_task` (`antigravity` / `gemini-4-argon-high`) または `agy --model gemini-4-argon-high` |
+| `argon in agy` | Google AI Pro（Argon 独立週枠） | T3 `delegate_task` (`antigravity` / `gemini-4-argon-medium`) または `agy --model gemini-4-argon-medium`。effort はモデル ID で選ぶ（既定 medium、high は明示判断） |
 | `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
 | `sonnet / opus in agy` | Google AI Pro（Claude/GPT 枠） | `agy --model claude-sonnet-5-5-high` / `claude-opus-5-5-high`（T3 には露出しない） |
 | `composer in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
@@ -97,6 +100,8 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | Opus 5.5 | 敵対監査・裁定 | `effort: high` | 不変条件と DoD だけ渡す |
 | Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
 | Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini 3.8 Flash を使う |
+
+Opus / Fable は**無指定だと medium**。high は明示的に書く（Sonnet は逆に無指定が high。`rules/models.md` 3.5 の表）。
 
 ## 6. 昇格・降格トリガー
 
@@ -128,3 +133,4 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 - 指定モデルを勝手に昇格・降格する。
 - Free を唯一の実装経路にしない（有料 1017 をフォールバックに置く）。
 - Free が 1017 だと断定しない（動作で確認する）。
+- **GPT 系（Sol / Terra / Luna）を Cursor の Other Models 枠で使う**（枠は Fable 専用）。
