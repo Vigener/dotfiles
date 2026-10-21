@@ -19,7 +19,7 @@
 |---|---|---|---|
 | **Design** | 研究方針・論理・意思決定・敵対レビュー・数理検証 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` / `agy: Sonnet 5.5` / Web Argon |
 | **Implement（前段）** | 仕様化・疑似コード | `agy: Gemini 4 Argon` | `claude: Sonnet 5.5` |
-| **Implement（中段）** | 打鍵・実装・リファクタ | `cursor: Composer 2.5` | `claude: Sonnet 5.5 (medium)` |
+| **Implement（中段）** | 打鍵・実装・リファクタ | `opencode: DeepSeek V4.1 Flash Free` | `cursor: Composer 2.5` / `claude: Sonnet 5.5 (medium)` |
 | **Implement（後段）** | Diff 敵対監査 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` |
 | **Extract** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | `cursor: Composer 2.5` |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5` / `cursor-agent` | `claude`（Team） |
@@ -33,10 +33,25 @@
 | 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
 | 設計・仕様化 | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
 | 敵対レビュー | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
-| 実装ループ | Composer 2.5 | Sonnet 5.5 (medium) | cursor / T3 |
-| 探索・量産 | Gemini 3.8 Flash | DeepSeek V4.1 Flash | agy / dsh-sub |
+| 実装ループ（W1） | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） / Sonnet 5.5 | opencode / cursor / T3 |
+| 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
+| 探索・量産（W2） | Gemini 3.8 Flash | DeepSeek Free（1M） | agy / opencode |
 | 裁定・袋小路 | Opus 5.5 | Fable 5.1（特別顧問） | agy / claude |
 | 機械的採点 | ローカル Python (pytest) | — | — |
+
+### Worker の分業
+
+| 層 | 既定 | 代替 | 使う場面 |
+|---|---|---|---|
+| **W1 日常実装** | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） | 編集 → テスト → 修正。まず Free。 |
+| **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（1M） | 全体把握・ログ要約・横断検索。 |
+| **W3 難所** | Sonnet 5.5 (Team) | Opus 5.5 | 仕様が曖昧、設計判断が絡む、2回失敗した。 |
+
+- Free は **期間限定・SLA なし・OpenCode 内限定**。外部 API からは使えない。
+- 消えた場合 / レート制限時は `deepseek/deepseek-flash`（1017・有料）へ。
+- Free の 1017 反映は **未確定**。同一プロンプトで軌跡と冗長性を比べて確認する。
+- Composer 3 が出たら W1 を再評価する。
+
 
 ## 4. 環境の指定とフォールバック
 
@@ -45,17 +60,19 @@
 | `argon in agy` | Google AI Pro（Argon 独立週枠） | T3 `delegate_task` (`antigravity` / `gemini-4-argon-high`) または `agy --model gemini-4-argon-high` |
 | `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
 | `sonnet / opus in agy` | Google AI Pro（Claude/GPT 枠） | `agy --model claude-sonnet-5-5-high` / `claude-opus-5-5-high`（T3 には露出しない） |
-| `composer in cursor` | Cursor Pro | `cursor-agent --model composer-2.5` |
+| `composer in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
 | `grok in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
 | `sonnet / opus in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `claude-opus-5-5`) または `cursor-agent --model claude-opus-5-5` |
 | `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
-| `deepseek in api` | DeepSeek 従量 | `dsh-sub --repo <dir> --prompt "..."` |
+| `deepseek in opencode` | OpenCode Free（期間限定・$0） | T3 `delegate_task` (`opencode` / `opencode/deepseek-v4.1-flash-free`) または `opencode run -m ...` |
+| `deepseek 1017 in api` | DeepSeek 従量（1017 確定） | T3 `delegate_task` (`opencode` / `deepseek/deepseek-flash`) または `dsh-sub` |
 | `サブエージェント(inherit)` | 親と同一モデル | T3 `delegate_task` (`opencode` / 親モデル、options 空) または native `subagent` |
 
 **環境省略時**:
 
+- **設計・探索**: ① agy（Argon / Gemini）→ ② Cursor → ③ Claude Team。
+- **実装（W1）**: ① DeepSeek Free（T3）→ ② Composer（Cursor）→ ③ Sonnet 5.5（Team）。
 - **Claude モデル**: ① Claude Team → ② agy の Claude/GPT 週枠 → ③ Cursor の Claude 枠。
-- **非 Claude**: ① agy（Argon / Gemini）→ ② Cursor（Composer / Grok）→ ③ DeepSeek。
 
 公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
 
@@ -63,7 +80,7 @@
 
 | モデル | 役割 | 設定 | 原則 |
 |---|---|---|---|
-| Sonnet 5.5 | 実装ループ主力 | `effort: medium` | DoD まで自律完遂。`high` を乱用しない |
+| Sonnet 5.5 | 難所の実装（W3） | `effort: medium` | DoD まで自律完遂。`high` を乱用しない |
 | Opus 5.5 | 敵対監査・裁定 | `effort: high` | 不変条件と DoD だけ渡す |
 | Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
 | Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini 3.8 Flash を使う |
@@ -85,7 +102,7 @@
 
 ## 7. ペース配分
 
-- **Cursor Pro（月枠）**: 更新日の約1週間前に使い切るペース。最後の1週間は Gemini 系と Cursor 無料系で回す。
+- **Cursor Pro（月枠）**: Grok を設計・レビューに使わず、Composer 用に空ける。更新日の約1週間前に使い切るペース。最後の1週間は Gemini 系と Cursor 無料系で回す。
 - **agy（週枠）**: リセット1〜2日前に使い切るペース。余剰は発想・設計に回す。
 - **Claude Team**: 5h / 週の残量を見て、日常の実装・監査に使う。使い切った場合のみ API を検討。
 - 実測は `update-ai-usage`。数値は本書に書かない。
@@ -96,3 +113,5 @@
 - `Private` フラグのタスクを agy に投げる。
 - 明示指示なしに Anthropic / OpenAI の従量 API を使う。
 - 指定モデルを勝手に昇格・降格する。
+- Free を唯一の実装経路にしない（有料 1017 をフォールバックに置く）。
+- Free が 1017 だと断定しない（動作で確認する）。

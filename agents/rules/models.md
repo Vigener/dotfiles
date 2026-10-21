@@ -24,6 +24,15 @@ HPC 境界は `rules/hpc.md` を参照。
 - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
 - **Cursor からの Fable 5.1 / Opus 5.5 の呼び出しは厳禁（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）**。
 
+## 2.5 Worker（実装役）の方針
+
+- **既定**: DeepSeek V4.1 Flash Free（T3 の `opencode` 経由）。1M context / 出力 384K / $0。
+- **Cursor 内の大量打鍵**: Composer 2.5。Cursor 枠は Composer 専用にし、Grok の設計利用で枯渇させない。
+- **難所**: Sonnet 5.5（Team）。
+- Free は **期間限定・SLA なし・OpenCode 内限定**。有料 1017（`deepseek/deepseek-flash`）をフォールバックに置く。
+- Free の 1017 反映は **未確定**。動作で確認する。断定して書かない。
+
+
 ## 3. Claude（Team シート優先）
 
 - **認証の確認**: `claude auth status` が `subscriptionType: "team"` なら、`claude` CLI と T3 の `claudeAgent` は **Team シート（サブスク）** で動く。従量 API ではない。
