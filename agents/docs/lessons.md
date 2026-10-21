@@ -27,4 +27,5 @@
 
 - `update-ai-usage` の Markdown 表示が、Claude のセッション枠を「0% left」と出したが、
   JSON の `limits[].percent` は 4% だった。**表示だけを信じて「今日は詰んでいる」と判断しない。**
-  `--format json` の `limits` を見る（既知の不具合。未修正）。
+  2026-10-21 に修正（`limits[]` を優先するようにした）。古いキャッシュが残っている間は
+  最大15分だけ古い値を出すので、変だと思ったら `--format json` の `limits` を見る。

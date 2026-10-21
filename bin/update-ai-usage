@@ -278,6 +278,16 @@ def fetch_claude_usage():
             "resets_at": bucket.get("resets_at"),
         }
     result["limits"] = data.get("limits") or []
+    # limits[] is authoritative. The utilization field behind five_hour/seven_day can be
+    # stale or saturated (2026-10-21: five_hour.utilization=1.0 while session percent=4).
+    for kind, key in (("session", "five_hour"), ("weekly_all", "seven_day")):
+        if key not in result:
+            continue
+        for lim in result["limits"]:
+            pct = lim.get("percent")
+            if lim.get("kind") == kind and pct is not None:
+                result[key]["used_pct"] = to_percent(float(pct) / 100)
+                break
     result["extra_usage_enabled"] = bool(
         (data.get("extra_usage") or {}).get("is_enabled")
     )
