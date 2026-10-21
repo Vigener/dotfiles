@@ -30,14 +30,28 @@
   2026-10-21 に修正（`limits[]` を優先するようにした）。古いキャッシュが残っている間は
   最大15分だけ古い値を出すので、変だと思ったら `--format json` の `limits` を見る。
 
-## 5. ルールを変えても T3 には届かない（2026-10-21）
+## 5. ルールを変えても届かない範囲（2026-10-21）
 
-- `opencode run --standalone` は毎回新しいプロセスなので、変更後の `AGENTS.md` を読む。
-- **T3 は常駐の `opencode serve` に接続する**ため、そのサーバが起動時に読んだ指示文書を保持し続ける。
-  実測では9日前に起動した `opencode serve --service` と、T3 側の serve が、旧版（`<RULE[...]>` タグ付き）を配っていた。
-- 対策: `agents/` のルールを変えたら **T3 を再起動**する。CLI も同じサービスに繋ぐので、
-  必要なら `opencode serve --service` も落として再生成させる。
-- 検証は `opencode run --standalone` の1行目と、**再起動後の新スレッド**の両方で行う（片方だけでは不十分）。
+システム指示は**プロセス起動時に読んで以後保持**される。境界はファイルの更新時刻ではなく、プロセスの寿命。
+
+| 経路 | 保持単位（実測） | 効かせ方 |
+|---|---|---|
+| OpenCode（T3 経由の `opencode serve`） | **アプリ全体** | T3 を再起動 |
+| OpenCode（CLI の常駐 `--service`） | サービス | `pkill -f 'opencode serve --service'` → 次回実行で再生成 |
+| Claude（T3 の `claudeAgent`） | **スレッド**（`claude --input-format stream-json --session-id` が終了後も残る） | 新スレッド |
+| Cursor（T3 の `cursor`） | ターン（`cursor-agent` は残らなかった） | 次ターン |
+| Antigravity（T3 の ACP） | スレッドと推定（週枠 0% で未検証） | 新スレッド |
+| CLI 直叩き（`claude -p` / `cursor-agent -p` / `agy -p`） | 実行ごと | 何もしなくてよい |
+
+**OpenCode だけ手順が重い**（アプリ全体が古いルールを配るため）。
+
+1. 作業の区切りで T3 を終了 → 起動する。
+2. 確認: 新しいスレッドで「注入されている指示文書の1行目を引用して」と聞く。
+   `# Global AI Agent Rules (Tier 0)` なら成功、`# Global AI Agent Rules` ならまだ古い。
+3. CLI 側だけ古い場合: `pkill -f 'opencode serve --service'`。次に `opencode` を叩けば新プロセスが立つ（2026-10-21 17:59 に実測）。
+4. モデル定義や MCP 設定は消えない（設定ファイルは起動時に読むだけ）。
+
+`opencode run --standalone` は毎回新しいプロセスなので、CLI の検証はこれで足りる。
 
 ### 保持の単位（T3 経由、2026-10-21 実測）
 
