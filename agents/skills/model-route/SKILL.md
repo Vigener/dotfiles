@@ -28,8 +28,9 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 
 ```markdown
 ### 🎯 モデル選定判定
-- **推奨モデル**: `agy: Gemini 4 Argon (high)`
-- **コスト階層**: 中（残量は `update-ai-usage` で確認）
+- **推奨モデル**: `agy: Gemini 4 Argon (medium)`
+- **effort**: medium（high は「成功条件が開いている」案件だけ。`rules/models.md` 3.5）
+- **コスト階層**: 中（残量は `update-ai-usage` で確認。サブスク枠も 3.6 のゲート対象）
 - **判定理由**: [Task / Flag と根拠を1〜2文]
 - **推奨アクション**: [次にどう指示するか]
 ```
