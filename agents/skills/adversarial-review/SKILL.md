@@ -22,7 +22,7 @@ description: >-
 - **トリガー駆動**: 毎ターン回さない
 - **agy Opus 禁止**（Google AI Pro が即 5h limit）
 - **要許可モデルは呼ぶ前に確認**: Cursor Sonnet 5 / GPT-5.6 Terra
-- **委譲チャネル**: 実装ループは herdr 推奨（`GLOBAL_RULES` `RULE[delegate_channel]`）。本スキル（敵対レビュー・採点）は Task / CLI 可。
+- **委譲チャネル**: 実装ループは `rules/delegation.md` の方針に従う。本スキル（敵対レビュー・採点）は Task / CLI 可。
 
 ## 役割分担（許可モデル）
 
@@ -47,7 +47,7 @@ T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に�
 ## 手順
 
 1. ティアを決める（迷ったら T1）。T3 なら Terra 許可を先に取る。
-   - スコープ: `~/dotfiles/agents/GLOBAL_RULES.md` の `RULE[adversarial_scope]`。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Sol／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
+   - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Sol／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
 2. **モデル名を先頭に（必須・呼び出し前）**:
    - Cursor Task: `description` を `{通称} {作業}` にする（例: `Gemini Flash T1 diff review`）。UI に通称が出る。チャット宣言は省略可。
    - agy / pi / herdr: 起動**直前**にチャットへ次を出す。宣言なしで呼んではならない。
