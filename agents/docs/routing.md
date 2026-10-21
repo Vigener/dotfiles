@@ -43,7 +43,7 @@
 
 | 層 | 既定 | 代替 | 使う場面 |
 |---|---|---|---|
-| **W1 日常実装** | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） | 編集 → テスト → 修正。まず Free。 |
+| **W1 日常実装** | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） | 編集 → テスト → 修正。まず Free。T1/T2 は Composer と同等、T3 型の検証は Free 優先。 |
 | **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（1M） | 全体把握・ログ要約・横断検索。 |
 | **W3 難所** | Sonnet 5.5 (Team) | Opus 5.5 | 仕様が曖昧、設計判断が絡む、2回失敗した。 |
 
@@ -51,6 +51,19 @@
 - 消えた場合 / レート制限時は `deepseek/deepseek-flash`（1017・有料）へ。
 - Free の 1017 反映は **未確定**。同一プロンプトで軌跡と冗長性を比べて確認する。
 - Composer 3 が出たら W1 を再評価する。
+
+### 2026-10-21 ベイクオフの結論
+
+DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）/ T3（検証・CLI）で比較した。
+詳細と限界は `logs/worker-bakeoff-2026-10-21.md`。
+
+- **機能面は同等**: 隠しテスト 14/14、可視 10/10。T1/T2 は実質同点。
+- **T3 だけ差**: Composer は `re.match` + `$` で `a\n` を通し、非文字列タグで traceback になり得る。
+  DeepSeek は `fullmatch` と型検査で塞ぐ。
+- **`__pycache__` の差は環境要因**。除くと Sonnet 約 297 対 297、Argon 300 対 300。
+- **結論**: W1 の既定は DeepSeek Free のまま。ただし T1/T2 は Composer と同等。
+  Composer は Cursor の大量打鍵・最小差分・Free 不調時の代替に残す。
+  Composer に T3 型を振るなら `fullmatch` と型検査を明示する。
 
 
 ## 4. 環境の指定とフォールバック
