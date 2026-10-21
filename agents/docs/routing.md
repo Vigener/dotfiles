@@ -31,7 +31,7 @@
 | 役割 | 第一候補 | 代替 | チャネル |
 |---|---|---|---|
 | 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
-| 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 | agy / T3 |
+| 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 (medium) | agy / T3 |
 | 敵対レビュー | Argon (medium) + Sonnet 5.5 (medium) の2本立て | Opus 5.5（high・要許可） | agy / T3 / claudeAgent |
 | 実装ループ（W1） | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） / Sonnet 5.5 | opencode / cursor / T3 |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
@@ -133,4 +133,4 @@ Opus / Fable は**無指定だと medium**。high は明示的に書く（Sonnet
 - 指定モデルを勝手に昇格・降格する。
 - Free を唯一の実装経路にしない（有料 1017 をフォールバックに置く）。
 - Free が 1017 だと断定しない（動作で確認する）。
-- **GPT 系（Sol / Terra / Luna）を Cursor の Other Models 枠で使う**（枠は Fable 専用）。
+- **Cursor の Other Models 枠を Fable 以外に使う**（枠は Fable 専用。GPT 系は 2026-10-21 に撤退）。

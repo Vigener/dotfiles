@@ -84,7 +84,6 @@ cursor-agent -p --output-format text --yolo --model composer-2.5 "Reply with onl
   - `grok-4.7-high` / `cursor-grok-4.6-high` (司令塔役)
   - `claude-fable-5-1-thinking-high` (短時間発想・教員説明の穴・仮説1本のBRIEF向け最新モデル)
   - `claude-sonnet-5-thinking-high` (※要許可)
-  - `gpt-5.6-terra-high` / `gpt-5.6-sol-high` (※レビュー分析時要許可)
 
 ---
 

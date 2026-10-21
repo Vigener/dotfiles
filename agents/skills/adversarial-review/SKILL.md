@@ -1,7 +1,7 @@
 ---
 name: adversarial-review
 description: >-
-  Cursor auto-review の代わりに agy/pi（＋許可時 Terra）で敵対レビューする。
+  Cursor auto-review の代わりに agy/pi（＋許可時 Sonnet 5 high / Opus / Fable）で敵対レビューする。
   「レビューして」「敵対レビュー」「agyで見て」「差分レビュー」で発動。
   hook には載せない（コスト爆発防止）。
 ---
@@ -29,11 +29,11 @@ description: >-
 
 | 役割 | モデル | 使うとき |
 |---|---|---|
-| **発想・方針・問いの立て直し** | **Sonnet 5**（要許可） | 設計の壁打ち、研究の言い方、アーキ選択。レビュー役にはしない（同役二重呼び出し禁止） |
-| **レビュー分析・計画の穴・採点統合** | **GPT-5.6 Terra**（要許可） | T3 の敵対レビュー、ルーブリック横断、複数ラウンドの統合判定 |
+| **発想・方針・問いの立て直し** | **Opus 5.5 / Fable 5.1**（要許可） | 設計の壁打ち、研究の言い方、アーキ選択。レビュー役にはしない。`claude` 経由（Cursor は核ボタンで禁止、agy の Opus は 5h limit で禁止） |
+| **レビュー分析・計画の穴・採点統合** | **Argon medium + Sonnet 5 medium**（別ファミリー2本立て） | T3 の敵対レビュー、ルーブリック横断、複数ラウンドの統合判定 |
 | 日常・中間 | pi / agy Flash·Pro / Sonnet 4.6 | T1–T2。許可不要で足りることが多い |
 
-Sonnet 5 と Terra を**同じレビュー役で並べない**（コスト倍・役割重複）。発想は Sonnet、監査は Terra。
+**high の同役二重は禁止。medium の別ファミリー2本立ては可（推奨）**。発想は Opus / Fable、監査は Argon + Sonnet。Sonnet を発想役にしない。
 
 ## ティア
 
@@ -41,14 +41,14 @@ Sonnet 5 と Terra を**同じレビュー役で並べない**（コスト倍・
 |---|---|---|---|
 | T1 | コミット前・軽い草案 | `git diff` のみ | `pi` (kimi-k3 等) / `agy` gemini-flash |
 | T2 | 主張・設計判断・status 更新 | diff + 関連1–2ファイル | `agy` gemini-pro / claude-sonnet-4-6 |
-| T3 | T2 で major+、または節目 | 広め | **許可時: GPT-5.6 Terra（分析レビュー）**。未許可なら agy Sonnet 4.6 で止める。発想の再設計が必要なら別途 **Sonnet 5** を許可申請（レビュー役ではない） |
+| T3 | T2 で major+、または節目 | 広め | **Argon medium + Sonnet 5 medium の2本立て**。Sonnet 5 の `high` を使うときだけ許可を取る。発想の再設計が必要なら別途 **Opus 5.5 / Fable 5.1** を許可申請（レビュー役ではない） |
 
 T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に載る言い方 / 計画の前提が大きく変わった。
 
 ## 手順
 
-1. ティアを決める（迷ったら T1）。T3 なら Terra 許可を先に取る。
-   - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Sol／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
+1. ティアを決める（迷ったら T1）。T3 なら **Argon medium + Sonnet 5 medium の2本立て**で走らせる（Sonnet 5 の `high` を使うときだけ許可を取る）。
+   - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Opus／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
 2. **モデル名を先頭に（必須・呼び出し前）**:
    - Cursor Task: `description` を `{通称} {作業}` にする（例: `Gemini Flash T1 diff review`）。UI に通称が出る。チャット宣言は省略可。
    - agy / pi / herdr: 起動**直前**にチャットへ次を出す。宣言なしで呼んではならない。
@@ -89,11 +89,11 @@ EOF
 $(cat /tmp/adv-review.diff)"
 ```
 
-T3（許可後）は同等プロンプトを **GPT-5.6 Terra** に渡し、可能なら T2 結果との差分だけ追加指摘させる。呼び出す前に手順2の宣言を更新すること。
+T3 では同等プロンプトを **Argon medium と Sonnet 5 medium の2本**に渡し、指摘集合の差を見る（high 1本を既定にしない）。呼び出す前に手順2の宣言を更新すること。
 
 5. triage: blocker/major だけ修正。nit は溜めて無視可。
 6. 結果を `inbox/REVIEWS/` または sandbox `docs/logs/` に残す（任意）。ログ先頭にも実際に使った model id を1行残す。
-7. レビュー後に設計の立て直しが必要なら、**別ターンで Sonnet 5 許可**を取り発想役に回す（レビューと混ぜない）。
+7. レビュー後に設計の立て直しが必要なら、**別ターンで Opus 5.5 / Fable 5.1 の許可**を取り発想役に回す（レビューと混ぜない）。
 
 ## hook にしない理由
 
