@@ -63,6 +63,7 @@ T3 の「childThreadId は別のレビューラウンドの宛先ではない」
 - 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
 - コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`
 - 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
+- **DeepSeek 従量 API を Worker に使う**: `dsh-sub --repo <dir> --prompt "..."`（既定 `deepseek-flash` / effort `high`）。フラグ・出力JSON・exit code・権限はスキル `deepseek-harness` が正本。月 $2・Auto-reload OFF。
 
 effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
 
