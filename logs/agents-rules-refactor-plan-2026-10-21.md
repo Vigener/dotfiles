@@ -166,11 +166,17 @@ opencode run --standalone -m opencode/deepseek-v4.1-flash-free \
   "あなたに注入された指示文書の1行目だけを引用してください。"
 ```
 
+**2026-10-21 結果**: 禁止記法 0件、絶対パスは規則文の例示のみ、旧参照（herdr / git-semantic-commit / `goal` / Terra / `gpt-5.6`）は履歴と herdr ツールの hooks 以外 0件。
+注入確認は**既存スレッドでは無効**（開始時のスナップショットを見るため）。新しいスレッドで1回だけ回す。
+
 ## 7. 未決事項
 
-- `docs/routing.md` の作成を Phase 2 に前倒すか、Phase 3 のままにするか。
-- Claude Team の消費速度が未測定。日常でどこまで `claudeAgent` を使うか。
-- Argon 残 34% をいつ・何に使い切るか。
+- ~~`docs/routing.md` の作成を Phase 2 に前倒すか~~ → **解消**（Phase 2 で作成済み）。
+- ~~Argon 残 34% をいつ・何に使い切るか~~ → **書き換え**。残量を文書に書かない方針なので数値は持たない。運用は「リセット2日前に使い切る」（`docs/routing.md` §7）。
+- **Claude Team の消費速度**: Sonnet の採点1回が 5h 枠の約4%（2026-10-21 の1点のみ）。日常でどこまで `claudeAgent` を使うかは未測定。
+- **medium × 2 が high × 1 の見落としを減らすか**は未実施（許可制）。同じ diff・同じ brief で Argon medium と Sonnet medium を走らせ、既存の Argon high 採点と major 指摘の集合を比べる。
+- **`add-to-todo` の去就**: Linear MCP が OpenCode / Claude に未連携のため保留継続（`now/TODO.md` が現状唯一の経路）。
+- **MBA / TB**: 2026-10-21 時点で MBA は `origin/main`（`961306a`）のまま。ローカルは20コミット先行しており、**分岐ではない**ので push → MBA で pull すれば追いつく。TB は Ubuntu ではなくなり ssh 不可。
 
 ## 8. 参照
 
