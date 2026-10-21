@@ -79,7 +79,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | `opus in agy` | Google AI Pro（Claude 週枠。**Opus は `claude` 優先**） | `agy --model claude-opus-5-5-high`。週枠が余っているときだけ・事前許可制 |
 | `composer in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
 | `grok in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
-| `sonnet / opus in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `claude-opus-5-5`) または `cursor-agent --model claude-opus-5-5` |
+| `fable in cursor` | Cursor Pro（**Fable 専用**・Other Models 枠） | T3 `delegate_task` (`cursor` / `claude-fable-5-1-thinking-high`) または `cursor-agent --model claude-fable-5-1-thinking-high`。事前許可制 |
 | `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
 | `deepseek in opencode` | OpenCode Free（期間限定・$0） | T3 `delegate_task` (`opencode` / `opencode/deepseek-v4.1-flash-free`) または `opencode run -m ...` |
 | `deepseek 1017 in api` | DeepSeek 従量（1017 確定） | T3 `delegate_task` (`opencode` / `deepseek/deepseek-flash`) または `dsh-sub` |
@@ -121,14 +121,15 @@ Opus / Fable は**無指定だと medium**。high は明示的に書く（Sonnet
 
 ## 7. ペース配分
 
-- **Cursor Pro（月枠）**: Grok を設計・レビューに使わず、Composer 用に空ける。更新日の約1週間前に使い切るペース。最後の1週間は Gemini 系と Cursor 無料系で回す。
+- **Cursor Pro（月枠）**: Other Models は **Fable 専用**（温存。許可時のみ）。Grok を設計・レビューに使わず、Composer 用に空ける。更新日の約1週間前に使い切るペース。最後の1週間は Gemini 系と Cursor 無料系で回す。
 - **agy（週枠）**: リセット1〜2日前に使い切るペース。余剰は発想・設計に回す。
 - **Claude Team**: 5h / 週の残量を見て、日常の実装・監査に使う。使い切った場合のみ API を検討。
 - 実測は `update-ai-usage`。数値は本書に書かない。
 
 ## 8. 禁止
 
-- Cursor から Fable 5.1 / Opus 5.5 を呼ぶ（核ボタン）。
+- **Fable 5.1 を許可なく Cursor で呼ぶ**（核ボタン）。
+- Cursor の Other Models 枠を Fable 以外に使う（枠は Fable 専用。GPT 系は 2026-10-21 に撤退）。
 - `Private` フラグのタスクを agy に投げる。
 - 明示指示なしに Anthropic / OpenAI の従量 API を使う。
 - 指定モデルを勝手に昇格・降格する。

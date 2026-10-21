@@ -20,10 +20,10 @@ HPC 境界は `rules/hpc.md` を参照。
 - 週枠は繰り越されないため **「Use it or lose it（毎週使い切る）」**。温存心理を撤廃し、**日常4大門番（①実装前仕様化、②Diff敵対監査、③意地悪境界値テスト生成、④批判的文献読解）** に最優先で投入する。
 - agy 側の週枠消化後は、Google AI Pro 付属の Web 版 Argon（無料）へフォールバックして使い倒す。
 
-## 2. Cursor Pro クォータ防護と Composer 打鍵特化
+## 2. Cursor Pro（Composer 打鍵・Fable 専用）
 
 - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
-- **Cursor からの Fable 5.1 / Opus 5.5 の呼び出しは厳禁（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）**。
+- **Cursor は Fable 専用**。Fable 5.1 を選べる唯一のサブスクが Cursor なので、Other Models 枠は Fable に全振りする。ただし**呼び出しは事前許可制**（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）。**Opus 5.5 を Cursor で呼ぶのは禁止**（`claude` を使う）。
 
 ## 2.5 Worker（実装役）の方針
 
