@@ -38,3 +38,6 @@ herdr/.config/herdr/*.sock
 rtk/filters.toml
 rtk/**/*.db
 rtk/tee/
+
+# Worker scratch data (bakeoff etc.); summaries live in logs/
+scratch/
