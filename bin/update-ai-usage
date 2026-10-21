@@ -375,6 +375,7 @@ def calculate_weekly_pacing(rem_fraction, reset_time_str):
 
         return {
             "burn_rate": burn_rate,
+            "remaining_pct": int(round(rem_frac * 100)),
             "time_to_empty_hr": time_to_empty_hr,
             "safe_daily_pct": safe_daily_pct,
             "remaining_hours": remaining_sec / 3600.0,
@@ -445,6 +446,7 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
     Grammar: `Agy[G:0% Ar:34% C:0%] Cu:2%/0% Cl:100% DS:$1.22`
       - percentages keep their `%`; a bare `0` is too easy to misread
       - weekly detail appears only when it matters (<= 50% or overburning)
+      - 🔥 burn-rate is dropped once weekly hits 0% (no pace left to manage)
       - reset countdowns appear only when a window is nearly empty
     """
     parts = []
@@ -478,7 +480,8 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
             item = f"{tag}:{rem_pct}%"
 
             if w_rem is not None:
-                if w_pacing and w_pacing["is_overburning"]:
+                # 枯渇後（W0%）は燃焼ペースを出しても意味がないので炎を付けない
+                if w_pacing and w_pacing["is_overburning"] and w_rem > 0:
                     rate = f"🔥{w_pacing['burn_rate']:.1f}x" if g_type == "gemini" else "🔥"
                     item += f"(W{w_rem}%{rate})"
                 elif w_rem <= WEEKLY_WARN_THRESHOLD:
@@ -577,7 +580,8 @@ def build_runcat_payload(agy, cursor, deepseek, claude=None):
                     agy_g_pacing = w_pacing
 
     # Add Pacing items to RunCat detailed dropdown
-    if agy_g_pacing and agy_g_pacing["is_overburning"]:
+    # 枯渇済み（残量 0% 表示）はペース配分の意味が無いので出さない
+    if agy_g_pacing and agy_g_pacing["is_overburning"] and agy_g_pacing["remaining_pct"] > 0:
         eta_h = agy_g_pacing["time_to_empty_hr"]
         eta_desc = f"約{eta_h:.0f}h後" if eta_h < 72 else f"約{eta_h/24:.1f}日後"
         metrics.append({
@@ -726,7 +730,8 @@ def format_markdown(agy, cursor, deepseek, claude=None):
                 if desc:
                     lines.append(f"  - _{desc}_")
 
-            if w_pacing:
+            # 枯渇済み（残量 0% 表示）はペース分析を出さない
+            if w_pacing and w_pacing["remaining_pct"] > 0:
                 burn_icon = "🔥" if w_pacing["is_overburning"] else "⏱️"
                 eta_h = w_pacing["time_to_empty_hr"]
                 eta_str = f"約{eta_h:.1f}時間後" if eta_h < 72 else f"約{eta_h/24:.1f}日後"
