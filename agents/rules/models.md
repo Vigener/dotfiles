@@ -40,6 +40,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - **認証の確認**: `claude auth status` が `subscriptionType: "team"` なら、`claude` CLI と T3 の `claudeAgent` は **Team シート（サブスク）** で動く。従量 API ではない。
 - **モデル別の置き場所**: **Sonnet 5.5 は agy（Google AI Pro の Claude 週枠）優先**、次点が Team。**Opus 5.5 は Team 優先**、agy は週枠が余っているときだけ（事前許可制）。agy 側の Claude 週枠は減りが早く、途中で止まると作業が切れるため。
+- **Team は研究優先**: dotfiles / life-brain などの生活タスクで Team を使うのは、agy が枯れていて代替が無いときだけ。研究タスクは Team 優先。
 - **認証の優先順位**: Team シート > Anthropic 従量 API（agy の Claude/GPT 週枠は別契約枠。全体の順序は `docs/routing.md`）。
 - **API に切り替わる条件**: `ANTHROPIC_API_KEY` が設定されている、または `CLAUDE_CODE_SIMPLE=1` を使うと従量 API になる。使う前に `claude auth status` と環境変数を確認する。
 - **Team 枠を使い切った場合**: Anthropic 公式 API を検討してよいが、API を使うならまず安価な DeepSeek 等を優先する。
