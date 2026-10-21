@@ -87,6 +87,7 @@ link_file "$DOTFILES/agents/GLOBAL_RULES.md" "$HOME/.gemini/AGENTS.md"
 mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
+link_file "$DOTFILES/bin/t3-refresh" "$HOME/.local/bin/t3-refresh"
 
 # Cursor Quota Guard (Gemini誤爆・高額モデル暴走防止)
 mkdir -p "$HOME/.local/share/cursor-agent"
