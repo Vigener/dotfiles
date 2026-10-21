@@ -445,6 +445,8 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
 
     Grammar: `Agy[G:0% Ar:34% C:0%] Cu:2%/0% Cl:100% DS:$1.22`
       - percentages keep their `%`; a bare `0` is too easy to misread
+      - lowercase `w` marks the weekly window (`G:0%(w0%)`) so it never reads
+        like another service tag (G/Ar/C/Cl/Cu/DS)
       - weekly detail appears only when it matters (<= 50% or overburning)
       - 🔥 burn-rate is dropped once weekly hits 0% (no pace left to manage)
       - reset countdowns appear only when a window is nearly empty
@@ -483,9 +485,9 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
                 # 枯渇後（W0%）は燃焼ペースを出しても意味がないので炎を付けない
                 if w_pacing and w_pacing["is_overburning"] and w_rem > 0:
                     rate = f"🔥{w_pacing['burn_rate']:.1f}x" if g_type == "gemini" else "🔥"
-                    item += f"(W{w_rem}%{rate})"
+                    item += f"(w{w_rem}%{rate})"
                 elif w_rem <= WEEKLY_WARN_THRESHOLD:
-                    item += f"(W{w_rem}%)"
+                    item += f"(w{w_rem}%)"
 
             if rem_pct <= ALERT_THRESHOLD and w_rem != 0:
                 rem_time = format_time_remaining(bucket.get("reset_time", ""))
@@ -523,7 +525,7 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
             if used_w is not None:
                 left_w = max(0.0, min(100.0, 100.0 - float(used_w)))
                 if left_w <= WEEKLY_WARN_THRESHOLD:
-                    item += f"(W{left_w:.0f}%)"
+                    item += f"(w{left_w:.0f}%)"
             if left <= ALERT_THRESHOLD:
                 rem_time = format_time_remaining(fh.get("resets_at", ""))
                 if rem_time:
