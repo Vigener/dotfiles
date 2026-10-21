@@ -4,7 +4,7 @@ description: >-
   Linear にタスク・チケット・Issue を【追加・登録・起票】する（書き込み専用）。
   agy (Gemini等) からローカルの cursor-agent CLI を経由して Linear にタスクを登録し、now/TODO.md へ反映する。
   【重要・ハイブリッド規律】
-  - 追加・起票（Write）: 本スキルを発動し、cursor-agent (--model auto) に隔離委譲する。
+  - 追加・起票（Write）: 本スキルを発動する。経路は実行環境で分岐（OpenCode / Claude は Linear MCP を直接、agy は cursor-agent に委譲）。
   - 参照・確認（Read）: 「Linearのタスク確認」「未完了一覧」「期日確認」等の読み取りは本スキルを使わず、agy 内蔵の Linear MCP を直接叩いて即時回答する。
   「Linearにタスク追加」「Linearのチケット作成」「Linearに起票」「Linear add task」「Linear issue作成」「add task in Linear」などで発動。
   ※注意: 数学・物理・機械学習等の文脈（線形代数・線形回帰・linear regression 等）における "linear" は対象外。
@@ -23,7 +23,17 @@ agy（Gemini / Claude）と Cursor の長所を組み合わせ、安定性とコ
 | 操作種別 | 担当エージェント | 実行手段 | 理由・メリット |
 |---|---|---|---|
 | **参照 (Read)**<br>一覧・ステータス・期日確認 | **agy (直接)** | 内蔵 Linear MCP<br>(`list_issues`, `get_issue` 等) | **最速（0.5秒で即答）**。別プロセスを起動するオーバーヘッドをゼロにし、会話のリズムを崩さない。 |
-| **起票 (Write)**<br>新規追加・チケット作成 | **Cursor (委譲)**<br>※本スキル | `cursor-agent`<br>(`--model auto`) | **コンテキスト隔離 ＆ 安定性**。<br>1. agy の MCP は公式提供ではなく書き込み時の挙動が不安定になるリスクをヘッジ。<br>2. 「起票 → ID/URL取得 → `now/TODO.md` 更新」の泥臭い往復を別プロセスへ隔離し、メインチャットのトークンを汚さない。<br>3. Cursor Pro の余剰枠（Auto モデル）を有効活用する。 |
+| **起票 (Write)**<br>新規追加・チケット作成 | **実行環境で分岐**（下記）<br>※本スキル | `cursor-agent`<br>(`--model auto`) または Linear MCP 直接 | **コンテキスト隔離 ＆ 安定性**。<br>1. 「起票 → ID/URL取得 → `now/TODO.md` 更新」の泥臭い往復を隔離し、メインチャットのトークンを汚さない。<br>2. 環境ごとに安定する経路が違う（下表）。 |
+
+**環境別の起票経路（2026-10-21 改定）**
+
+| 実行環境 | 起票 | 理由 |
+|---|---|---|
+| **OpenCode / Claude** | **Linear MCP を直接**使う | MCP 接続済み。プロセス起動のオーバーヘッドが無く、ID/URL もその場で取れる |
+| **agy** | `cursor-agent --model auto` に委譲 | agy の MCP は書き込み時の挙動が不安定という前提を維持する |
+| それ以外（Cursor 等） | `cursor-agent --model auto` | 同じ経路で足りる |
+
+どの経路でも、書き込みは `rules/delegation.md` §11 に従う（**明示指示があるときだけ・1操作ずつ**）。
 
 > [!NOTE]
 > ユーザーから「Linearのタスク一覧見せて」「LIFE-12 の期日っていつだっけ？」などの **参照（Read）** を求められた場合は、本スキルを起動せず agy 自身の内蔵 MCP ツールで直接回答すること。

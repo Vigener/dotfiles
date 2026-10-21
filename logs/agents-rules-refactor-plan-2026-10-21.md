@@ -130,7 +130,7 @@
 
 - 廃止: `herdr` / `goal` / `git-semantic-commit`。
 - 改名: `thinkpad-resident` → `http-resident`（`open-artifact` の参照も更新）。
-- 保留: `add-to-todo`。
+- 保留: `add-to-todo`。→ **2026-10-21 判定（Sonnet 5.5 medium）: 残す**。理由は役割が別物（`now/TODO.md` はエージェントの実行キュー、Linear は人間向けの計画・履歴）で、統合すると確認タスク1件ごとに起票の手間が乗る。併せて2点修正した: ①`add-to-todo` のリンクを `file:///` 絶対パスから相対パスへ（Tier 0 違反だった）②`cursor-linear-task` の起票経路を環境別に分岐（OpenCode / Claude は MCP 直接、agy は cursor-agent）。
 - `bin/link-dotfiles-macos.sh` の `agents/skills/herdr` リンクを削除。
 
 **2026-10-21 実行**: 3スキルを削除（`herdr` は必要になったら git 履歴から復旧する方針）。
