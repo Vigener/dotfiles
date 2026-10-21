@@ -15,7 +15,7 @@
 - 実装と検証は異種モデル・別コンテキストで行う（Maker-Breaker）。
 - 指定されたモデルを勝手に昇格・降格しない（Strict Model Fidelity）。
 - 子には会話履歴が渡らない。brief に前提・制約・完了条件を全部書く。
-- → `rules/delegation.md`
+- 子の追補は台帳の `childThreadId` に送る。台帳に無いときだけ新規起票する。→ `rules/delegation.md`
 
 ## 3. 成果物
 

@@ -18,7 +18,7 @@
 
 ```json
 {
-  "target": { "providerInstanceId": "antigravity", "model": "gemini-4-argon-high" },
+  "target": { "providerInstanceId": "antigravity", "model": "gemini-4-argon-medium" },
   "mode": "wait",
   "role": "design",
   "task": "..."
@@ -28,8 +28,26 @@
 - 同一モデルでよい場合は `{ "providerInstanceId": "opencode", "model": "opencode/deepseek-v4.1-flash-free" }` を指定し、options を空にする（inherit 相当）。
 - T3 側のライブカタログ（`orchestrator_capabilities`）を参照して、独立した子スレッドを起票する。
 - 子は親の会話履歴を引き継がない。brief に前提・制約・完了条件を全部書く。
-- 同じ作業の続きは `t3_thread_send(childThreadId)`。独立レビューは新規 `delegate_task`。実行中の訂正は `mode: "steer"`。
 - 同一モデルの軽い並列なら native `subagent` でもよい（T3 の子スレッドは作られない）。
+
+### 追補・訂正・別ラウンドの使い分け
+
+| 状況 | 手段 | 安定キー |
+|---|---|---|
+| 実行中に前提が変わった | `mode: "steer"` | 実行中の子 |
+| 同一成果物の続き（仕様補足・却下理由の共有・採点） | `t3_thread_send(childThreadId)` | childThreadId |
+| 独立した別ラウンド（第二意見・別成果物・Breaker 交代） | 新規 `delegate_task` | 新しい clientRequestId |
+
+判定は2問。1問目が Yes で2問目が No なら継続、2問目が Yes なら新規。
+
+1. 次の作業は子の内部状態（隠しテスト・却下案・ルーブリックの意図・途中成果物）を必要とするか。
+2. 独立した判断が本質か（第二意見・ブラインド評価・Maker-Breaker の Breaker 交代）。
+
+ブラインド性は候補の匿名化で作る。子の記憶を消して作らない。
+1問目と2問目が両方 Yes になるのは設計ミス。役割を分ける。
+
+T3 の「childThreadId は別のレビューラウンドの宛先ではない」は**独立ラウンドの禁止**であり、同一タスクの追補は `t3_thread_send(childThreadId)` が正規手段（実測済み）。
+追補では `taskId` が新しく発行される。台帳の主キーは `childThreadId`、`taskId` はターンごとに追記する。
 
 ## 4. Antigravity（`invoke_subagent`）
 
@@ -44,7 +62,9 @@
 
 - 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "..."`
 - コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent --model composer-2.5 "..."` または `--model grok`
-- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --model gemini-4-argon-high --dangerously-skip-permissions -p "..."`
+- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --model gemini-4-argon-medium --dangerously-skip-permissions -p "..."`
+
+effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
 
 ## 6. モデル同一性（Strict Model Fidelity）
 
@@ -52,7 +72,7 @@
 - 勝手に別モデルへ昇格・降格しない。
   - `flash` 指定 → `agy --model gemini-3.8-flash-high`
   - `composer` 指定 → `cursor-agent --model composer-2.5`
-  - `argon` 指定 → `agy --model gemini-4-argon-high`
+  - `argon` 指定 → `agy --model gemini-4-argon-medium`（high は明示指示があるときだけ `-high`）
 - 指定モデルの枠（クォータ・コスト）を厳守する。
 
 ## 7. 親の振る舞い
@@ -66,10 +86,18 @@
 1. **実装・多段（編集→pytest→修正）**: T3 `delegate_task`（別スレッド）または Cursor Task。herdr は主経路にしない。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: `delegate_task`（Argon / Claude 等）または CLI（`agy`）。`pi` は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。モデル切替は `/model`。
-4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Sol / Terra / Luna / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
+4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
 
 ## 9. 敵対レビューのスコープ
 
 1. **正本に無い使用上限を発明しない**（例: Fable 1日1回、別 BRIEF の別日必須、案Aと案Bの同日禁止）。
-2. **「同日同問」は Fable↔Sol（または同役二重）に限定**。Fable の別 BRIEF・別セッションでの同日 A→B は禁止理由にしない。
+2. **「同日同問」は Fable↔Opus（または同役二重）に限定**。Fable の別 BRIEF・別セッションでの同日 A→B は禁止理由にしない。
 3. 疑わしい制限指摘は severity を `major` にせず `nit` とし、正本の該当行を引用必須。引用できなければ指摘しない。
+
+## 10. ファイル所有権
+
+同じリポジトリで別スレッドが稼働中なら、そのスレッドが触っているファイルを編集しない。
+
+- `git add -A` を使わない。パスを明示して stage する（相手の `scratch/` 等を巻き込まない）。
+- commit は相手スレッドが terminal になってから。
+- worktree 分離はルール共有を切らない（`AGENTS.md` が symlink で本体を読むため）。
