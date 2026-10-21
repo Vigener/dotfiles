@@ -14,7 +14,7 @@ APP="T3 Code (Beta)"
 echo "==> quit: $APP"
 osascript -e "quit app \"$APP\"" >/dev/null 2>&1 || true
 for _ in $(seq 1 20); do
-  pgrep -f "MacOS/$APP\$" >/dev/null 2>&1 || break
+  pgrep -f '/MacOS/T3 Code' >/dev/null 2>&1 || break
   sleep 0.5
 done
 
@@ -27,6 +27,6 @@ open -a "$APP"
 sleep 5
 
 echo "==> state"
-pgrep -f "MacOS/$APP\$" >/dev/null 2>&1 && echo "T3: running" || echo "T3: NOT running (MBA からなら launchctl asuser を使って再実行)"
+pgrep -f '/MacOS/T3 Code' >/dev/null 2>&1 && echo "T3: running" || echo "T3: NOT running (MBA からなら launchctl asuser を使って再実行)"
 ps -Ao pid,lstart,command | grep '[o]pencode serve' | cut -c1-100 \
   || echo "opencode serve: まだ無し（最初のスレッド実行時に立つ）"
