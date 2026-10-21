@@ -133,11 +133,21 @@
 - 保留: `add-to-todo`。
 - `bin/link-dotfiles-macos.sh` の `agents/skills/herdr` リンクを削除。
 
+**2026-10-21 実行**: 3スキルを削除（`herdr` は必要になったら git 履歴から復旧する方針）。
+`git-semantic-commit` の実質3行（意味で分割 / `git add -A` 禁止 / push は明示時のみ）は `rules/artifacts.md` §4 へ移設。
+リンク削除は `bin/link-dotfiles-macos.sh` と `~/.gemini/config/skills/herdr` の両方。
+**改名は取りやめ**: 同名のコマンド `thinkpad-resident` が `~/.local/bin` に実在し、`open-artifact` もそのコマンド名で呼ぶため、
+スキル名だけ変えると文書と実体が食い違う。改名するなら CLI 本体と両マシンのリンクまで同時に動かす必要がある。
+
 ### Phase 5: cursorrules / docs / HTML 整理
 
 - `agents/docs/*.html` を削除（参照ゼロを確認済み）。
 - `docs/ai-cli-invocation-guide.md` を削除、または3行に圧縮。
 - `cursorrules` の最終確認。
+
+**2026-10-21 実行**: `ai-cli-invocation-guide.md`（139行）は削除。残す価値があったのは実行時の罠だけで、
+`rules/delegation.md` §5 に移設した（`</dev/null` 必須 / `agy` の `-p` 順序 / YOLO フラグの差 / OpenCode の `#none`）。
+モデル一覧とテンプレートは `docs/routing.md` と重複していたため落とした。
 
 ## 6. 検証コマンド
 

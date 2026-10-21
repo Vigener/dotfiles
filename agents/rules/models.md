@@ -67,5 +67,5 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ## 4. ゴール固定・敵対レビュー
 
-- 長作業の開始時はスキル `goal`。
+- 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
 - 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。選定と詳細手順はスキル `adversarial-review`（`~/dotfiles/agents/skills/adversarial-review/SKILL.md`）および `model-route` を参照。

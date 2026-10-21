@@ -61,7 +61,7 @@ description: >-
 
 ## ステップ 5: コミット
 
-dotfiles 変更は `git-semantic-commit` スキルに従い、ユーザーがコミット依頼したとき（または明示依頼時）に push まで。
+dotfiles 変更は `rules/artifacts.md` §4 に従い、ユーザーがコミット依頼したとき（または明示依頼時）に push まで。
 
 ## 禁止
 

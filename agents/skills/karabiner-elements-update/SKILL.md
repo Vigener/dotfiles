@@ -61,7 +61,7 @@ Karabiner の設定ファイル群は `dotfiles/karabiner/rules/` にある。
 対象の表（例: `### APP（かなレイヤー）` の `#### アプリ起動`）を見つけ、整合性がとれるようにマークダウンのテーブルを更新する。
 
 ### 4. コミットとプッシュ
-変更を Conventional Commits でコミットし、リモートへプッシュする（詳細は `git-semantic-commit` に従う）。
+変更を Conventional Commits でコミットし、リモートへプッシュする（規律は `rules/artifacts.md` §4）。
 
 ```bash
 # 例: 対象ファイルを明示して add → commit → pull --rebase → push

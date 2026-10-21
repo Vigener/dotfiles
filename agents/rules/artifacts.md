@@ -19,3 +19,11 @@
 3. **セッション終了時（best-effort）**: 人間向け HTML を更新したら `open-artifact` スキルに従い、MBA でブラウザを開く（`ssh mac 'open URL'`）。オフライン時の失敗は無視して URL をチャットに出す。
 4. **配信**: 母艦（**mini**）の `http-brain`（:8766）等。素の `python -m http.server` 禁止（`thinkpad-resident`）。略称は `glossary.md`。
 5. **挙動設定の変更**: 必ず `update-agent-config` で層（Context / Harness / Loop / Graph A/B）を判定してから最小変更する。
+
+## 4. コミット
+
+スキルは置かない（モデルの既定動作で足りる）。次の3つだけ守る。
+
+- **意味で分割する**（1コミット1関心事）。無関係な整形を混ぜない。
+- **`git add -A` を使わない**。パスを明示して stage する（相手の作業中データを巻き込まない）。
+- **push は明示指示があるときだけ**（「push」「上げて」「リモートに」）。

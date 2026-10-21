@@ -94,7 +94,6 @@ printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
 | スキル | 関係 |
 |---|---|
 | `human-review-html` | トーン別テンプレ選択・複製（`wiki/templates/human-review/`） |
-| `goal` | Goal 固定 → 作業 → **締めは本スキルで HTML open** |
 | `update-agent-config` | 挙動設定変更時の層判定 |
 | `adversarial-review` | HTML 化する前の品質ゲート（任意） |
 

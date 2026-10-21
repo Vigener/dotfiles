@@ -51,17 +51,16 @@ T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に�
    - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。正本に無い使用上限（Fable 1日1回・別BRIEF別日必須等）を発明しない。「同日同問」は Fable↔Opus／同役二重のみ。疑わしい制限は nit＋正本引用必須（major にしない）。
 2. **モデル名を先頭に（必須・呼び出し前）**:
    - Cursor Task: `description` を `{通称} {作業}` にする（例: `Gemini Flash T1 diff review`）。UI に通称が出る。チャット宣言は省略可。
-   - agy / pi / herdr: 起動**直前**にチャットへ次を出す。宣言なしで呼んではならない。
+   - agy / pi: 起動**直前**にチャットへ次を出す。宣言なしで呼んではならない。
 
 ```text
 レビュワーモデルとして、次を呼び出します:
 - 一次: <実コマンドに渡す model id>（例: agy claude-sonnet-4-6）
 - 二次（使うときのみ）: <model id>（例: なし / pi kimi-k3）
-- 経路: CLI | Cursor Task | herdr pane
+- 経路: CLI | Cursor Task
 - ティア: T1|T2|T3
 ```
 
-   herdr ペイン必須にはしない（宣言で可視性を担保）。ペインを使う場合も宣言は省略しない。
 3. 差分を取る:
 
 ```bash

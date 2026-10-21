@@ -75,6 +75,5 @@ description: >-
 ## 関連
 
 - `open-artifact` — 開く
-- `goal` — 締めに HTML + open-artifact
 - `adversarial-review` — 品質ゲート
 - フォーマットガイド: `research-brain/.agents/references/wiki_formatting_guide.md`
