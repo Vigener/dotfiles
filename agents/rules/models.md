@@ -3,7 +3,7 @@
 正本: 本ファイル（dotfiles）。
 タスク別の対応表: `docs/routing.md`。判定手順: スキル `model-route`。
 参考: `research-brain/wiki/ai-engineering/subscription_and_api_playbook_2026-10.md`。
-決定と教訓の履歴: `docs/user_model_routing_mental_model.md`（**非規範**。規範は本ファイルと `docs/routing.md`）。
+決定と教訓の履歴: `docs/history/2026-model-decisions.md`（経緯）と `docs/lessons.md`（事故）。どちらも**非規範**。
 
 HPC 境界は `rules/hpc.md` を参照。
 
@@ -33,15 +33,17 @@ HPC 境界は `rules/hpc.md` を参照。
 - Free は **期間限定・SLA なし・OpenCode 内限定**。有料 1017（`deepseek/deepseek-flash`）をフォールバックに置く。
 - Free の 1017 反映は **未確定**。動作で確認する。断定して書かない。
 - **DeepSeek API（`dsh-sub`）**: 従量 API だが、`bin/dsh-sub`（スキル `deepseek-harness`）というワンショット契約済みのハーネスを持つ。既定 `deepseek-flash` / effort `high`、難所は `deepseek-v4-pro` / `effort max`（常用禁止）。**従量なので 3.6 のゲート対象**（無料枠と混同しない）。
+- **DeepSeek の予算**: **月 $2・Auto-reload OFF**。残高が $0.5 を切ったら月1回だけ補充する。サブスクが主、API は「サブスクが枯れた日の圧力弁」なので、ここを増やす前に Argon / Team の枠を消化する。月 $2 は仮置き（実消費が $1 を超えた月が続いたら見直す）。
 
 
-## 3. Claude（Team シート優先）
+## 3. Claude（Sonnet は agy、Opus は Team）
 
 - **認証の確認**: `claude auth status` が `subscriptionType: "team"` なら、`claude` CLI と T3 の `claudeAgent` は **Team シート（サブスク）** で動く。従量 API ではない。
-- **Claude の認証優先順位**: Team シート > Anthropic 従量 API（agy の Claude/GPT 週枠は別契約枠。全体の順序は `docs/routing.md`）。
+- **モデル別の置き場所**: **Sonnet 5.5 は agy（Google AI Pro の Claude 週枠）優先**、次点が Team。**Opus 5.5 は Team 優先**、agy は週枠が余っているときだけ（事前許可制）。agy 側の Claude 週枠は減りが早く、途中で止まると作業が切れるため。
+- **認証の優先順位**: Team シート > Anthropic 従量 API（agy の Claude/GPT 週枠は別契約枠。全体の順序は `docs/routing.md`）。
 - **API に切り替わる条件**: `ANTHROPIC_API_KEY` が設定されている、または `CLAUDE_CODE_SIMPLE=1` を使うと従量 API になる。使う前に `claude auth status` と環境変数を確認する。
 - **Team 枠を使い切った場合**: Anthropic 公式 API を検討してよいが、API を使うならまず安価な DeepSeek 等を優先する。
-- Claude 特有の自走が必要な局面では Sonnet 5.5 / Opus 5.5 を Team 枠で使う。`claudeAgent` は `binaryPath: claude` を叩くため、CLI と同じ認証を共有する。
+- Claude 特有の自走が必要な局面では Sonnet 5.5 / Opus 5.5 を Team 枠で使う。`claudeAgent` は `binaryPath: claude` を叩くため、CLI と同じ認証を共有する。Opus を T3 から呼ぶなら `claudeAgent`、Sonnet なら `agy`（CLI）が既定。
 
 ## 3.5 effort の既定値
 

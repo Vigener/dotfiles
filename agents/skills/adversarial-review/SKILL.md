@@ -20,7 +20,7 @@ description: >-
   - 単なる難癖・却下（REJECT）・重箱の隅突きで終わらせず、**「よりシンプル・堅牢・エレガントになる具体的代替案（Alternative Proposal）や上位互換の設計」** を積極的に提示させる。
 - **diff 優先**: 入力の主軸は git diff とするが、探索が必要なら関連ファイルも参照させる。
 - **トリガー駆動**: 毎ターン回さない
-- **agy Opus 禁止**（Google AI Pro が即 5h limit）
+- **agy Opus は原則使わない**（Google AI Pro が即 5h limit）。**Opus 5.5 は `claude`（Team）優先**、agy は週枠が余っているときだけ許可制。agy は Sonnet 5.5 専用と考える。
 - **要許可モデルは呼ぶ前に確認**: Sonnet 5 の `high` / Opus 5.5 / Fable 5.1（Sonnet 5 の medium は既定なので不要）
 - **effort は既定 medium**: ルーブリック・DoD・差分を渡せる監査と採点は medium で足りる。high は「何が良いか自体を決める」局面だけ（`rules/models.md` 3.5）。
 - **委譲チャネル**: 実装ループは `rules/delegation.md` の方針に従う。本スキル（敵対レビュー・採点）は Task / CLI 可。

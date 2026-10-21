@@ -17,10 +17,10 @@
 
 | Task / Flag | 役割 | 第一候補 | 代替 |
 |---|---|---|---|
-| **Design** | 研究方針・論理・意思決定・敵対レビュー・数理検証 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` / `agy: Sonnet 5.5` / Web Argon |
+| **Design** | 研究方針・論理・意思決定・敵対レビュー・数理検証 | `agy: Gemini 4 Argon` | `claude: Opus 5.5`（要許可） / `agy: Sonnet 5.5` / Web Argon |
 | **Implement（前段）** | 仕様化・疑似コード | `agy: Gemini 4 Argon` | `claude: Sonnet 5.5` |
 | **Implement（中段）** | 打鍵・実装・リファクタ | `opencode: DeepSeek V4.1 Flash Free` | `cursor: Composer 2.5` / `claude: Sonnet 5.5 (medium)` |
-| **Implement（後段）** | Diff 敵対監査 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` |
+| **Implement（後段）** | Diff 敵対監査 | `agy: Gemini 4 Argon` | `claude: Opus 5.5`（要許可） |
 | **Extract** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | `cursor: Composer 2.5` |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5` / `cursor-agent` | `claude`（Team） |
 | **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | `agy: Gemini 4 Argon`（批判的読解） |
@@ -36,7 +36,7 @@
 | 実装ループ（W1） | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） / Sonnet 5.5 | opencode / cursor / T3 |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
 | 探索・量産（W2） | Gemini 3.8 Flash | DeepSeek Free（1M） | agy / opencode |
-| 裁定・袋小路 | Opus 5.5 | Fable 5.1（特別顧問） | agy / claude |
+| 裁定・袋小路 | Opus 5.5（要許可） | Fable 5.1（特別顧問・要許可） | claude（agy は週枠が余っているときのみ） |
 | 機械的採点 | ローカル Python (pytest) | — | — |
 
 - effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` 3.5）。
@@ -75,7 +75,8 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 |---|---|---|
 | `argon in agy` | Google AI Pro（Argon 独立週枠） | T3 `delegate_task` (`antigravity` / `gemini-4-argon-medium`) または `agy --model gemini-4-argon-medium`。effort はモデル ID で選ぶ（既定 medium、high は明示判断） |
 | `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
-| `sonnet / opus in agy` | Google AI Pro（Claude/GPT 枠） | `agy --model claude-sonnet-5-5-high` / `claude-opus-5-5-high`（T3 には露出しない） |
+| `sonnet in agy` | Google AI Pro（Claude 週枠。**Sonnet の第一候補**） | `agy --model claude-sonnet-5-5-high`（T3 には露出しない） |
+| `opus in agy` | Google AI Pro（Claude 週枠。**Opus は `claude` 優先**） | `agy --model claude-opus-5-5-high`。週枠が余っているときだけ・事前許可制 |
 | `composer in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
 | `grok in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
 | `sonnet / opus in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `claude-opus-5-5`) または `cursor-agent --model claude-opus-5-5` |
@@ -88,7 +89,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 
 - **設計・探索**: ① agy（Argon / Gemini）→ ② Cursor → ③ Claude Team。
 - **実装（W1）**: ① DeepSeek Free（T3）→ ② Composer（Cursor）→ ③ Sonnet 5.5（Team）。
-- **Claude モデル**: ① Claude Team → ② agy の Claude/GPT 週枠 → ③ Cursor の Claude 枠。
+- **Claude モデル**: Sonnet は ① agy の Claude 週枠 → ② Claude Team → ③ Cursor。**Opus は ① Claude Team → ② agy（週枠が余っているときのみ）→ ③ Cursor**。Fable は Cursor の Other Models のみ（要許可）。
 
 公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
 
