@@ -167,7 +167,11 @@ opencode run --standalone -m opencode/deepseek-v4.1-flash-free \
 ```
 
 **2026-10-21 結果**: 禁止記法 0件、絶対パスは規則文の例示のみ、旧参照（herdr / git-semantic-commit / `goal` / Terra / `gpt-5.6`）は履歴と herdr ツールの hooks 以外 0件。
-注入確認は**既存スレッドでは無効**（開始時のスナップショットを見るため）。新しいスレッドで1回だけ回す。
+注入確認は**新しいセッションで実施済み**（`opencode run --standalone`、paid DeepSeek で約 $0.001）。
+注入文書は `agents/GLOBAL_RULES.md`（Tier 0）のみで、1行目は `# Global AI Agent Rules (Tier 0)`。
+旧版にあった `adversarial_scope` と「`user_model_routing_mental_model` が正本」は**どちらも無し**。
+Cursor 側は `.cursorrules`（→ `agents/rules/cursorrules`）が注入される（1行目 `# Cursor Agent Rules`）。
+T3 の新規スレッド経由は Free モデルのレート制限で失敗したため、CLI 経路で代替した（無料枠が戻ったら再試行可）。
 
 ## 7. 未決事項
 

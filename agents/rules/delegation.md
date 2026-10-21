@@ -109,3 +109,10 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 - `git add -A` を使わない。パスを明示して stage する（相手の `scratch/` 等を巻き込まない）。
 - commit は相手スレッドが terminal になってから。
 - worktree 分離はルール共有を切らない（`AGENTS.md` が symlink で本体を読むため）。
+
+## 11. MCP（Linear 等）
+
+外部 MCP を繋ぐときは、**読み取りは自由・書き込みは明示指示があるときだけ**にする。
+
+- 起票・更新・クローズ・コメント投稿は「指示された1操作」に限る。まとめて作らない。
+- 接続設定（`opencode mcp add` / `claude mcp add`）は `~/.config/opencode/opencode.jsonc` 等に入る。**T3 稼働中に T3 側の設定を書き換えない**。
