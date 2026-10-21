@@ -447,8 +447,9 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
       - percentages keep their `%`; a bare `0` is too easy to misread
       - lowercase `w` marks the weekly window (`G:0%(w0%)`) so it never reads
         like another service tag (G/Ar/C/Cl/Cu/DS)
-      - weekly detail appears only when it matters (<= 50% or overburning);
-        Claude is the exception (`Cl:100%(w100%)`) since it has a single group
+      - weekly detail appears only when it matters (<= 50% or overburning)
+        and differs from the primary number (`G:0%(w0%)` collapses to `G:0%`)
+      - Claude compares its weekly against 5h, so `Cl:100%(w0%)` keeps the 0
       - 🔥 burn-rate is dropped once weekly hits 0% (no pace left to manage)
       - reset countdowns appear only when a window is nearly empty
     """
@@ -487,7 +488,8 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
                 if w_pacing and w_pacing["is_overburning"] and w_rem > 0:
                     rate = f"🔥{w_pacing['burn_rate']:.1f}x" if g_type == "gemini" else "🔥"
                     item += f"(w{w_rem}%{rate})"
-                elif w_rem <= WEEKLY_WARN_THRESHOLD:
+                elif w_rem <= WEEKLY_WARN_THRESHOLD and w_rem != rem_pct:
+                    # 週次が主数値と同じなら同じ数字の繰り返しなので畳む (G:0%(w0%) → G:0%)
                     item += f"(w{w_rem}%)"
 
             if rem_pct <= ALERT_THRESHOLD and w_rem != 0:
@@ -525,8 +527,9 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
             used_w = wk.get("used_pct")
             if used_w is not None:
                 left_w = max(0.0, min(100.0, 100.0 - float(used_w)))
-                # Claude は 5h と weekly の両方を常時出す（1グループだけなので幅の余裕がある）
-                item += f"(w{left_w:.0f}%)"
+                # 5h と同じ値なら繰り返しになるので畳む（異なる値のときは 5h/weekly 両方出す）
+                if int(round(left_w)) != int(round(left)):
+                    item += f"(w{left_w:.0f}%)"
             if left <= ALERT_THRESHOLD:
                 rem_time = format_time_remaining(fh.get("resets_at", ""))
                 if rem_time:
