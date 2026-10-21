@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
 update-ai-usage
-Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, and Anthropic/Claude,
+Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, and Claude (Team),
 calculate weekly burn rates (pacing & depletion ETA), trigger desktop alerts,
 write RunCat Neo custom metrics JSON, and format output for Raycast / CLI.
 """
 
 import argparse
-import glob
 import json
 import os
 import shutil
@@ -127,87 +126,163 @@ def fetch_deepseek_balance():
         return {"error": f"Failed to call DeepSeek API: {e}"}
 
 
-def fetch_anthropic_info():
-    """
-    Fetch Anthropic account and profile info via Claude Code OAuth token or API key.
-    Note: Anthropic does NOT provide a public API endpoint to query prepaid balance.
-    """
-    token = None
-    auth_type = "oauth"
+CLAUDE_KEYCHAIN_SERVICE = "Claude Code-credentials"
+CLAUDE_USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
+# The usage endpoint rate-limits (429) when polled aggressively, so reuse a recent
+# result and keep serving the last good one while the endpoint is cooling down.
+CLAUDE_CACHE_TTL_SEC = 900
+CLAUDE_CACHE_MAX_STALE_SEC = 6 * 3600
+CLAUDE_CACHE_PATH = "~/.cache/update-ai-usage/claude-usage.json"
 
-    # 1. Check Claude Code OAuth credentials
+
+def read_claude_oauth_token():
+    """
+    Read the Claude Code OAuth access token (macOS Keychain first).
+    Claude Code stores and refreshes `Claude Code-credentials`, so reading it
+    every run keeps us on a valid token without our own refresh logic.
+    """
+    try:
+        res = subprocess.run(
+            ["security", "find-generic-password", "-s", CLAUDE_KEYCHAIN_SERVICE, "-w"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            data = json.loads(res.stdout)
+            oauth = (data.get("claudeAiOauth") or {}) if isinstance(data, dict) else {}
+            token = oauth.get("accessToken")
+            if token:
+                return token, oauth.get("subscriptionType")
+    except Exception:
+        pass
+
+    # Older layouts kept the same JSON in a plain file
     cred_path = os.path.expanduser("~/.config/anthropic/credentials/default.json")
     if os.path.exists(cred_path):
         try:
             with open(cred_path, "r", encoding="utf-8") as f:
                 cred = json.load(f)
-            token = cred.get("access_token")
+            oauth = (cred.get("claudeAiOauth") or {}) if isinstance(cred, dict) else {}
+            token = cred.get("access_token") or oauth.get("accessToken")
+            if token:
+                return token, oauth.get("subscriptionType")
         except Exception:
             pass
 
-    # 2. Check ANTHROPIC_API_KEY env var as fallback
-    if not token:
-        token = os.environ.get("ANTHROPIC_API_KEY")
-        auth_type = "api_key"
+    return None, None
 
-    if not token:
-        return {"error": "Anthropic credentials not found"}
 
-    result = {
-        "auth_type": auth_type,
-        "is_available": True,
-    }
-
-    if auth_type == "oauth":
-        try:
-            req = urllib.request.Request(
-                "https://api.anthropic.com/api/oauth/profile",
-                headers={
-                    "Authorization": f"Bearer {token}",
-                    "Accept": "application/json",
-                    "anthropic-version": "2023-06-01",
-                },
-                method="GET",
-            )
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                org = data.get("organization", {})
-                acc = data.get("account", {})
-                result["organization_name"] = org.get("name")
-                result["billing_type"] = org.get("billing_type")  # e.g., 'prepaid'
-                result["rate_limit_tier"] = org.get("rate_limit_tier")
-                result["email"] = acc.get("email")
-                result["status"] = "Connected (Prepaid)" if org.get("billing_type") == "prepaid" else "Connected"
-        except urllib.error.HTTPError as e:
-            result["error"] = f"HTTP {e.code}"
-        except Exception as e:
-            result["error"] = str(e)
-    else:
-        result["status"] = "API Key configured"
-
-    # Calculate local Claude Code spend from session logs if available
+def read_claude_cache():
     try:
-        total_local_spend = 0.0
-        session_count = 0
-        for path in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
-            session_cost = 0.0
-            with open(path, "r", encoding="utf-8") as f:
-                for line in f:
-                    if '"totalCostUSD"' in line:
-                        try:
-                            d = json.loads(line)
-                            if "totalCostUSD" in d:
-                                session_cost = float(d["totalCostUSD"])
-                        except Exception:
-                            pass
-            if session_cost > 0:
-                total_local_spend += session_cost
-                session_count += 1
-        result["local_claude_spend_usd"] = round(total_local_spend, 4)
-        result["local_claude_sessions"] = session_count
+        with open(os.path.expanduser(CLAUDE_CACHE_PATH), "r", encoding="utf-8") as f:
+            cached = json.load(f)
+        if isinstance(cached, dict) and isinstance(cached.get("data"), dict):
+            return cached
+    except Exception:
+        pass
+    return None
+
+
+def write_claude_cache(data):
+    path = os.path.expanduser(CLAUDE_CACHE_PATH)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        temp_fd, temp_path = tempfile.mkstemp(
+            dir=os.path.dirname(path), prefix="claude_", suffix=".tmp"
+        )
+        with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
+            json.dump(
+                {"fetched_at": datetime.now(timezone.utc).timestamp(), "data": data}, f
+            )
+        os.replace(temp_path, path)
     except Exception:
         pass
 
+
+def claude_cache_suffix(claude):
+    """Describe how old the served value is when it came from the cache."""
+    if not claude or not claude.get("cached"):
+        return ""
+    age = claude.get("cache_age_sec") or 0
+    if age < 60:
+        return ""
+    fetched_at = datetime.now(timezone.utc).timestamp() - age
+    stamp = datetime.fromtimestamp(fetched_at).strftime("%H:%M")
+    return f" · {stamp}時点"
+
+
+def fetch_claude_usage():
+    """
+    Fetch Claude subscription rate-limit usage via Claude Code's OAuth endpoint.
+
+    Same source as `/usage` in the CLI. The endpoint reports `utilization` as a
+    fraction of the window already used (0-1, may exceed 1), so it is scaled to
+    percent here for the 5-hour session window and the 7-day weekly window.
+    NOTE: API keys cannot call this endpoint; a Claude Code OAuth login is required.
+    """
+    cached = read_claude_cache()
+    cache_age = None
+    if cached:
+        cache_age = max(
+            0.0,
+            datetime.now(timezone.utc).timestamp() - float(cached.get("fetched_at", 0)),
+        )
+        if cache_age < CLAUDE_CACHE_TTL_SEC:
+            return {**cached["data"], "cached": True, "cache_age_sec": round(cache_age)}
+
+    def stale_fallback(error):
+        if cached and cache_age is not None and cache_age < CLAUDE_CACHE_MAX_STALE_SEC:
+            return {
+                **cached["data"],
+                "cached": True,
+                "stale": True,
+                "cache_age_sec": round(cache_age),
+                "error": error,
+            }
+        return {"error": error}
+
+    token, plan = read_claude_oauth_token()
+    if not token:
+        return stale_fallback("Claude Code OAuth credentials not found")
+
+    try:
+        req = urllib.request.Request(
+            CLAUDE_USAGE_URL,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "anthropic-beta": "oauth-2025-04-20",
+                "anthropic-version": "2023-06-01",
+                "Accept": "application/json",
+            },
+            method="GET",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        return stale_fallback(f"HTTP {e.code}")
+    except Exception as e:
+        return stale_fallback(str(e))
+
+    def to_percent(value):
+        try:
+            return max(0.0, min(100.0, round(float(value) * 1000) / 10))
+        except (TypeError, ValueError):
+            return None
+
+    result = {"plan": plan}
+    for key in ("five_hour", "seven_day"):
+        bucket = data.get(key) or {}
+        result[key] = {
+            "used_pct": to_percent(bucket.get("utilization")),
+            "resets_at": bucket.get("resets_at"),
+        }
+    result["limits"] = data.get("limits") or []
+    result["extra_usage_enabled"] = bool(
+        (data.get("extra_usage") or {}).get("is_enabled")
+    )
+
+    write_claude_cache(result)
     return result
 
 
@@ -363,18 +438,106 @@ def classify_agy_group(group_name):
         return "claude"
 
 
-def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
+def build_metrics_bar(agy, cursor, deepseek, claude=None):
+    """
+    Compact one-line status shared by the RunCat menu bar and Raycast inline.
+
+    Grammar: `Agy[G:0% Ar:34% C:0%] Cu:2%/0% Cl:100% DS:$1.22`
+      - percentages keep their `%`; a bare `0` is too easy to misread
+      - weekly detail appears only when it matters (<= 50% or overburning)
+      - reset countdowns appear only when a window is nearly empty
+    """
+    parts = []
+
+    agy_items = {}
+    if "groups" in agy:
+        for g in agy["groups"]:
+            g_type = classify_agy_group(g.get("name", ""))
+            b_dict = {b.get("window"): b for b in g.get("buckets", [])}
+            five_h = b_dict.get("5h")
+            weekly = b_dict.get("weekly")
+            w_rem = None
+            w_pacing = None
+            if weekly:
+                w_rem = int(round(float(weekly.get("remaining_fraction", 0.0)) * 100))
+                w_pacing = calculate_weekly_pacing(
+                    weekly.get("remaining_fraction"), weekly.get("reset_time")
+                )
+
+            bucket = five_h or weekly
+            if not bucket:
+                continue
+            if five_h is None:
+                # the primary number already *is* the weekly window
+                w_rem = None
+            rem_pct = int(round(float(bucket.get("remaining_fraction", 0.0)) * 100))
+            if five_h and w_rem == 0:
+                rem_pct = 0
+
+            tag = {"gemini": "G", "argon": "Ar", "claude": "C"}[g_type]
+            item = f"{tag}:{rem_pct}%"
+
+            if w_rem is not None:
+                if w_pacing and w_pacing["is_overburning"]:
+                    rate = f"🔥{w_pacing['burn_rate']:.1f}x" if g_type == "gemini" else "🔥"
+                    item += f"(W{w_rem}%{rate})"
+                elif w_rem <= WEEKLY_WARN_THRESHOLD:
+                    item += f"(W{w_rem}%)"
+
+            if rem_pct <= ALERT_THRESHOLD and w_rem != 0:
+                rem_time = format_time_remaining(bucket.get("reset_time", ""))
+                if rem_time:
+                    item += f":{rem_time}"
+            agy_items[tag] = item
+
+    agy_parts = [agy_items[tag] for tag in ("G", "Ar", "C") if tag in agy_items]
+    if agy_parts:
+        parts.append("Agy[" + " ".join(agy_parts) + "]")
+    elif "error" in agy:
+        parts.append("Agy:Err")
+
+    if "planUsage" in cursor:
+        plan = cursor["planUsage"]
+        auto_left = int(round(max(0.0, 100.0 - float(plan.get("autoPercentUsed", 0.0)))))
+        api_left = int(round(max(0.0, 100.0 - float(plan.get("apiPercentUsed", 0.0)))))
+        item = f"Cu:{auto_left}%/{api_left}%"
+        if auto_left <= ALERT_THRESHOLD or api_left <= ALERT_THRESHOLD:
+            reset = format_cursor_reset(cursor.get("billingCycleEnd"))
+            if reset:
+                item += f"({reset})"
+        parts.append(item)
+    elif "error" in cursor:
+        parts.append("Cu:Err")
+
+    if claude and "five_hour" in claude:
+        fh = claude.get("five_hour") or {}
+        wk = claude.get("seven_day") or {}
+        used = fh.get("used_pct")
+        if used is not None:
+            left = max(0.0, min(100.0, 100.0 - float(used)))
+            item = f"Cl:{left:.0f}%"
+            used_w = wk.get("used_pct")
+            if used_w is not None:
+                left_w = max(0.0, min(100.0, 100.0 - float(used_w)))
+                if left_w <= WEEKLY_WARN_THRESHOLD:
+                    item += f"(W{left_w:.0f}%)"
+            if left <= ALERT_THRESHOLD:
+                rem_time = format_time_remaining(fh.get("resets_at", ""))
+                if rem_time:
+                    item += f":{rem_time}"
+            parts.append(item)
+
+    if "balance_infos" in deepseek and deepseek["balance_infos"]:
+        b_info = deepseek["balance_infos"][0]
+        symbol = "$" if b_info.get("currency", "USD") == "USD" else "¥"
+        parts.append(f"DS:{symbol}{float(b_info.get('total_balance', 0)):.2f}")
+
+    return " ".join(parts) if parts else "---"
+
+
+def build_runcat_payload(agy, cursor, deepseek, claude=None):
     metrics = []
-    agy_g5h = None
-    agy_gw = None
     agy_g_pacing = None
-
-    agy_ar = None
-    agy_ar_pacing = None
-
-    agy_c5h = None
-    agy_cw = None
-    agy_c_pacing = None
 
     if "groups" in agy:
         for g in agy["groups"]:
@@ -410,22 +573,8 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
                     "formattedValue": f"{rem_frac * 100:.0f}%{time_str}",
                     "normalizedValue": round(rem_frac, 3),
                 })
-                if g_type == "gemini":
-                    if win == "5h":
-                        agy_g5h = int(round(rem_frac * 100))
-                    elif win == "weekly":
-                        agy_gw = int(round(rem_frac * 100))
-                        agy_g_pacing = w_pacing
-                elif g_type == "argon":
-                    if win == "5h" or agy_ar is None:
-                        agy_ar = int(round(rem_frac * 100))
-                        agy_ar_pacing = w_pacing
-                elif g_type == "claude":
-                    if win == "5h":
-                        agy_c5h = int(round(rem_frac * 100))
-                    elif win == "weekly":
-                        agy_cw = int(round(rem_frac * 100))
-                        agy_c_pacing = w_pacing
+                if g_type == "gemini" and win == "weekly":
+                    agy_g_pacing = w_pacing
 
     # Add Pacing items to RunCat detailed dropdown
     if agy_g_pacing and agy_g_pacing["is_overburning"]:
@@ -442,7 +591,6 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
             "normalizedValue": min(1.0, agy_g_pacing["safe_daily_pct"] / 20.0),
         })
 
-    cursor_str = None
     if "planUsage" in cursor:
         plan = cursor["planUsage"]
         auto_used = float(plan.get("autoPercentUsed", 0.0))
@@ -451,7 +599,6 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
         # Align with T3 Code UI (% left / remaining)
         auto_left = max(0.0, 100.0 - auto_used)
         api_left = max(0.0, 100.0 - api_used)
-        cursor_str = f"{int(round(auto_left))}%(O{int(round(api_left))}%)"
 
         metrics.append({
             "title": "Cursor Models (Left)",
@@ -480,60 +627,50 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
             except Exception:
                 pass
 
-    ds_str = None
     if "balance_infos" in deepseek and deepseek["balance_infos"]:
         b_info = deepseek["balance_infos"][0]
         curr = b_info.get("currency", "USD")
         tot = b_info.get("total_balance", "0.00")
         symbol = "$" if curr == "USD" else "¥"
-        ds_str = f"{symbol}{float(tot):.2f}"
         metrics.append({
             "title": f"DeepSeek Balance ({curr})",
             "formattedValue": f"{symbol}{tot}",
             "normalizedValue": min(1.0, max(0.0, round(float(tot) / 10.0, 3))),
         })
 
+    # Claude (Claude Code subscription: 5-hour session + weekly windows)
+    if claude and "five_hour" in claude:
+        fh = claude.get("five_hour") or {}
+        wk = claude.get("seven_day") or {}
+        used_5h = fh.get("used_pct")
+        used_7d = wk.get("used_pct")
+        if used_5h is not None:
+            left_5h = max(0.0, min(100.0, 100.0 - float(used_5h)))
+            left_7d = None if used_7d is None else max(0.0, min(100.0, 100.0 - float(used_7d)))
+            label = "Claude Team" if claude.get("plan") == "team" else "Claude"
+            suffix = claude_cache_suffix(claude)
 
-    bar_parts = []
-    # Gemini: ペースが 1.5x を超えていればメニューバーにも 🔥 と倍率を表示
-    if agy_g5h is not None:
-        if agy_gw is not None:
-            if agy_g_pacing and agy_g_pacing["is_overburning"]:
-                bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%🔥{agy_g_pacing['burn_rate']:.1f}x)")
-            elif agy_gw <= WEEKLY_WARN_THRESHOLD:
-                bar_parts.append(f"G:{agy_g5h}%(W{agy_gw}%)")
-            else:
-                bar_parts.append(f"G:{agy_g5h}%")
-        else:
-            bar_parts.append(f"G:{agy_g5h}%")
+            rem_time = format_time_remaining(fh.get("resets_at", ""))
+            metrics.append({
+                "title": f"{label} (5h, left){suffix}",
+                "formattedValue": f"{left_5h:.0f}%" + (f" ({rem_time}後)" if rem_time else ""),
+                "normalizedValue": round(left_5h / 100.0, 3),
+            })
+            if left_7d is not None:
+                w_time = format_time_remaining(wk.get("resets_at", ""))
+                metrics.append({
+                    "title": f"{label} (weekly, left){suffix}",
+                    "formattedValue": f"{left_7d:.0f}%" + (f" ({w_time}後)" if w_time else ""),
+                    "normalizedValue": round(left_7d / 100.0, 3),
+                })
+    elif claude and "error" in claude:
+        # keep the menu bar clean; surface the failure in the dropdown instead
+        metrics.append({
+            "title": "Claude (unavailable)",
+            "formattedValue": claude["error"],
+        })
 
-    if agy_ar is not None:
-        if agy_ar_pacing and agy_ar_pacing["is_overburning"]:
-            bar_parts.append(f"Ar:{agy_ar}%🔥")
-        else:
-            bar_parts.append(f"Ar:{agy_ar}%")
-
-    if agy_c5h is not None:
-        if agy_cw is not None:
-            if agy_c_pacing and agy_c_pacing["is_overburning"]:
-                bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%🔥)")
-            elif agy_cw <= WEEKLY_WARN_THRESHOLD:
-                bar_parts.append(f"C:{agy_c5h}%(W{agy_cw}%)")
-            else:
-                bar_parts.append(f"C:{agy_c5h}%")
-        else:
-            bar_parts.append(f"C:{agy_c5h}%")
-
-    if cursor_str is not None:
-        plan = cursor.get("planUsage", {})
-        auto_left = int(round(max(0.0, 100.0 - float(plan.get("autoPercentUsed", 0.0)))))
-        api_left = int(round(max(0.0, 100.0 - float(plan.get("apiPercentUsed", 0.0)))))
-        bar_parts.append(f"Cur:{auto_left}%(O{api_left}%)")
-
-    if ds_str is not None:
-        bar_parts.append(f"DS:{ds_str}")
-
-    metrics_bar = " ".join(bar_parts) if bar_parts else "---"
+    metrics_bar = build_metrics_bar(agy, cursor, deepseek, claude)
 
     return {
         "title": "AI Quotas",
@@ -544,104 +681,12 @@ def build_runcat_payload(agy, cursor, deepseek, anthropic=None):
     }
 
 
-def format_inline(agy, cursor, deepseek, anthropic=None):
-    parts = []
-    if "groups" in agy:
-        group_strings = {}
-        for g in agy["groups"]:
-            g_name = g.get("name", "")
-            g_type = classify_agy_group(g_name)
-            b_dict = {b.get("window"): b for b in g.get("buckets", [])}
-
-            if g_type == "argon":
-                bucket = b_dict.get("5h") or b_dict.get("weekly", {})
-                rem_pct = int(round(float(bucket.get("remaining_fraction", 0.0)) * 100))
-                rem_time = format_time_remaining(bucket.get("reset_time", ""))
-                pacing = calculate_weekly_pacing(bucket.get("remaining_fraction"), bucket.get("reset_time"))
-
-                ar_str = f"Ar:{rem_pct}%"
-                if pacing and pacing["is_overburning"]:
-                    ar_str += f"🔥{pacing['burn_rate']:.1f}x"
-                elif rem_pct <= ALERT_THRESHOLD and rem_time:
-                    ar_str += f":{rem_time}"
-                group_strings["argon"] = ar_str
-
-            elif g_type == "gemini":
-                h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
-                h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
-                w_bucket = b_dict.get("weekly", {})
-                w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
-                w_time = format_time_remaining(w_bucket.get("reset_time", ""))
-                pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
-
-                if w_rem <= 0:
-                    h_rem = 0
-
-                g_5h_str = f"G:{h_rem}%"
-                if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
-                    g_5h_str += f":{h_time}"
-
-                # Pacing fire indicator & multiplier
-                pace_str = f"🔥{pacing['burn_rate']:.1f}x" if pacing and pacing["is_overburning"] else ""
-
-                if w_rem <= ALERT_THRESHOLD and w_time:
-                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%{pace_str}:{w_time})"
-                else:
-                    group_strings["gemini"] = f"{g_5h_str}(W{w_rem}%{pace_str})"
-
-            else:  # claude
-                h_rem = int(round(float(b_dict.get("5h", {}).get("remaining_fraction", 0.0)) * 100))
-                h_time = format_time_remaining(b_dict.get("5h", {}).get("reset_time", ""))
-                w_bucket = b_dict.get("weekly", {})
-                w_rem = int(round(float(w_bucket.get("remaining_fraction", 0.0)) * 100))
-                w_time = format_time_remaining(w_bucket.get("reset_time", ""))
-                pacing = calculate_weekly_pacing(w_bucket.get("remaining_fraction"), w_bucket.get("reset_time"))
-
-                if w_rem <= 0:
-                    h_rem = 0
-
-                c_5h_str = f"C:{h_rem}%"
-                if h_rem <= ALERT_THRESHOLD and h_time and w_rem > 0:
-                    c_5h_str += f":{h_time}"
-
-                pace_str = f"🔥{pacing['burn_rate']:.1f}x" if pacing and pacing["is_overburning"] else ""
-
-                if w_rem <= ALERT_THRESHOLD and w_time:
-                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%{pace_str}:{w_time})"
-                else:
-                    group_strings["claude"] = f"{c_5h_str}(W{w_rem}%{pace_str})"
-
-        ordered_parts = [group_strings[k] for k in ["gemini", "argon", "claude"] if k in group_strings]
-        if ordered_parts:
-            parts.append(" ".join(ordered_parts))
-    elif "error" in agy:
-        parts.append("Agy:Err")
-
-    if "planUsage" in cursor:
-        plan = cursor["planUsage"]
-        auto_left = int(round(max(0.0, 100.0 - float(plan.get("autoPercentUsed", 0.0)))))
-        api_left = int(round(max(0.0, 100.0 - float(plan.get("apiPercentUsed", 0.0)))))
-        cur_reset = format_cursor_reset(cursor.get("billingCycleEnd"))
-
-        # Cursor: いずれかがピンチ（<= ALERT_THRESHOLD）ならリセット残り日数（例: 8d）を添える
-        if (auto_left <= ALERT_THRESHOLD or api_left <= ALERT_THRESHOLD) and cur_reset:
-            parts.append(f"Cur:{auto_left}%(O{api_left}%):{cur_reset}")
-        else:
-            parts.append(f"Cur:{auto_left}%(O{api_left}%)")
-    elif "error" in cursor:
-        parts.append("Cur:Err")
-
-    if "balance_infos" in deepseek and deepseek["balance_infos"]:
-        b_info = deepseek["balance_infos"][0]
-        curr = b_info.get("currency", "USD")
-        tot = b_info.get("total_balance", "0.00")
-        symbol = "$" if curr == "USD" else "¥"
-        parts.append(f"DS:{symbol}{float(tot):.2f}")
-
-    return " | ".join(parts) if parts else "No data"
+def format_inline(agy, cursor, deepseek, claude=None):
+    """Raycast inline mode: same compact line as the RunCat menu bar."""
+    return build_metrics_bar(agy, cursor, deepseek, claude)
 
 
-def format_markdown(agy, cursor, deepseek, anthropic=None):
+def format_markdown(agy, cursor, deepseek, claude=None):
     lines = ["# 🧠 AI Quotas & Usage Summary\n"]
 
     # Antigravity section
@@ -741,6 +786,31 @@ def format_markdown(agy, cursor, deepseek, anthropic=None):
     elif "error" in deepseek:
         lines.append(f"> ⚠️ DeepSeek: `{deepseek.get('error')}`\n")
 
+    # Claude (Claude Code subscription windows)
+    plan_label = "Team" if claude and claude.get("plan") == "team" else "Claude Code"
+    lines.append(f"## Claude ({plan_label}){claude_cache_suffix(claude)}")
+    if claude and "five_hour" in claude:
+        for key, name in (("five_hour", "Session (5h)"), ("seven_day", "Weekly (7d)")):
+            bucket = claude.get(key) or {}
+            used = bucket.get("used_pct")
+            if used is None:
+                continue
+            left = max(0.0, min(100.0, 100.0 - float(used)))
+            rem_time = format_time_remaining(bucket.get("resets_at", ""))
+            reset_badge = f" `[リセットまで {rem_time}]`" if rem_time else ""
+            lines.append(
+                f"- **{name}**: `{left:.1f}% left` `[{format_progress_bar(left, 12)}]`{reset_badge}"
+            )
+        limits = claude.get("limits") or []
+        active = [l.get("kind") for l in limits if l.get("is_active")]
+        if active:
+            lines.append(f"- **Active limit**: `{', '.join(active)}`")
+        lines.append("")
+    elif claude and "error" in claude:
+        lines.append(f"> ⚠️ Claude: `{claude.get('error')}`\n")
+    else:
+        lines.append("> ⚠️ Claude: no usage data\n")
+
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lines.append(f"---\n_Last updated: {now_str}_")
     return "\n".join(lines)
@@ -798,12 +868,12 @@ def main():
     agy = fetch_antigravity_usage(agy_bin)
     cursor = fetch_cursor_usage()
     deepseek = fetch_deepseek_balance()
-    anthropic = fetch_anthropic_info()
+    claude = fetch_claude_usage()
 
     if args.notify:
         check_and_send_critical_notifications(agy)
 
-    runcat_payload = build_runcat_payload(agy, cursor, deepseek, anthropic)
+    runcat_payload = build_runcat_payload(agy, cursor, deepseek, claude)
 
     if args.write_runcat:
         try:
@@ -812,15 +882,15 @@ def main():
             sys.stderr.write(f"Warning: Failed to write RunCat JSON: {e}\n")
 
     if args.format == "markdown":
-        print(format_markdown(agy, cursor, deepseek, anthropic))
+        print(format_markdown(agy, cursor, deepseek, claude))
     elif args.format == "inline":
-        print(format_inline(agy, cursor, deepseek, anthropic))
+        print(format_inline(agy, cursor, deepseek, claude))
     elif args.format == "json":
         print(json.dumps({
             "antigravity": agy,
             "cursor": cursor,
             "deepseek": deepseek,
-            "anthropic": anthropic,
+            "claude": claude,
         }, indent=2, ensure_ascii=False))
     elif args.format == "runcat":
         print(json.dumps(runcat_payload, indent=2, ensure_ascii=False))
