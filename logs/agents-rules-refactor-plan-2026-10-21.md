@@ -121,8 +121,10 @@
 - `quota_snapshot.md` は**作らない**（数値を保存しない方針のため）。
 - 数値は `update-ai-usage` の参照に置換。
 
-**2026-10-21 進捗**: 前半（規範でないと明記・陳腐化した §1〜§3 の表を削除・教訓3本に圧縮・50行）は完了。
-`lessons.md` / `history/` への分割は未了（内容は移すだけで増えない）。数値の撤去も圧縮時に済んでいる。
+**2026-10-21 進捗**: Phase 3 完了。規範性の明示・陳腐化した表の削除・数値撤去は圧縮時に済ませ、
+内容を `docs/lessons.md`（事故3件＋残量の読み方）と `docs/history/2026-model-decisions.md`（契約経緯・撤回した選択肢）に分割した。
+旧パス `docs/user_model_routing_mental_model.md` は転送先を書いたポインタだけ残す（他マシンの旧ルール対策）。
+併せて Sonnet は agy、Opus は Claude Team という分担を確定した（`rules/models.md` §3、`docs/routing.md` §4）。
 
 ### Phase 4: スキル棚卸し
 
