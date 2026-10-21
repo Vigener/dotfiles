@@ -527,8 +527,9 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
             used_w = wk.get("used_pct")
             if used_w is not None:
                 left_w = max(0.0, min(100.0, 100.0 - float(used_w)))
-                # 5h と同じ値なら繰り返しになるので畳む（異なる値のときは 5h/weekly 両方出す）
-                if int(round(left_w)) != int(round(left)):
+                # Agy と同じく、週次は危険域（<= 50%）のときだけ出す。
+                # 5h と同じ値なら繰り返しになるのでさらに畳む。
+                if left_w <= WEEKLY_WARN_THRESHOLD and int(round(left_w)) != int(round(left)):
                     item += f"(w{left_w:.0f}%)"
             if left <= ALERT_THRESHOLD:
                 rem_time = format_time_remaining(fh.get("resets_at", ""))
