@@ -79,6 +79,11 @@ mkdir -p "$HOME/.cursor"
 link_file "$DOTFILES/agents/skills" "$HOME/.cursor/skills"
 link_file "$DOTFILES/agents/rules/cursorrules" "$HOME/.cursorrules"
 
+# グローバル指示ファイル: 各ハーネスの自動読込点を GLOBAL_RULES.md の単一正本へ向ける
+link_file "$DOTFILES/agents/GLOBAL_RULES.md" "$HOME/.config/opencode/AGENTS.md"
+link_file "$DOTFILES/agents/GLOBAL_RULES.md" "$HOME/.claude/CLAUDE.md"
+link_file "$DOTFILES/agents/GLOBAL_RULES.md" "$HOME/.gemini/AGENTS.md"
+
 mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
