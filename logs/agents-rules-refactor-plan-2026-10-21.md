@@ -174,7 +174,7 @@ opencode run --standalone -m opencode/deepseek-v4.1-flash-free \
 - ~~`docs/routing.md` の作成を Phase 2 に前倒すか~~ → **解消**（Phase 2 で作成済み）。
 - ~~Argon 残 34% をいつ・何に使い切るか~~ → **書き換え**。残量を文書に書かない方針なので数値は持たない。運用は「リセット2日前に使い切る」（`docs/routing.md` §7）。
 - **Claude Team の消費速度**: Sonnet の採点1回が 5h 枠の約4%（2026-10-21 の1点のみ）。日常でどこまで `claudeAgent` を使うかは未測定。
-- **medium × 2 が high × 1 の見落としを減らすか**は未実施（許可制）。同じ diff・同じ brief で Argon medium と Sonnet medium を走らせ、既存の Argon high 採点と major 指摘の集合を比べる。
+- **medium × 2 が high × 1 の見落としを減らすか**: モック実験は**しない**（2026-10-21 決定）。普段の使用感（返答の質・トークンの減り方）で判定する。medium と high の差は小さいという報告が複数あり、high は同一作業で週枠の大半を使った例もある。
 - **`add-to-todo` の去就**: Linear MCP が OpenCode / Claude に未連携のため保留継続（`now/TODO.md` が現状唯一の経路）。
 - **MBA / TB**: 2026-10-21 時点で MBA は `origin/main`（`961306a`）のまま。ローカルは20コミット先行しており、**分岐ではない**ので push → MBA で pull すれば追いつく。TB は Ubuntu ではなくなり ssh 不可。
 
