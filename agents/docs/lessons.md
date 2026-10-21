@@ -53,14 +53,7 @@
 
 `opencode run --standalone` は毎回新しいプロセスなので、CLI の検証はこれで足りる。
 
-### 保持の単位（T3 経由、2026-10-21 実測）
-
-| T3 経由 | 実体プロセス | 保持単位 | 変更が効くとき |
-|---|---|---|---|
-| opencode | `opencode serve`（常駐） | **アプリ全体** | T3 かサーバの再起動 |
-| claudeAgent | `claude --input-format stream-json --session-id=…` | **スレッド** | 新しいスレッド |
-| cursor | `cursor-agent -p`（ターン中だけ） | ターン | 次のターン |
-| antigravity | ACP セッション | スレッドと推定 | 未検証（週枠が回復したら1回確認） |
+**補足**
 
 - `claude` はターン終了後も**プロセスが残る**（実測: 完了2分後も生存）。だから同一スレッドの続きは古いルールのまま。
 - `opencode` だけは**アプリ全体で1プロセス**なので、影響が全スレッドに及ぶ。ルール変更後は `pkill -f 'opencode serve'` → T3 再起動が確実。
