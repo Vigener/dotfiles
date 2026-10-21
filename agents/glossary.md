@@ -8,7 +8,7 @@
 | 略 | 正式 | SSH 例 | 備考 |
 |---|---|---|---|
 | **MBA** | MacBook Air (M4) | `ssh mac` | 画面・司令塔。持ち歩き |
-| **TB** | ThinkPad (E14 等・Ubuntu) | `ssh thinkpad` | 保険・Linux・ジャンプ。旧母艦 |
+| **TB** | ThinkPad (E14 等・Ubuntu) | `ssh thinkpad` | **未使用・保険**。現行母艦は mini |
 | **mini** | Mac mini (M2 Pro) | `ssh mini` / `ssh mini-lan` | **現行母艦**（2026-08〜）。`MM` は使わない |
 
 ## リポジトリ・作業木

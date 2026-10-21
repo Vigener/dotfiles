@@ -64,7 +64,7 @@
 再取得:
 `~/dotfiles/bin/update-ai-usage --format markdown --no-notify --no-write-runcat`
 
-## 4. Phase 2（次にやる）: rules/ の精錬と SSOT 一本化
+## 4. Phase 2（完了）: rules/ の精錬と SSOT 一本化
 
 **目的**: 同じルールが複数箇所に書かれている状態を解消し、各ルールの正本を1つにする。
 
@@ -72,7 +72,7 @@
 
 1. **`rules/models.md`**
    - 冒頭の「正本: research-brain/...」を「正本: 本ファイル（dotfiles）」に変更。
-   - 詳細な役割表は `docs/routing.md`（Phase 3 で作成）へ置き、ここは方針と参照だけにする。
+   - 詳細な役割表は `docs/routing.md`（Phase 2 で前倒し作成済み）へ置き、ここは方針と参照だけにする。
    - `models.md` 内に残る数値・slug の最終確認。
 2. **`skills/model-route/SKILL.md`**
    - 役割表・%・slug の表を削除。
@@ -99,6 +99,14 @@
 - `§` / `RULE[` / 死パスが 0。
 - 変更が 4〜6 ファイル程度に収まっている。
 
+### 結果（2026-10-21 完了）
+
+- 新規 `docs/routing.md`（役割表・環境表・昇格/降格・ペース配分）
+- `model-route` は 165行 → 約40行。数値・slug 表を削除
+- `models.md` の正本を dotfiles に変更し、Claude の認証順序を明確化
+- `cursorrules` の役割表を参照1本に
+- 旧 `user_model_routing_mental_model.md` に「経緯記録」バナーを追加
+
 ### やらないこと
 
 - `docs/user_model_routing_mental_model.md` の4分割（Phase 3）。
@@ -109,7 +117,7 @@
 
 ### Phase 3: docs 整理と数値撤去
 
-- `docs/user_model_routing_mental_model.md`（41KB）を `docs/routing.md` / `docs/lessons.md` / `docs/history/` に分割。
+- `docs/user_model_routing_mental_model.md`（41KB）を `docs/lessons.md` / `docs/history/` に分割（役割表は Phase 2 で `docs/routing.md` へ移設済み）。
 - `quota_snapshot.md` は**作らない**（数値を保存しない方針のため）。
 - 数値は `update-ai-usage` の参照に置換。
 

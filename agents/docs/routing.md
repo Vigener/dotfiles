@@ -1,0 +1,98 @@
+# モデルルーティング表（2026-10-21）
+
+> 方針・禁止事項は `agents/rules/models.md` が正本。本書は「タスク → モデル」の対応表。
+> 残量・リセット・消費ペースは
+> `~/dotfiles/bin/update-ai-usage --format markdown --no-notify --no-write-runcat`
+> で取得する。**数値は本書に書かない。**
+
+## 1. 判定順序
+
+1. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、残量ペースを無視して最高峰（Argon / Sonnet 5.5 / Opus 5.5）を投入する。
+2. **Task**: Design / Implement / Extract を判定。
+3. **Flag**: Private / Search / Orchestration を判定。
+4. **環境**: `in agy` / `in cursor` / `in claude` / `api` の指定を確認。省略時は下のフォールバック順。
+5. **コスト階層**: 低 / 中 / 高 と現在の残量で最終決定。
+
+## 2. Task × Flag 早見表
+
+| Task / Flag | 役割 | 第一候補 | 代替 |
+|---|---|---|---|
+| **Design** | 研究方針・論理・意思決定・敵対レビュー・数理検証 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` / `agy: Sonnet 5.5` / Web Argon |
+| **Implement（前段）** | 仕様化・疑似コード | `agy: Gemini 4 Argon` | `claude: Sonnet 5.5` |
+| **Implement（中段）** | 打鍵・実装・リファクタ | `cursor: Composer 2.5` | `claude: Sonnet 5.5 (medium)` |
+| **Implement（後段）** | Diff 敵対監査 | `agy: Gemini 4 Argon` | `agy: Opus 5.5` |
+| **Extract** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | `cursor: Composer 2.5` |
+| **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5` / `cursor-agent` | `claude`（Team） |
+| **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | `agy: Gemini 4 Argon`（批判的読解） |
+| **Flag: Orchestration** | サブエージェント指揮・並行管理 | `delegate_task`（T3） | `agy: Gemini 4 Argon`（Cursor 枠逼迫時） |
+
+## 3. 役割別モデル
+
+| 役割 | 第一候補 | 代替 | チャネル |
+|---|---|---|---|
+| 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
+| 設計・仕様化 | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
+| 敵対レビュー | Gemini 4 Argon (high) | Opus 5.5 (high) / Sonnet 5.5 | agy / T3 |
+| 実装ループ | Composer 2.5 | Sonnet 5.5 (medium) | cursor / T3 |
+| 探索・量産 | Gemini 3.8 Flash | DeepSeek V4.1 Flash | agy / dsh-sub |
+| 裁定・袋小路 | Opus 5.5 | Fable 5.1（特別顧問） | agy / claude |
+| 機械的採点 | ローカル Python (pytest) | — | — |
+
+## 4. 環境の指定とフォールバック
+
+| 記法 | 契約 | 実行 |
+|---|---|---|
+| `argon in agy` | Google AI Pro（Argon 独立週枠） | T3 `delegate_task` (`antigravity` / `gemini-4-argon-high`) または `agy --model gemini-4-argon-high` |
+| `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
+| `sonnet / opus in agy` | Google AI Pro（Claude/GPT 枠） | `agy --model claude-sonnet-5-5-high` / `claude-opus-5-5-high`（T3 には露出しない） |
+| `composer in cursor` | Cursor Pro | `cursor-agent --model composer-2.5` |
+| `grok in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
+| `sonnet / opus in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `claude-opus-5-5`) または `cursor-agent --model claude-opus-5-5` |
+| `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
+| `deepseek in api` | DeepSeek 従量 | `dsh-sub --repo <dir> --prompt "..."` |
+| `サブエージェント(inherit)` | 親と同一モデル | T3 `delegate_task` (`opencode` / 親モデル、options 空) または native `subagent` |
+
+**環境省略時**:
+
+- **Claude モデル**: ① Claude Team → ② agy の Claude/GPT 週枠 → ③ Cursor の Claude 枠。
+- **非 Claude**: ① agy（Argon / Gemini）→ ② Cursor（Composer / Grok）→ ③ DeepSeek。
+
+公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
+
+## 5. Claude 5.x の役割と設定
+
+| モデル | 役割 | 設定 | 原則 |
+|---|---|---|---|
+| Sonnet 5.5 | 実装ループ主力 | `effort: medium` | DoD まで自律完遂。`high` を乱用しない |
+| Opus 5.5 | 敵対監査・裁定 | `effort: high` | 不変条件と DoD だけ渡す |
+| Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
+| Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini 3.8 Flash を使う |
+
+## 6. 昇格・降格トリガー
+
+**昇格（低 → 中 → 高）**
+
+- 同じ指摘が2回続く / 設計の前提が崩れた
+- 論文の主張・章立てに触れる
+- セキュリティ・再現性・計算量の判断
+- 敵対レビューで `major` 以上が出た
+
+**降格（高 → 中 → 低）**
+
+- 仕様が固まり、実装が機械的になった
+- テストが通り、残りが整形・ログ要約
+- 同じモデルで2回連続して新しい指摘が出ない
+
+## 7. ペース配分
+
+- **Cursor Pro（月枠）**: 更新日の約1週間前に使い切るペース。最後の1週間は Gemini 系と Cursor 無料系で回す。
+- **agy（週枠）**: リセット1〜2日前に使い切るペース。余剰は発想・設計に回す。
+- **Claude Team**: 5h / 週の残量を見て、日常の実装・監査に使う。使い切った場合のみ API を検討。
+- 実測は `update-ai-usage`。数値は本書に書かない。
+
+## 8. 禁止
+
+- Cursor から Fable 5.1 / Opus 5.5 を呼ぶ（核ボタン）。
+- `Private` フラグのタスクを agy に投げる。
+- 明示指示なしに Anthropic / OpenAI の従量 API を使う。
+- 指定モデルを勝手に昇格・降格する。

@@ -10,7 +10,7 @@
 - サブエージェント起動や委譲がエラー（`PlatformClient is nil` 等）で失敗しても、親が「失敗したから親が直接やる」とインラインで引き受けてはならない。
 - 親が引き受けると、意図したコンテキスト分離・役割分担がすべて破綻する。
 
-## 3. T3 Code: `delegate_task`
+## 3. T3 Code（`delegate_task`）
 
 **用途**: 親と異なるモデル（例: Gemini 4 Argon）への委譲、クロスプロバイダ委譲、T3 ネイティブ子タスク起票。
 
@@ -29,8 +29,9 @@
 - T3 側のライブカタログ（`orchestrator_capabilities`）を参照して、独立した子スレッドを起票する。
 - 子は親の会話履歴を引き継がない。brief に前提・制約・完了条件を全部書く。
 - 同じ作業の続きは `t3_thread_send(childThreadId)`。独立レビューは新規 `delegate_task`。実行中の訂正は `mode: "steer"`。
+- 同一モデルの軽い並列なら native `subagent` でもよい（T3 の子スレッドは作られない）。
 
-## 4. Antigravity: `invoke_subagent`
+## 4. Antigravity（`invoke_subagent`）
 
 **用途**: 親と同じモデルでの軽量・高速並行処理。
 
@@ -52,7 +53,7 @@
   - `flash` 指定 → `agy --model gemini-3.8-flash-high`
   - `composer` 指定 → `cursor-agent --model composer-2.5`
   - `argon` 指定 → `agy --model gemini-4-argon-high`
-- 指定モデルの枠（クォータ・コスト）を 100% 守る。
+- 指定モデルの枠（クォータ・コスト）を厳守する。
 
 ## 7. 親の振る舞い
 

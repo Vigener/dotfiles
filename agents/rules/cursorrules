@@ -14,12 +14,12 @@
 - 実装と検証は異種モデル・別コンテキスト（Maker-Breaker）。
 - 指定モデルを勝手に昇格・降格しない（Strict Model Fidelity）。→ `rules/delegation.md`
 
-## 役割・モデル構成 (2026-10-16 改定)
+## 役割・モデル構成
 
-- 司令塔・高難度設計: agy Gemini 4 Argon（独立週枠・定額バーンダウン） ➔ サブ: Claude Sonnet 5.5 (APIスポット) / Grok 4.7
-- 実装役（打鍵・量産）: Composer 2.5 (`agent --model composer-2.5`)
-- Cursor Pro クォータ防護: Grok 4.7 への日常の設計・思考丸投げを停止し、agy Argon に仕様化・敵対的監査を委譲。Cursor 側は Composer 打鍵に特化。
-- 正本: `research-brain/wiki/ai-engineering/user_model_routing_mental_model.md`（基準スナップショット: `~/dotfiles/agents/docs/user_model_routing_mental_model.md`）
+- 正本: `rules/models.md`（方針）と `docs/routing.md`（対応表）。
+- Cursor の標準は打鍵・量産: `cursor-agent --model composer-2.5`。
+- Cursor から Fable 5.1 / Opus 5.5 は呼ばない（クォータ防護）。
+- 設計・敵対監査は agy Argon に委譲する。
 
 ## チャット出力フォーマット
 
