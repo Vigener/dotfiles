@@ -60,11 +60,18 @@ T3 の「childThreadId は別のレビューラウンドの宛先ではない」
 
 プラットフォーム内蔵の委譲が使えない場合、またはターミナルから直叩きする場合は、Bash 経由で外部 CLI を別プロセス起動する。
 
-- 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --model gemini-3.8-flash-high --dangerously-skip-permissions -p "..."`
-- コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent --model composer-2.5 "..."` または `--model grok`
-- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --model gemini-4-argon-medium --dangerously-skip-permissions -p "..."`
+- 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
+- コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`
+- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
 
 effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
+
+**非対話呼び出しの罠（2026-10-21 実測）。忘れると20分溶ける。**
+
+- **`</dev/null` を必ず付ける**。`opencode run` は常駐サービスと協調するため、stdin を開いたままだと入力待ちでブロックする。
+- **`agy` はフラグの順序に注意**。`agy -p --dangerously-skip-permissions ...` と書くと、`-p` が後続のフラグをプロンプト文字列として食い、`code 2` で落ちる。`--dangerously-skip-permissions --print "..."` の順にする（または `-p="..."`）。
+- **YOLO フラグはツールごとに違う**: opencode は `run --auto`、cursor-agent は `-p --yolo`、agy は `--dangerously-skip-permissions`。
+- **OpenCode の思考抑制**は `-m "deepseek/deepseek-flash#none"`（`#low` / `#high` / `#max`）。整形・分類・抽出のような機械的作業で使う。
 
 ## 6. モデル同一性（Strict Model Fidelity）
 
@@ -83,7 +90,7 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 
 優先の目安であり、Cursor Task による実装を全面禁止しない。
 
-1. **実装・多段（編集→pytest→修正）**: T3 `delegate_task`（別スレッド）または Cursor Task。herdr は主経路にしない。
+1. **実装・多段（編集→pytest→修正）**: T3 `delegate_task`（別スレッド）または Cursor Task。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: `delegate_task`（Argon / Claude 等）または CLI（`agy`）。`pi` は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。モデル切替は `/model`。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
