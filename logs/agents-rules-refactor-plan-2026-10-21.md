@@ -172,6 +172,7 @@ opencode run --standalone -m opencode/deepseek-v4.1-flash-free \
 旧版にあった `adversarial_scope` と「`user_model_routing_mental_model` が正本」は**どちらも無し**。
 Cursor 側は `.cursorrules`（→ `agents/rules/cursorrules`）が注入される（1行目 `# Cursor Agent Rules`）。
 T3 の新規スレッド経由は Free モデルのレート制限で失敗したため、CLI 経路で代替した（無料枠が戻ったら再試行可）。
+2026-10-21 18:10、T3 再起動後の**新規スレッド**で再確認し、`# Global AI Agent Rules (Tier 0)` / サブスク枠の行あり / `adversarial_scope` なし を確認（有料 1017、約 $0.001）。経路は閉じた。
 
 ## 7. 未決事項
 
