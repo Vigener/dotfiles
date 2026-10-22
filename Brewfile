@@ -1,4 +1,5 @@
 brew "bottom"
+brew "ca-certificates"
 brew "direnv"
 brew "displayplacer"
 brew "fzf"

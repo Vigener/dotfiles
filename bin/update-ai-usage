@@ -11,12 +11,23 @@ import json
 import os
 import shutil
 import sqlite3
+import ssl
 import subprocess
 import sys
 import tempfile
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+
+# /usr/bin/python3 ignores SSL_CERT_FILE and /etc/ssl/cert.pem is a sealed, stale
+# bundle that still trusts the compromised eMudhra intermediates (2026-10-20), so
+# pin Homebrew's ca-certificates when present.
+_BREW_CA_BUNDLES = (
+    "/opt/homebrew/etc/ca-certificates/cert.pem",
+    "/usr/local/etc/ca-certificates/cert.pem",
+)
+_CAFILE = next((p for p in _BREW_CA_BUNDLES if os.path.exists(p)), None)
+SSL_CONTEXT = ssl.create_default_context(cafile=_CAFILE) if _CAFILE else None
 
 # Threshold to trigger alert display (show reset countdown when quota <= this %)
 ALERT_THRESHOLD = 15
@@ -86,7 +97,7 @@ def fetch_cursor_usage():
             },
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CONTEXT) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         return {"error": f"Failed to call Cursor API: {e}"}
@@ -120,7 +131,7 @@ def fetch_deepseek_balance():
             },
             method="GET",
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CONTEXT) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         return {"error": f"Failed to call DeepSeek API: {e}"}
@@ -257,7 +268,7 @@ def fetch_claude_usage():
             },
             method="GET",
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CONTEXT) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         return stale_fallback(f"HTTP {e.code}")

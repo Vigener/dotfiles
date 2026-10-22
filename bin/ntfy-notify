@@ -29,6 +29,11 @@ if [[ -n "$CLICK" ]]; then
   esac
 fi
 args=(-sS -H "Title: ${TITLE}")
+# macOS /etc/ssl/cert.pem is sealed and still trusts the compromised eMudhra
+# intermediates (2026-10-20); prefer Homebrew's ca-certificates when present.
+for ca in /opt/homebrew/etc/ca-certificates/cert.pem /usr/local/etc/ca-certificates/cert.pem; do
+  if [[ -f "$ca" ]]; then args+=(--cacert "$ca"); break; fi
+done
 [[ -n "$CLICK" ]] && args+=(-H "Click: ${CLICK}")
 args+=(-H "Tags: memo" -d "$BODY" "${SERVER}/${TOPIC}")
 exec curl "${args[@]}"
