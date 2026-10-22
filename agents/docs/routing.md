@@ -33,7 +33,7 @@
 | 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
 | 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 (medium) | agy / T3 |
 | 敵対レビュー | Argon (medium) + Sonnet 5.5 (medium) の2本立て | Opus 5.5（high・要許可） | agy / T3 / claudeAgent |
-| 実装ループ（W1） | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） / Sonnet 5.5 | opencode / cursor / T3 |
+| 実装ループ（W1） | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor） → DeepSeek V4.1 Flash Free（T3） → `dsh-sub` | agy / cursor / opencode / T3 |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
 | 探索・量産（W2） | Gemini 3.8 Flash | DeepSeek Free（1M） | agy / opencode |
 | 裁定・袋小路 | Opus 5.5（要許可） | Fable 5.1（特別顧問・要許可） | claude（agy は週枠が余っているときのみ） |
@@ -46,11 +46,11 @@
 
 | 層 | 既定 | 代替 | 使う場面 |
 |---|---|---|---|
-| **W1 日常実装** | DeepSeek V4.1 Flash Free（T3） | Composer 2.5（Cursor） | 編集 → テスト → 修正。まず Free。T1/T2 は Composer と同等、T3 型の検証は Free 優先。 |
+| **W1 日常実装** | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor） → DeepSeek V4.1 Flash Free（T3） → `dsh-sub` | 編集 → テスト → 修正。順にフォールバック（サブスク枠と Quota の使い放題レベルの順）。T3 型の検証は DeepSeek が強い。 |
 | **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（1M） | 全体把握・ログ要約・横断検索。 |
 | **W3 難所** | Sonnet 5.5 (Team) | Opus 5.5 | 仕様が曖昧、設計判断が絡む、2回失敗した。 |
 
-- Free は **期間限定・SLA なし・OpenCode 内限定**。外部 API からは使えない。
+- Free は **期間限定・SLA なし・OpenCode 内限定**。外部 API からは使えない。無制限ではなく一定のリミットがあると判明したため、常用は難しい（2026-10-22 方針変更）。
 - 消えた場合 / レート制限時は `deepseek/deepseek-flash`（1017・有料）へ。
 - Free の 1017 反映は **未確定**。同一プロンプトで軌跡と冗長性を比べて確認する。
 - Composer 3 が出たら W1 を再評価する。
@@ -64,7 +64,8 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 - **T3 だけ差**: Composer は `re.match` + `$` で `a\n` を通し、非文字列タグで traceback になり得る。
   DeepSeek は `fullmatch` と型検査で塞ぐ。
 - **`__pycache__` の差は環境要因**。除くと Sonnet 約 297 対 297、Argon 300 対 300。
-- **結論**: W1 の既定は DeepSeek Free のまま。ただし T1/T2 は Composer と同等。
+- **結論（当時）**: W1 の既定は DeepSeek Free のまま。ただし T1/T2 は Composer と同等。
+  → **2026-10-22 改訂**: Free にリミットがあり常用が難しいため、W1 は Gemini 3.8 Flash → Composer 2.5 → DeepSeek Free → `dsh-sub` の順でフォールバックする。
   Composer は Cursor の大量打鍵・最小差分・Free 不調時の代替に残す。
   Composer に T3 型を振るなら `fullmatch` と型検査を明示する。
 
@@ -101,7 +102,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 **環境省略時**:
 
 - **設計・探索**: ① agy（Argon / Gemini）→ ② Cursor → ③ Claude Team。
-- **実装（W1）**: ① DeepSeek Free（T3）→ ② Composer（Cursor）→ ③ Sonnet 5.5（Team）。
+- **実装（W1）**: ① Gemini 3.8 Flash（agy）→ ② Composer（Cursor）→ ③ DeepSeek Free（T3）→ ④ `dsh-sub`。難所は W3（Sonnet 5.5）。
 - **Claude モデル**: Sonnet は ① agy の Claude 週枠 → ② Claude Team → ③ Cursor。**Opus は ① Claude Team → ② agy（週枠が余っているときのみ）→ ③ Cursor**。Fable は Cursor の Other Models のみ（要許可）。
 
 公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
