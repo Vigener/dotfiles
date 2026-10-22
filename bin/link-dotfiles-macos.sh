@@ -54,6 +54,7 @@ link_file() {
 echo "==> linking from $DOTFILES"
 
 link_file "$DOTFILES/zsh/.zshrc" "$HOME/.zshrc"
+link_file "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
 # .zprofile: intentionally not linked (machine-local brew shellenv / OrbStack)
 
 link_file "$DOTFILES/herdr/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"

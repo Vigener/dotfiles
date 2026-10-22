@@ -5,15 +5,7 @@
 # Homebrew
 export HOMEBREW_PREFIX="/opt/homebrew"
 
-# eMudhra 中間CA侵害 (2026-10-20): /etc/ssl/cert.pem は署名済みボリューム上で書き換えられず、
-# /usr/bin/curl・git・mise Python が古い根を信頼し続ける。Homebrew の最新バンドルに向ける。
-# 注意: /usr/bin/python3 (LibreSSL) は SSL_CERT_FILE を無視する → コード側で cafile 指定が必要。
-# git は ~/.gitconfig の http.sslCAInfo で別途指定（このファイルでは扱わない）。
-# Apple が cert.pem を更新したら不要になる。
-if [[ -f "$HOMEBREW_PREFIX/etc/ca-certificates/cert.pem" ]]; then
-  export CURL_CA_BUNDLE="$HOMEBREW_PREFIX/etc/ca-certificates/cert.pem"
-  export SSL_CERT_FILE="$CURL_CA_BUNDLE"
-fi
+# CURL_CA_BUNDLE / SSL_CERT_FILE (eMudhra 中間CA侵害対応) は非対話シェルにも要るので zsh/.zshenv にある。
 
 # herdr --remote は、フラグなしだと client を HERDR_REMOTE_KEYBINDINGS=local で
 # 起動する（親の env を上書きする）。plugin_action は MBA に無くて消える。
