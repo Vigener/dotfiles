@@ -102,7 +102,7 @@ herdr server reload-config   # 設定変更後
 ペイン名をエージェントの topic（会話タイトル）に自動同期する。
 
 ```bash
-# bun が PATH に入っていること（mise 等）
+# node が /opt/homebrew/bin/node にあること（brew）。manifest の command は node の絶対パスに直す
 ghq get https://github.com/danbuhler/herdr-pane-topic-sync
 herdr plugin link ~/ghq/github.com/danbuhler/herdr-pane-topic-sync
 # 必要なら手動 sync
@@ -111,7 +111,7 @@ herdr plugin action invoke dan.pane-topic-sync.sync
 
 注意:
 
-- herdr サーバの PATH に `bun` が無い場合、プラグイン manifest の command を **bun の絶対パス**に直す必要がある（端末ごとにパスが違うため git に `plugins.json` は載せない）
+- herdr サーバの PATH に `node` が無い場合、プラグイン manifest の command を **node の絶対パス**に直す必要がある（端末ごとにパスが違うため git に `plugins.json` は載せない）。Bun は eMudhra 中間CA侵害(2026-10-20)の修正版が未公開のため外した（このプラグインは純 Node で動く）
 - 推奨: `sync_panes = true` / `sync_tabs = false`（同タブ複数 pane でも agents パネルが同名にならない）
 - 任意 config 例: `~/.config/herdr/plugins/config/dan.pane-topic-sync/config.toml`（dotfiles 側にミラー可）
 

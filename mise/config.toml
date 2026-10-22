@@ -2,7 +2,6 @@
 
 # 言語やツールのバージョン指定
 [tools]
-bun = "latest"
 direnv = "latest"
 node = "lts"
 npm = "latest"
