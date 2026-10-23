@@ -31,7 +31,7 @@
 ## Markdown 編集・検証
 
 - テーブル変更時は `mise exec -- npx -y markdownlint-cli2 "<file>"`（exit 0）。
-- リンク変更時は `! git grep -nE "file:///|/Users/|/home/" "<file>"`（0件）。
+- リンク変更時は `! git grep -nE "file:///|/Users/|/home/" "<file>"`（0件）。ファイル内リンクの検査であり、チャットでは絶対パスのリンクを使う（`rules/links.md` §1）。
 
 ## 共通ルールの参照
 
