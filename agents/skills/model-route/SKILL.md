@@ -18,6 +18,8 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 1. **Phase-First**: 教員報告前・数理難所・章立て・仕様策定の山場か？
    → Yes なら最高峰（Argon / Opus 5.5 / Sonnet 5.5）を残量ペース無視で投入。
 2. **Task**: Design / Implement / Extract のどれか。
+2.5. **Visual**: 成果物の合否は見た目で決まるか。
+    → Yes なら実装は W1 のまま、目視 QA を別モデル（または親）に分離する。同じ見た目指摘の 2 回目で W1 を止める（`docs/routing.md` §3 Visual QA）。
 3. **Flag**: Private / Search / Orchestration のどれか。
 4. **環境**: `in agy` / `in cursor` / `in claude` / `api` の指定があるか。
    省略時は `routing.md` のフォールバック順（agy → Cursor → Claude Team）。

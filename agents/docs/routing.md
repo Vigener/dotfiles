@@ -8,7 +8,7 @@
 ## 1. 判定順序
 
 1. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、残量ペースを無視して最高峰（Argon / Sonnet 5.5 / Opus 5.5）を投入する。ただし **モデルと effort は別軸**で、最高峰モデルを選ぶことは high effort を選ぶことを意味しない（`rules/models.md` 3.5）。
-2. **Task**: Design / Implement / Extract を判定。
+2. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、§3 Visual QA を適用する。
 3. **Flag**: Private / Search / Orchestration を判定。
 4. **環境**: `in agy` / `in cursor` / `in claude` / `api` の指定を確認。省略時は下のフォールバック順。
 5. **コスト階層**: 低 / 中 / 高 と現在の残量で最終決定。
@@ -54,6 +54,16 @@
 - `dsh-sub` / 有料 1017 は、Cursor 月枠と Gemini Flash 週枠の**両方が切れたとき**の緊急 Worker。通常の次点にはしない。
 - Free の 1017 反映は **未確定**。同一プロンプトで軌跡と冗長性を比べて確認する。
 - Composer 3 が出たら W1 を再評価する。
+
+### Visual QA（図・PNG・HTML レイアウト）
+
+成果物の合否が「見て決まる」仕事（matplotlib の論文図、凡例、キャプション、HTML の重なり）は、スクリプト実装と目視を分ける。Task 列に Visual は足さない。画像生成モデルも経路に入れない。Composer を図禁止にもしない。
+
+- **スクリプト・数値・フォント・再現性**: W1（Gemini 3.8 Flash / Composer 2.5）。ここは閉じた Implement。
+- **PNG / 画面の目視**: W1 の自己申告は証拠にしない。親、または視覚が強いモデル（Flash / Sonnet / Argon）が画像を Read する。Composer / DeepSeek に「PNG を見て重なりなしと報告せよ」と書かない。
+- **最初の 1 回の見た目直しは想定内**。同じ見た目クラス（重なり・余白・改行）が 2 回目に出たら W1 ループを止める（§6 の「同じ指摘が 2 回続く」を図にも適用）。親が figsize / `subplots_adjust` / fontsize / overlap assert を閉じてから W1 に 1 通り出すか、W3 に上げる。
+- overlap のプログラム検査は初回 brief に入れる。検査を通すために目盛りを消すのは不合格。
+- 論文図は matplotlib。T3 の `html_preview` はチャット用 HTML であり、論文 PNG の代替にしない。
 
 ### 2026-10-21 ベイクオフの結論
 
