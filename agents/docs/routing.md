@@ -19,7 +19,7 @@
 |---|---|---|---|
 | **Design** | 研究方針・論理・意思決定・敵対レビュー・数理検証 | `agy: Gemini 4 Argon` | `claude: Opus 5.5`（要許可） / `agy: Sonnet 5.5` / Web Argon |
 | **Implement（前段）** | 仕様化・疑似コード | `agy: Gemini 4 Argon` | `claude: Sonnet 5.5` |
-| **Implement（中段）** | 打鍵・実装・リファクタ | `opencode: DeepSeek V4.1 Flash Free` | `cursor: Composer 2.5` / `claude: Sonnet 5.5 (medium)` |
+| **Implement（中段）** | 打鍵・実装・リファクタ | `agy: Gemini 3.8 Flash` | `cursor: Composer 2.5` / `claude: Sonnet 5.5 (medium)` |
 | **Implement（後段）** | Diff 敵対監査 | `agy: Gemini 4 Argon` | `claude: Opus 5.5`（要許可） |
 | **Extract** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | `cursor: Composer 2.5` |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5` / `cursor-agent` | `claude`（Team） |
