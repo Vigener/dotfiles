@@ -33,7 +33,7 @@
 | 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
 | 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 (medium) | agy / T3 |
 | 敵対レビュー | Argon (medium) + Sonnet 5.5 (medium) の2本立て | Opus 5.5（high・要許可） | agy / T3 / claudeAgent |
-| 実装ループ（W1） | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor） → DeepSeek V4.1 Flash Free（T3） → `dsh-sub` | agy / cursor / opencode / T3 |
+| 実装ループ（W1） | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor）。緊急時のみ `dsh-sub` | agy / cursor / T3 |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | Opus 5.5 | claudeAgent / T3 |
 | 探索・量産（W2） | Gemini 3.8 Flash | DeepSeek Free（1M） | agy / opencode |
 | 裁定・袋小路 | Opus 5.5（要許可） | Fable 5.1（特別顧問・要許可） | claude（agy は週枠が余っているときのみ） |
@@ -46,12 +46,12 @@
 
 | 層 | 既定 | 代替 | 使う場面 |
 |---|---|---|---|
-| **W1 日常実装** | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor） → DeepSeek V4.1 Flash Free（T3） → `dsh-sub` | 編集 → テスト → 修正。順にフォールバック（サブスク枠と Quota の使い放題レベルの順）。T3 型の検証は DeepSeek が強い。 |
+| **W1 日常実装** | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor） | 編集 → テスト → 修正。DeepSeek Free はあれば使ってよいが常用しない。`dsh-sub` は Cursor 月枠と Flash 週枠が両方切れた緊急枠（`rules/models.md` §2.5） |
 | **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（1M） | 全体把握・ログ要約・横断検索。 |
 | **W3 難所** | Sonnet 5.5 (Team) | Opus 5.5 | 仕様が曖昧、設計判断が絡む、2回失敗した。 |
 
 - Free は **期間限定・SLA なし・OpenCode 内限定**。外部 API からは使えない。無制限ではなく一定のリミットがあると判明したため、常用は難しい（2026-10-22 方針変更）。
-- 消えた場合 / レート制限時は `deepseek/deepseek-flash`（1017・有料）へ。
+- `dsh-sub` / 有料 1017 は、Cursor 月枠と Gemini Flash 週枠の**両方が切れたとき**の緊急 Worker。通常の次点にはしない。
 - Free の 1017 反映は **未確定**。同一プロンプトで軌跡と冗長性を比べて確認する。
 - Composer 3 が出たら W1 を再評価する。
 
@@ -65,10 +65,10 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
   DeepSeek は `fullmatch` と型検査で塞ぐ。
 - **`__pycache__` の差は環境要因**。除くと Sonnet 約 297 対 297、Argon 300 対 300。
 - **結論（当時）**: W1 の既定は DeepSeek Free のまま。ただし T1/T2 は Composer と同等。
-  → **2026-10-22 改訂**: Free にリミットがあり常用が難しいため、W1 は Gemini 3.8 Flash → Composer 2.5 → DeepSeek Free → `dsh-sub` の順でフォールバックする。
-  Composer は Cursor の大量打鍵・最小差分・Free 不調時の代替に残す。
+  → **2026-10-22 改訂**: Free にリミットがあり常用が難しいため、W1 は Gemini 3.8 Flash → Composer 2.5。
+  → **2026-10-23**: `dsh-sub` は Cursor 月枠と Flash 週枠が両方切れた緊急枠。通常の次点にはしない。
+  Composer は Cursor の大量打鍵・最小差分に残す。
   Composer に T3 型を振るなら `fullmatch` と型検査を明示する。
-
 
 ## 4. 環境の指定とフォールバック
 
@@ -78,12 +78,12 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
 | `sonnet in agy` | Google AI Pro（Claude 週枠。**Sonnet の第一候補**） | `agy --model claude-sonnet-5-5-medium`（`-low` / `-high` も可。**既定 medium**。T3 には露出しない） |
 | `opus in agy` | Google AI Pro（Claude 週枠。**Opus は `claude` 優先**） | `agy --model claude-opus-5-5-high`。週枠が余っているときだけ・事前許可制 |
-| `composer in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
-| `grok in cursor` | Cursor Pro | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
+| `composer in cursor` | Cursor Pro（**申請不要**） | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
+| `grok in cursor` | Cursor Pro（**申請不要**。設計・レビューの主軸にはしない） | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
 | `fable in cursor` | Cursor Pro（**Fable 専用**・Other Models 枠） | T3 `delegate_task` (`cursor` / `claude-fable-5-1-thinking-high`) または `cursor-agent --model claude-fable-5-1-thinking-high`。事前許可制 |
 | `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
 | `deepseek in opencode` | OpenCode Free（期間限定・$0） | T3 `delegate_task` (`opencode` / `opencode/deepseek-v4.1-flash-free`) または `opencode run -m ...` |
-| `deepseek 1017 in api` | DeepSeek 従量（1017 確定） | T3 `delegate_task` (`opencode` / `deepseek/deepseek-flash`) または `dsh-sub` |
+| `deepseek 1017 in api` | DeepSeek 従量（1017 確定）。Cursor かつ Flash が切れた緊急枠 | T3 `delegate_task` (`opencode` / `deepseek/deepseek-flash`) または `dsh-sub` |
 | `サブエージェント(inherit)` | 親と同一モデル | T3 `delegate_task` (`opencode` / 親モデル、options 空) または native `subagent` |
 
 **モデル→プロバイダは固定**（カタログに出ていても、契約が違うプロバイダでは選ばない）
@@ -102,7 +102,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 **環境省略時**:
 
 - **設計・探索**: ① agy（Argon / Gemini）→ ② Cursor → ③ Claude Team。
-- **実装（W1）**: ① Gemini 3.8 Flash（agy）→ ② Composer（Cursor）→ ③ DeepSeek Free（T3）→ ④ `dsh-sub`。難所は W3（Sonnet 5.5）。
+- **実装（W1）**: ① Gemini 3.8 Flash（agy）→ ② Composer（Cursor）。難所は W3（Sonnet 5.5）。Cursor と Flash が両方切れたときだけ `dsh-sub`。
 - **Claude モデル**: Sonnet は ① agy の Claude 週枠 → ② Claude Team → ③ Cursor。**Opus は ① Claude Team → ② agy（週枠が余っているときのみ）→ ③ Cursor**。Fable は Cursor の Other Models のみ（要許可）。
 
 公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
@@ -147,6 +147,6 @@ Opus / Fable は**無指定だと medium**。high は明示的に書く（Sonnet
 - `Private` フラグのタスクを agy に投げる。
 - 明示指示なしに Anthropic / OpenAI の従量 API を使う。
 - 指定モデルを勝手に昇格・降格する。
-- Free を唯一の実装経路にしない（有料 1017 をフォールバックに置く）。
+- Free を唯一の実装経路にしない。有料 1017 / `dsh-sub` は Cursor かつ Flash 枯渇時だけ。
 - Free が 1017 だと断定しない（動作で確認する）。
 - **Cursor の Other Models 枠を Fable 以外に使う**（枠は Fable 専用。GPT 系は 2026-10-21 に撤退）。

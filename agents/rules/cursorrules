@@ -17,7 +17,7 @@
 ## 役割・モデル構成
 
 - 正本: `rules/models.md`（方針）と `docs/routing.md`（対応表）。
-- Cursor の標準は打鍵・量産: `cursor-agent --model composer-2.5`。
+- Cursor の標準は打鍵・量産: `cursor-agent --model composer-2.5`。Composer / Grok は申請不要。
 - Cursor の Other Models は **Fable 5.1 専用**（事前許可制）。Opus 5.5 を Cursor で呼ばない（`claude` を使う）。
 - 設計・敵対監査は agy Argon に委譲する。
 

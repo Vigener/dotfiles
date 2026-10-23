@@ -23,19 +23,18 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 2. Cursor Pro（Composer 打鍵・Fable 専用）
 
 - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
+- **Composer / Grok は申請不要**（T3 `delegate_task` / `cursor-agent` とも）。Grok を設計・レビューの主軸にしない制限は残す。
 - **Cursor は Fable 専用**。Fable 5.1 を選べる唯一のサブスクが Cursor なので、Other Models 枠は Fable に全振りする。ただし**呼び出しは事前許可制**（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）。**Opus 5.5 を Cursor で呼ぶのは禁止**（`claude` を使う）。
 - **Argon は `antigravity` 固定**。cursor のカタログに `gemini-4-argon` が出るが選ばない（Other Models は Fable 専用）。固定表は `docs/routing.md` §4。
 
 ## 2.5 Worker（実装役）の方針
 
-- **既定**: DeepSeek V4.1 Flash Free（T3 の `opencode` 経由）。1M context / 出力 384K / $0。
-- **Cursor 内の大量打鍵**: Composer 2.5。Cursor 枠は Composer 専用にし、Grok の設計利用で枯渇させない。
-- **難所**: Sonnet 5.5（Team）。
-- Free は **期間限定・SLA なし・OpenCode 内限定**。有料 1017（`deepseek/deepseek-flash`）をフォールバックに置く。
-- Free の 1017 反映は **未確定**。動作で確認する。断定して書かない。
-- **DeepSeek API（`dsh-sub`）**: 従量 API だが、`bin/dsh-sub`（スキル `deepseek-harness`）というワンショット契約済みのハーネスを持つ。既定 `deepseek-flash` / effort `high`、難所は `deepseek-v4-pro` / `effort max`（常用禁止）。**従量なので 3.6 のゲート対象**（無料枠と混同しない）。
-- **DeepSeek の予算**: **月 $2・Auto-reload OFF**。残高が $0.5 を切ったら月1回だけ補充する。サブスクが主、API は「サブスクが枯れた日の圧力弁」なので、ここを増やす前に Argon / Team の枠を消化する。月 $2 は仮置き（実消費が $1 を超えた月が続いたら見直す）。
-
+- **既定**: Gemini 3.8 Flash（agy）。次点は Composer 2.5（Cursor の大量打鍵）。
+- **Cursor 内の大量打鍵**: Composer 2.5。Grok の設計利用で Cursor 枠を枯渇させない。
+- **難所**: Sonnet 5.5（agy の Claude 週枠優先。Team は研究優先）。
+- DeepSeek V4.1 Flash Free（T3 の `opencode`）は **期間限定・SLA なし・OpenCode 内限定**。リミットがあるため常用は難しい。Free の 1017 反映は **未確定**。動作で確認する。断定して書かない。
+- **DeepSeek API（`dsh-sub`）**: Cursor 月枠と Gemini Flash 週枠の**両方が切れたとき**の緊急 Worker。通常の W1 代替にはしない。`bin/dsh-sub`（スキル `deepseek-harness`）。既定 `deepseek-flash` / effort `high`。難所は `deepseek-v4-pro` / `effort max`（常用禁止）。無料枠と混同しない。緊急窓に入っていれば申請不要。Auto-reload は OFF（残高が尽きると止まる。困らない額を入れておく）。
+- **DeepSeek の緊急予算**: 窓のあいだは **$1〜2/日まで可**（他サブスクのリセットまでの一時）。通常月は使わない。数字の正本はこの節だけ。
 
 ## 3. Claude（Sonnet は agy、Opus は Team）
 
@@ -64,13 +63,12 @@ HPC 境界は `rules/hpc.md` を参照。
 | claudeAgent の Opus / Fable | medium | 明示不要。high にするときだけ書く |
 | antigravity の Argon | モデル ID で決まる | `gemini-4-argon-medium` を既定にする。high は明示的な判断としてのみ |
 
-## 3.6 サブスク枠のコストゲート
+## 3.6 許可の所在
 
-- 1タスクで 5h 枠の約 2% 以上、または週枠の約 5% 以上を消費しうる呼び出しは、**事前に1行で宣言して許可を取る**。サブスク枠も対象。
-  - 5h の消費は週の約5〜7倍（目安は保守側の 5:1）。通常は 5h が先に当たるが、週枠の残りが少なければ週枠が律速。実測は `docs/lessons.md` §6。
-- 許可は呼び出し単位。「検証のため」は免除理由にならない。
+- 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の消費％を推定して申請しない。
+- **要申請**: Fable 5.1 / Opus 5.5（全部）/ Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API。
+- **申請不要**: Composer / Grok / Gemini Flash / Argon medium / Sonnet medium / DeepSeek Free / 緊急窓の `dsh-sub`。
 - **依頼者がモデル/effort を名指しした場合は、その1回分の許可とみなす**（提案も再確認も不要。例:「Argon high で設計して」）。
-- 同じモデル・同じ役割の短時間の再呼び出しは、理由を1行書く。
 
 ## 3.7 格上げの提案（名指しされたモデルは勝手に変えない）
 
