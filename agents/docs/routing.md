@@ -77,7 +77,9 @@
 
 - 数値の出どころ: 4.7 の出力は約 8.1 万トークン/タスク、4.6 は約 3.6 万（Artificial Analysis。二次引用）。CursorBench 40.4→46.3%、DeepSWE 65.2→71.0% は自己申告で、独立の差は小さい（単独レビュー 28.8 対 28.7）。
 - **「4.6 は指示に従順」「4.6 は長会話でクォータが減りにくい」は未検証**。直接比較の証拠は無く、4.6 にも「laziness」の声がある。理由には書かない。判断の根拠は出力量とコストにとどめる。
-- **Fast は日常では使わない**（2 倍課金とされる）。T3 のカタログは 4.6 / 4.7 とも `fastMode` の既定を `true` と広告するが、options 無しで呼んだ実際の挙動は未観測（応答の `options` は `[]`）。確実にするため `delegate_task` の options に `{"fastMode": false}` を明示する。4.7 は `reasoning_effort`、4.6 は `effort`（キー名が違う）。既定 high。xhigh は effort 格上げとして扱う（`rules/models.md` 3.5）。
+- **Fast は使わない**（2 倍課金とされる）。**T3 `delegate_task` で Cursor モデルを options 無しで呼ぶと Fast で動く**（2026-10-23 に Cursor ダッシュボードで `grok-4.7-high-fast` / `composer-2.5-fast` を確認。T3 の UI はスレッドに options が無いと「Fast オフ」と表示するため、UI 表示は証拠にならない。失敗時のエラーも "Increase limits for faster responses"）。Grok 4.6 / 4.7 と Composer 2.5 / 2 はカタログの `fastMode` 既定が `true`。
+  - **`delegate_task` の `target.options` に `fastMode: false` を必ず明示する。未指定で呼ばない。** 応答の `options` に `fastMode: false` が返ることを確認する（`[]` なら Fast になっている）。
+  - effort のキーはモデルごとに違う: 4.7 は `reasoning_effort`、4.6 は `effort`、Composer は effort 無し。既定 high。xhigh は effort 格上げとして扱う（`rules/models.md` 3.5）。
 - 4.7 は `contextWindow` 既定 500k。単発では `256k` に絞ってよい。
 - Maker-Breaker: Grok 4.6 と 4.7 は**同一ファミリー**。親が Grok 4.6 のとき、Breaker に Grok 4.7 は使えない（Google 系か Sonnet 5.5）。Breaker に 4.7 を使えるのは、親が xAI 以外のとき。
 - `cursor-agent` の ID（2026-10-23 実測）: Fast は `-fast` 付きの別 ID で、素の ID は非 Fast。4.7 は `grok-4.7-high`（`grok-4.7` 単体も通る）、4.6 は `cursor-grok-4.6-high`（`cursor-` 接頭辞が付く）。`-fast` 付きは使わない。一覧は `cursor-agent --list-models`。
@@ -105,8 +107,8 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | `flash in agy` | Google AI Pro（Gemini 枠） | T3 `delegate_task` (`antigravity` / `gemini-3.8-flash-high`) または `agy` |
 | `sonnet in agy` | Google AI Pro（Claude 週枠。**Sonnet の第一候補**） | `agy --model claude-sonnet-5-5-medium`（`-low` / `-high` も可。**既定 medium**。T3 には露出しない） |
 | `opus in agy` | Google AI Pro（Claude 週枠。**Opus は `claude` 優先**） | `agy --model claude-opus-5-5-high`。週枠が余っているときだけ・事前許可制 |
-| `composer in cursor` | Cursor Pro（**申請不要**） | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
-| `grok in cursor` | Cursor Pro（**申請不要**。設計・レビューの主軸にはしない）。司令塔は 4.6、単発レビュー・発想は 4.7（§3） | T3 `delegate_task` (`cursor` / `grok-4.6` または `grok-4.7`、options に `{"fastMode": false}` を明示) または `cursor-agent --model cursor-grok-4.6-high` / `grok-4.7-high`（`-fast` 付きは使わない） |
+| `composer in cursor` | Cursor Pro（**申請不要**。`fastMode: false` を明示する場合に限る） | T3 `delegate_task` (`cursor` / `composer-2.5`、options に `{"fastMode": false}` を**必ず**明示) または `cursor-agent --model composer-2.5`（`-fast` 付きは使わない） |
+| `grok in cursor` | Cursor Pro（**申請不要**。`fastMode: false` を明示する場合に限る。設計・レビューの主軸にはしない）。司令塔は 4.6、単発レビュー・発想は 4.7（§3） | T3 `delegate_task` (`cursor` / `grok-4.6` または `grok-4.7`、options に `{"fastMode": false}` を**必ず**明示) または `cursor-agent --model cursor-grok-4.6-high` / `grok-4.7-high`（`-fast` 付きは使わない） |
 | `fable in cursor` | Cursor Pro（**Fable 専用**・Other Models 枠） | T3 `delegate_task` (`cursor` / `claude-fable-5-1-thinking-high`) または `cursor-agent --model claude-fable-5-1-thinking-high`。事前許可制 |
 | `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
 | `deepseek in opencode` | OpenCode Free（期間限定・$0） | T3 `delegate_task` (`opencode` / `opencode/deepseek-v4.1-flash-free`) または `opencode run -m ...` |

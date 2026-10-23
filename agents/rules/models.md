@@ -23,8 +23,8 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 2. Cursor Pro（Composer 打鍵・Fable 専用）
 
 - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
-- **Composer / Grok は申請不要**（T3 `delegate_task` / `cursor-agent` とも）。Grok を設計・レビューの主軸にしない制限は残す。
-- **Grok は Fast を使わない**（2 倍課金とされる。T3 は `fastMode: false` を明示、CLI は `-fast` 無しの ID。詳細は `docs/routing.md` §3）。司令塔は 4.6、単発レビュー・発想は 4.7（`docs/routing.md` §3）。xhigh は effort の格上げとして扱う。
+- **Composer / Grok は申請不要。ただし Fast オフを明示した呼び出しに限る**（下記）。Grok を設計・レビューの主軸にしない制限は残す。
+- **Cursor モデル（Composer / Grok）は Fast を使わない**。T3 `delegate_task` は options 無しだと Fast で動く（2026-10-23 にダッシュボードで確認。UI は Fast オフと表示するが信用しない）。`target.options` に `fastMode: false` を**必ず**明示し、応答の `options` で確認する。CLI は `-fast` 無しの ID。明示せずに呼んだ場合は申請不要の範囲外（無許可の Fast 利用）として扱う。詳細は `docs/routing.md` §3。司令塔は 4.6、単発レビュー・発想は 4.7（`docs/routing.md` §3）。xhigh は effort の格上げとして扱う。
 - **Cursor は Fable 専用**。Fable 5.1 を選べる唯一のサブスクが Cursor なので、Other Models 枠は Fable に全振りする。ただし**呼び出しは事前許可制**（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）。**Opus 5.5 を Cursor で呼ぶのは禁止**（`claude` を使う）。
 - **Argon は `antigravity` 固定**。cursor のカタログに `gemini-4-argon` が出るが選ばない（Other Models は Fable 専用）。固定表は `docs/routing.md` §4。
 
@@ -68,7 +68,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の消費％を推定して申請しない。
 - **要申請**: Fable 5.1 / Opus 5.5（全部）/ Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API。
-- **申請不要**: Composer / Grok / Gemini Flash / Argon medium / Sonnet medium / DeepSeek Free / 緊急窓の `dsh-sub`。
+- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini Flash / Argon medium / Sonnet medium / DeepSeek Free / 緊急窓の `dsh-sub`。
 - **依頼者がモデル/effort を名指しした場合は、その1回分の許可とみなす**（提案も再確認も不要。例:「Argon high で設計して」）。
 
 ## 3.7 格上げの提案（名指しされたモデルは勝手に変えない）
