@@ -98,7 +98,7 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
 5. **Cursor を `delegate_task` で呼ぶとき**: `target.options` に `{"fastMode": false}` を必ず明示し、応答の `options` で確認する。未指定は Fast で動く（2026-10-23 実測。T3 の UI は Fast オフと表示するが信用しない）。`rules/models.md` §2。
    - **既存スレッドへの追補**: スレッドは作成時の設定を引き継ぐ。options が無い旧スレッドは、追補の前に `t3_thread_configure`（`modelSelection.options` に `fastMode: false` と effort）で直し、`t3_thread_configuration` で確認してから `t3_thread_send` する。「新規起票して brief を付け直す」で回避しない（子の文脈が失われる）。
-   - CLI は `bin/cursor-agent-guard` が `-fast` 付き ID と `[fast=true]` を遮断する（明示許可は `CURSOR_ALLOW_FAST=1`）。ガードが効くのは `~/.cargo/bin` 経由。`~/.local/bin/cursor-agent` は Cursor の自動更新で実体に上書きされうるため、`bin/link-dotfiles-macos.sh` で張り直す。
+   - CLI（`cursor-agent`）は既定が非 Fast（`~/.cursor/cli-config.json` の `fast: false`）なので、ガードで遮断はしない。`-fast` 付き ID を自分で選ばないこと。問題は T3 経由の `delegate_task` だけ。
 
 ## 9. 敵対レビューのスコープ
 
