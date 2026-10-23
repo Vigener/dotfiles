@@ -82,7 +82,7 @@
   - effort のキーはモデルごとに違う: 4.7 は `reasoning_effort`、4.6 は `effort`、Composer は effort 無し。既定 high。xhigh は effort 格上げとして扱う（`rules/models.md` 3.5）。
 - 4.7 は `contextWindow` 既定 500k。単発では `256k` に絞ってよい。
 - Maker-Breaker: Grok 4.6 と 4.7 は**同一ファミリー**。親が Grok 4.6 のとき、Breaker に Grok 4.7 は使えない（Google 系か Sonnet 5.5）。Breaker に 4.7 を使えるのは、親が xAI 以外のとき。
-- `cursor-agent` の ID（2026-10-23 実測）: Fast は `-fast` 付きの別 ID で、素の ID は非 Fast。4.7 は `grok-4.7-high`（`grok-4.7` 単体も通る）、4.6 は `cursor-grok-4.6-high`（`cursor-` 接頭辞が付く）。`-fast` 付きは使わない。一覧は `cursor-agent --list-models`。
+- `cursor-agent` の ID（2026-10-23 実測）: Fast は `-fast` 付きの別 ID で、素の ID は非 Fast。4.7 は `grok-4.7-high`（`grok-4.7` 単体も通る）、4.6 は `cursor-grok-4.6-high`（`cursor-` 接頭辞が付く）。`-fast` 付きは使わない。一覧は `cursor-agent --list-models`。CLI の既定は `~/.cursor/cli-config.json` の `modelParameters.<model>` に持ち、Composer 2.5 / Grok 4.6 / 4.7 とも `fast: false`（2026-10-23 実測）。上書きは `--model 'composer-2.5[fast=false]'` の括弧記法。**T3 の設定画面（Models）には Fast を切る既定の設定が無い**（Fast mode の対応可否の表示のみ）。T3 経由は `options` の明示で守る。
 
 ### 2026-10-21 ベイクオフの結論
 

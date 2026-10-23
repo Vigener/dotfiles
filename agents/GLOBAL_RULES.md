@@ -8,6 +8,7 @@
 - **HPC**: 生の `sbatch` / `qsub`、Miyabi / Pegasus / Sirius への `ssh` / `scp` / `rsync` は禁止。必ず harness 経由（`ppx_harness` / `miyabi_harness --dry-run`）。実ログインは人間。→ `rules/hpc.md`
 - **高額 API**: 明示指示なしに Anthropic / OpenAI の従量 API を使わない。サブスク枠を優先する。→ `rules/models.md`
 - **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、明示指示があるときだけ。
+- **Cursor の Fast（2 倍課金）**: Composer / Grok を T3 `delegate_task` で呼ぶときは `target.options` に `{"fastMode": false}` を必ず明示し、応答の `options` で確認する。未指定は Fast で動く（T3 の UI は Fast オフと表示するが信用しない）。既存スレッドへの追補は先に `t3_thread_configure`。CLI は `-fast` 付き ID を使わない。→ `rules/delegation.md` §8
 
 ## 2. 委譲
 
