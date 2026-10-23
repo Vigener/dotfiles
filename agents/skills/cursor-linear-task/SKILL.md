@@ -75,7 +75,7 @@ cursor-agent -p --force --approve-mcps --trust --model auto "プロンプト..."
 | `--trust` | **ワークスペース信頼**。現在の作業ディレクトリを信頼されたワークスペースとして扱い、セキュリティ警告プロンプトをスキップする。 |
 | `--model auto` | **自動モデル選択（推奨）**。タスク起票のような定型処理を高コストなフロンティアモデルに過剰割り当てせず、最適な中軽量モデルへルーティングする。モデルナンバリングの陳腐化も防ぐ。 |
 
-※ 特定の高推論モデル（例: `grok-4.7-high`）を明示したい場合は `--model grok-4.7-high` を指定することも可能。
+※ モデルは `auto` で足りる。明示指定はしない（Grok は Fast の切り方を確認できるまで `cursor-agent` から呼ばない。`docs/routing.md` §4）。
 
 ---
 
@@ -111,7 +111,7 @@ JSON_EOF
 
 ### 3. 実行（ファイル経由またはヒアドキュメント）
 
-長文プロンプトの場合は `inbox/prompt_cursor_grok_linear_xxx.txt` などに保存するか、コマンドラインに直接渡す。
+長文プロンプトの場合は `inbox/prompt_cursor_linear_xxx.txt` などに保存するか、コマンドラインに直接渡す。
 
 ```bash
 cursor-agent -p --force --approve-mcps --trust --model auto "$(cat prompt.txt)"

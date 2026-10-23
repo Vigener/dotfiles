@@ -12,7 +12,7 @@ description: >-
 
 - **Maker-Breaker 異種ファミリー原則**:
   - 実装・正常系テストを行った Maker（親オーケストレータ）と**異なるモデルファミリー／プロバイダ**を Breaker に選定する（自己盲点・Sycophancy の物理排除）。
-  - 日常例: 親が Google系（Gemini 3.8 Flash等）なら Breaker は xAI系（Grok 4.7 等）／親が xAI系（Grok 4.7）なら Breaker は Google系（Flash等）。節目・難所は Argon / Sonnet 5.5 / DeepSeek V4 系へエスカレーション。迷ったら `/model-route` で決定。
+  - 日常例: 親が Google系（Gemini 3.8 Flash等）なら Breaker は xAI系（Grok 4.7。Fast 無効）／親が xAI系（Grok 4.6 / 4.7 のどちらでも）なら Breaker は Google系（Flash等）。Grok 4.6 と 4.7 は同一ファミリーなので、親 4.6 に Breaker 4.7 は組めない。節目・難所は Argon / Sonnet 5.5 / DeepSeek V4 系へエスカレーション。迷ったら `/model-route` で決定。
   - レビューモデルとテスト作成モデルを細分化（3者分離）せず、Breaker への1回の委譲で「Diff敵対監査 ＋ 意地悪境界値テスト生成」を一括依頼する。
 - **コンテキスト完全隔離**: 親スレッドの会話履歴を一切渡さず、Diff と前提仕様のみを渡す（独立タスク/別スレッド/CLI）。
 - **read-only ＆ 探索許可**: レビュアーにファイル編集はさせないが、前提文脈や関連モジュールの**自律的なファイル閲覧・grep探索（Read-only tools）は積極的に許可**する（Diff単体で文脈誤認するのを防ぐ）。

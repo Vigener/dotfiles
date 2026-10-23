@@ -21,6 +21,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Ar
 2.5. **Visual**: 成果物の合否は見た目で決まるか。
     → Yes なら実装は W1 のまま、目視 QA を別モデル（または親）に分離する。同じ見た目指摘の 2 回目で W1 を止める（`docs/routing.md` §3 Visual QA）。
 3. **Flag**: Private / Search / Orchestration のどれか。
+   Grok を選ぶなら、長い会話の司令塔は 4.6、単発の敵対レビュー・発想は 4.7。Fast は必ず切る（`docs/routing.md` §3 Grok 4.6 / 4.7）。4.6 と 4.7 は同一ファミリー扱い（Maker-Breaker で組ませない）。
 4. **環境**: `in agy` / `in cursor` / `in claude` / `api` の指定があるか。
    省略時は `routing.md` のフォールバック順（agy → Cursor → Claude Team）。
 5. **コスト階層**: 低 / 中 / 高 を判定し、現在の残量と照合する。

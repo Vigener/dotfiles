@@ -30,7 +30,7 @@
 
 | 役割 | 第一候補 | 代替 | チャネル |
 |---|---|---|---|
-| 司令塔（日常） | Gemini 3.8 Flash / Grok 4.7 | Claude Sonnet 5.5 (Team) | T3 / CLI |
+| 司令塔（日常） | Gemini 3.8 Flash / Grok 4.6 | Claude Sonnet 5.5 (Team) | T3 / CLI |
 | 設計・仕様化 | Gemini 4 Argon (medium) | Opus 5.5（high・要許可） / Sonnet 5.5 (medium) | agy / T3 |
 | 敵対レビュー | Argon (medium) + Sonnet 5.5 (medium) の2本立て | Opus 5.5（high・要許可） | agy / T3 / claudeAgent |
 | 実装ループ（W1） | Gemini 3.8 Flash（agy） | Composer 2.5（Cursor）。緊急時のみ `dsh-sub` | agy / cursor / T3 |
@@ -65,6 +65,23 @@
 - overlap のプログラム検査は初回 brief に入れる。検査を通すために目盛りを消すのは不合格。
 - 論文図は matplotlib。T3 の `html_preview` はチャット用 HTML であり、論文 PNG の代替にしない。
 
+### Grok 4.6 / 4.7 の使い分け（2026-10-23 調査）
+
+同一 Cursor Models 枠・同単価。差は出力量と、1 回で何をさせるか。
+
+| 用途 | モデル | 理由 |
+|---|---|---|
+| 司令塔（長い会話・指揮） | Grok 4.6 | 出力トークンが 4.7 の約半分。会話が伸びても枠を食いにくい |
+| 単発の敵対レビュー・発想 | Grok 4.7 | コーディング系ベンチ・幻覚率で優位。単発なら冗長さのコストが小さい |
+| 実装・量産 | Composer 2.5（W1） | 4.7 でのコード量産は出力 2 倍で枠に不利。従来方針のまま |
+
+- 数値の出どころ: 4.7 の出力は約 8.1 万トークン/タスク、4.6 は約 3.6 万（Artificial Analysis。二次引用）。CursorBench 40.4→46.3%、DeepSWE 65.2→71.0% は自己申告で、独立の差は小さい（単独レビュー 28.8 対 28.7）。
+- **「4.6 は指示に従順」「4.6 は長会話でクォータが減りにくい」は未検証**。直接比較の証拠は無く、4.6 にも「laziness」の声がある。理由には書かない。判断の根拠は出力量とコストにとどめる。
+- **Fast は必ず切る**。T3 のカタログでは 4.6 / 4.7 とも `fastMode` の既定が `true`（2 倍課金とされる）。`delegate_task` の options に `{"fastMode": false}` を明示する。4.7 は `reasoning_effort`、4.6 は `effort`（キー名が違う）。既定 high。xhigh は effort 格上げとして扱う（`rules/models.md` 3.5）。
+- 4.7 は `contextWindow` 既定 500k。単発では `256k` に絞ってよい。
+- Maker-Breaker: Grok 4.6 と 4.7 は**同一ファミリー**。親が Grok 4.6 のとき、Breaker に Grok 4.7 は使えない（Google 系か Sonnet 5.5）。Breaker に 4.7 を使えるのは、親が xAI 以外のとき。
+- `cursor-agent` 側の Fast の切り方は未確認。確認できるまで Grok は T3 の `delegate_task` 経由で呼ぶ。
+
 ### 2026-10-21 ベイクオフの結論
 
 DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）/ T3（検証・CLI）で比較した。
@@ -89,7 +106,7 @@ DeepSeek Free と Composer 2.5 を T1（バグ修正）/ T2（リファクタ）
 | `sonnet in agy` | Google AI Pro（Claude 週枠。**Sonnet の第一候補**） | `agy --model claude-sonnet-5-5-medium`（`-low` / `-high` も可。**既定 medium**。T3 には露出しない） |
 | `opus in agy` | Google AI Pro（Claude 週枠。**Opus は `claude` 優先**） | `agy --model claude-opus-5-5-high`。週枠が余っているときだけ・事前許可制 |
 | `composer in cursor` | Cursor Pro（**申請不要**） | T3 `delegate_task` (`cursor` / `composer-2.5`) または `cursor-agent --model composer-2.5` |
-| `grok in cursor` | Cursor Pro（**申請不要**。設計・レビューの主軸にはしない） | T3 `delegate_task` (`cursor` / `grok-4.7`) または `cursor-agent --model grok-4.7` |
+| `grok in cursor` | Cursor Pro（**申請不要**。設計・レビューの主軸にはしない）。司令塔は 4.6、単発レビュー・発想は 4.7（§3） | T3 `delegate_task` (`cursor` / `grok-4.6` または `grok-4.7`、options に `{"fastMode": false}` を必ず指定)。`cursor-agent` は Fast の切り方を確認するまで使わない |
 | `fable in cursor` | Cursor Pro（**Fable 専用**・Other Models 枠） | T3 `delegate_task` (`cursor` / `claude-fable-5-1-thinking-high`) または `cursor-agent --model claude-fable-5-1-thinking-high`。事前許可制 |
 | `opus in claude` | **Claude Team**（`claude auth status` で確認） | T3 `delegate_task` (`claudeAgent` / `claude-opus-5-5`) または `claude -p` |
 | `deepseek in opencode` | OpenCode Free（期間限定・$0） | T3 `delegate_task` (`opencode` / `opencode/deepseek-v4.1-flash-free`) または `opencode run -m ...` |

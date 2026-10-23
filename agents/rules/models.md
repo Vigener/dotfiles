@@ -24,6 +24,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - Grok 4.7 への日常の思考・設計丸投げを停止し、agy Argon へオフロード。Cursor 側は **Composer 2.5 (`agent --model composer-2.5`)** による打鍵・量産に特化させる。
 - **Composer / Grok は申請不要**（T3 `delegate_task` / `cursor-agent` とも）。Grok を設計・レビューの主軸にしない制限は残す。
+- **Grok は Fast を切って呼ぶ**（カタログの `fastMode` 既定は `true`、2 倍課金とされる）。司令塔は 4.6、単発レビュー・発想は 4.7（`docs/routing.md` §3）。xhigh は effort の格上げとして扱う。
 - **Cursor は Fable 専用**。Fable 5.1 を選べる唯一のサブスクが Cursor なので、Other Models 枠は Fable に全振りする。ただし**呼び出しは事前許可制**（核ボタン・一撃で高額クレジットが蒸発した事故の教訓）。**Opus 5.5 を Cursor で呼ぶのは禁止**（`claude` を使う）。
 - **Argon は `antigravity` 固定**。cursor のカタログに `gemini-4-argon` が出るが選ばない（Other Models は Fable 専用）。固定表は `docs/routing.md` §4。
 
