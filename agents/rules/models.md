@@ -55,9 +55,9 @@ HPC 境界は `rules/hpc.md` を参照。
 ### 設計・仕様（大きなループ）
 
 - **ループ最初に 1 回**: Opus が方向・仕様の骨子・完了条件（DoD）を決める（§3.6 **申請不要**）。
-- **細かい仕様**: Sonnet 5.5 **medium**（agy の Claude 週枠 → Team）。
-- **Opus へ上げる**（Sonnet high ではなく Opus）: 同一タスク内で前提が崩れたとき、または**同じ指摘が 2 回**出たとき（§3.6 **申請不要**）。
-- 上げた**回数と理由を記録**する。多い場合は「最初から Sonnet high にする」切り替えを長い目で検討する（RES-23 の計測と合わせて見る）。
+- **細かい仕様**: Sonnet 5.5 **(medium)**（agy の Claude 週枠 → Team）。
+- **Opus 5.5 へ上げる**（Sonnet 5.5 high ではなく Opus 5.5）: 同一タスク内で前提が崩れたとき、または**同じ指摘が 2 回**出たとき（§3.6 **申請不要**）。
+- 上げた**回数と理由を記録**する。多い場合は「最初から Sonnet 5.5 high にする」切り替えを長い目で検討する（RES-23 の計測と合わせて見る）。
 
 ### W1 日常実装
 
@@ -67,7 +67,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### 敵対的レビュー
 
-- **本流**: Sonnet 5.5 **medium**（Diff 監査・T2–T3）。必要なら **Grok 4.7**（非 Fast）を加える。
+- **本流**: Sonnet 5.5 **(medium)**（Diff 監査・T2–T3）。必要なら **Grok 4.7**（非 Fast）を加える。
 - **大きなループの最後に Opus で 1 回**（high・§3.6 **申請不要**）。手順はスキル `adversarial-review`。
 
 ### DeepSeek API（`dsh-sub`）
@@ -103,7 +103,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - 開いている（何が良いか自体を決める）: high。
 - 機械的（整形・分類・抽出）: low。
 - モデルと effort は別軸。モデルを上げる前に effort を下げられないか考える。
-- **役割の目安**: ループ頭の設計 = Opus high（§3.6 申請不要）/ 細仕様 = Sonnet medium / 実装 = `dsh-sub`（W1）/ Cloud 実装 = Composer 2.5 / 敵対レビュー = Sonnet medium + ループ末 Opus（§3.6 申請不要）/ 探索・推敲 = Gemini Flash。
+- **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/ 細仕様 = Sonnet 5.5 (medium) / 実装 = `dsh-sub`（W1）/ Cloud 実装 = Composer 2.5 / 敵対レビュー = Sonnet 5.5 (medium) + ループ末 Opus 5.5（§3.6 申請不要）/ 探索・推敲 = Gemini 3.8 Flash。
 - **effort を変えるときは新しいスレッドで始める**。同一スレッドの途中で変えると、それまでの履歴を読み直すうえキャッシュも効きにくい（Antigravity の運用知見）。
 - medium と high の品質差は小さいという報告が複数ある。差の有無は**モック実験ではなく普段の使用感**（返答の質・トークンの減り方）で判断する（2026-10-21 決定）。
 
@@ -117,11 +117,11 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の消費％を推定して申請しない。
 - **オーケストレーターのハンドオフ**（`rules/delegation.md` §1）: 司令塔が `docs/routing.md` に従い Worker（W1 `dsh-sub` 等）・探索・レビュアへ `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
-- **要申請**: Fable 5.1 / Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**（例: Phase-First の節目 Opus、発想・裁定のみの追加 Opus、agy 週枠の Opus）。
-- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini Flash / Argon medium / Sonnet medium / DeepSeek Free / **W1 の `dsh-sub`（DeepSeek-V4.1-Flash-1017、常用）** / **Opus 5.5 の次の用途**:
+- **要申請**: Fable 5.1 / Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**（例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、agy 週枠の Opus 5.5）。
+- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium) / DeepSeek Free / **W1 の `dsh-sub`（DeepSeek-V4.1-Flash-1017、常用）** / **Opus 5.5 の次の用途**:
   - 大きなループの最初の設計（方向・仕様骨子・DoD）
   - 大きなループの最後の敵対的レビュー（1 回）
-  - 同一タスク内で前提が崩れたとき、または同じ指摘が 2 回出たときの、Sonnet から Opus への引き上げ
+  - 同一タスク内で前提が崩れたとき、または同じ指摘が 2 回出たときの、Sonnet 5.5 から Opus 5.5 への引き上げ
 - **依頼者がモデル/effort を名指しした場合は、その1回分の許可とみなす**（提案も再確認も不要。例:「Argon high で設計して」）。
 
 ## 3.7 格上げの提案（名指しされたモデルは勝手に変えない）
@@ -129,10 +129,10 @@ HPC 境界は `rules/hpc.md` を参照。
 - 名指しされたモデル/effort でも、成功条件が開いている（設計判断・前提の崩壊・論文の主張）と分かっていれば、**着手前に1行**で格上げ案を出す。
 - **出力が格上げ後に再利用できない作業**（判断・主張の組み立て）は、承認が出るまで開始しない。**例外**: §3.6 申請不要の Opus 引き上げ（前提崩れ・同指摘 2 回）と、申請不要のループ頭設計・ループ末レビュー。再利用できる作業（調査・列挙・材料集め）は medium で進めてよい。
 - 提案は1行・選択肢は最大2つ・推奨を1つ。返事が無いまま次の区切りを過ぎたら「保留」と報告し、他の再利用可能な作業へ移る（全体は止めない）。
-- 格上げ先の順序: ①同一モデルの effort 上げ（要許可）②前提崩れ・同指摘2回は **Opus**（§3.6 申請不要。Sonnet high より優先）③別ファミリー medium ④Fable（核ボタン・要許可）。**要申請の格上げ先は、承認が出るまで切り替えない。**
+- 格上げ先の順序: ①同一モデルの effort 上げ（要許可）②前提崩れ・同指摘2回は **Opus 5.5**（§3.6 申請不要。Sonnet 5.5 high より優先）③別ファミリー medium ④Fable（核ボタン・要許可）。**要申請の格上げ先は、承認が出るまで切り替えない。**
 - 名指しモデルの変更は承認があったときだけ（Strict Model Fidelity）。「任せる」と言われた場合はこの限りでない。
 
 ## 4. ゴール固定・敵対レビュー
 
 - 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
-- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は Sonnet / Opus / Grok / Gemini Flash 等で組む。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
+- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)** / **Opus 5.5** / **Grok 4.7** 等（**Gemini 3.8 Flash は使わない**）。T1 軽量 diff は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。

@@ -18,22 +18,23 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
 1. **環境**: Cursor **Cloud Agent** かローカルか。
    - Cloud → 設計 **Grok 4.7**、実装 **Composer 2.5**（いずれも非 Fast）。`routing.md` §3 Cloud Agent。
 2. **Phase-First**: 教員報告前・数理難所・章立て・仕様策定の山場か？
-   → Yes なら **Opus 5.5**（§3.6 **要申請**。ループ頭設計と別）または Sonnet 5.5 medium。Argon は設計に使わない。
+   → Yes なら **Opus 5.5**（§3.6 **要申請**。ループ頭設計と別）または Sonnet 5.5 (medium)。Argon は設計に使わない。
 3. **Task**: Design / Implement / Extract のどれか。
-   - Design（大きなループ）: 頭 1 回 **Opus**（方向・DoD）→ 細部 **Sonnet medium**。
+   - Design（大きなループ）: 頭 1 回 **Opus 5.5**（方向・DoD）→ 細部 **Sonnet 5.5 (medium)**。
    - Implement（W1）: ローカルは **`dsh-sub`** のみ。
    - Extract / W2: **Gemini 3.8 Flash**。
+   - 敵対レビュー T1（軽い diff）: **`dsh-sub`**（W1 直後は Sonnet 5.5 (medium)）。`adversarial-review`。
 3.5. **Visual**: 成果物の合否は見た目で決まるか。
-    → Yes なら W1 は `dsh-sub` のまま、目視 QA は Flash / Sonnet / Opus / 親。同じ見た目指摘の 2 回目で W1 を止める（`docs/routing.md` §3 Visual QA）。
+    → Yes なら W1 は `dsh-sub` のまま、目視 QA は Sonnet 5.5 (medium) / Opus 5.5 / 親。同じ見た目指摘の 2 回目で W1 を止める（`docs/routing.md` §3 Visual QA）。
 4. **Flag**:
    - Private → **Composer 2.5**（Cursor・非 Fast）。
-   - Search → **Gemini Flash**。
-   - Orchestration → **Opus**（Team）。
-   - ループ末の日本語推敲 → **yomiyasu + Gemini Flash**（RES-24 試行中）。
+   - Search → **Gemini 3.8 Flash**。
+   - Orchestration → **Opus 5.5**（Team）。
+   - ループ末の日本語推敲 → **yomiyasu + Gemini 3.8 Flash**（RES-24 試行中）。
 5. **監査で Gemini/Claude 以外が要る**: **Grok 4.7**（Cursor・非 Fast）。Fast は使わない（`docs/routing.md` §8）。
 6. **環境指定**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）。
    省略時は `routing.md` §4 のフォールバック順。
-7. **昇格**: 前提崩れ・同指摘 2 回 → **Opus**（§3.6 **申請不要**）。回数と理由を記録（RES-23）。
+7. **昇格**: 前提崩れ・同指摘 2 回 → **Opus 5.5**（§3.6 **申請不要**）。回数と理由を記録（RES-23）。
 
 **やらないこと**: 残量ペースでモデルを動的に切り替える（旧手順 5 を廃止）。必要なら `update-ai-usage` で使い切り防止のみ確認する。
 
