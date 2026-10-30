@@ -7,9 +7,9 @@
 
 ## 1. 判定順序
 
-1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は §3 Cloud Agent を先に適用する。
+1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は本書 §3「Cursor Cloud Agent」を先に適用する。
 2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
-3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、§3 Visual QA を適用する。
+3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、本書 §3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
 5. **チャネル**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
 6. **残量**: 動的振り分けはしない。使い切り防止の確認に `update-ai-usage` を使う（`rules/models.md` §2.9）。
@@ -74,15 +74,15 @@
 
 - **スクリプト・数値・フォント・再現性**: W1（`dsh-sub`）。ここは閉じた Implement。
 - **PNG / 画面の目視**: W1 の自己申告は証拠にしない。**第一候補は Gemini 3.8 Flash**（agy・マルチモーダル）。**フォールバックは Grok 4.7**（Cursor・非 Fast）。Grok 4.7 がローカルで PNG をどこまで判断できるかは**未確認**（試す前に期待値を上げない）。DeepSeek / Composer に「PNG を見て重なりなしと報告せよ」とだけ頼まない。**通常の Visual QA に Opus 5.5 は使わない**（引き上げ時のみ `models.md` §3.6）。
-- **最初の 1 回の見た目直しは想定内**。同じ見た目クラス（重なり・余白・改行）が 2 回目に出たら W1 ループを止める（§6 の「同じ指摘が 2 回続く」を図にも適用）。親が figsize / `subplots_adjust` / fontsize / overlap assert を閉じてから W1 に 1 通り出すか、**Opus 5.5 へ引き上げ**する。
+- **最初の 1 回の見た目直しは想定内**。同じ見た目クラス（重なり・余白・改行）が 2 回目に出たら W1 ループを止める（本書 §6 の「同じ指摘が 2 回続く」を図にも適用）。親が figsize / `subplots_adjust` / fontsize / overlap assert を閉じてから W1 に 1 通り出すか、**Opus 5.5 へ引き上げ**する。
 - overlap のプログラム検査は初回 brief に入れる。検査を通すために目盛りを消すのは不合格。
 - 論文図は matplotlib。T3 の `html_preview` はチャット用 HTML であり、論文 PNG の代替にしない。
 
 ### Grok 4.7（ローカルでの位置づけ）
 
 - **司令塔・設計の主軸にしない**（平常時のオーケストレーターは Opus 5.5）。
-- **用途（この2つのみ）**: **Visual QA フォールバック**（Flash のあと）、**Opus 5.5 が使えないときのオーケストレーター代行**（Grok の月枠リセットが遠いため温存）。
-- **Fast は使わない**（`rules/models.md` §2、`rules/delegation.md` §8）。T3 `delegate_task` は `fastMode: false` 必須。
+- **用途（この2つのみ）**: **Visual QA フォールバック**（Flash のあと）、**Opus 5.5 が使えないときのオーケストレーター代行**（Opus 不在時に代行できるのが Grok だけで、Grok の枠はリセットまでが長いため温存する）。
+- **Fast は使わない**（`rules/models.md` §2.1、`rules/delegation.md` §8、`docs/routing.md` §8）。T3 `delegate_task` は `fastMode: false` 必須。
 - Maker-Breaker: W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)**（W1 直後 T1・T2–T3）。
 
 ### yomiyasu
@@ -115,7 +115,7 @@
 | Sonnet 5.5 | `agy` → Team | cursor |
 | Opus 5.5 | `claudeAgent` / Team | cursor、agy（余剰時のみ・要許可） |
 | Fable 5.1 | `cursor` のみ | それ以外 |
-| Composer / Grok | `cursor` | ローカル W1・設計には使わない（Private / Cloud / §2.1 の Grok 例外のみ） |
+| Composer / Grok | `cursor` | ローカル W1・設計には使わない（Private / Cloud / `rules/models.md` §2.1 の Grok 例外のみ） |
 | Gemini 3.8 Flash | `agy` | 実装 W1 |
 
 **環境省略時（ローカル）**:

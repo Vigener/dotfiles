@@ -29,10 +29,10 @@ HPC 境界は `rules/hpc.md` を参照。
 ### 2.1 ローカル（T3 / `cursor-agent`）
 
 - **Composer / Grok は原則使わない**（ローカルの W1 は `dsh-sub`。§2.5）。
-- **例外（3つ）** — いずれも **Grok / Composer は Fast オフを明示**（§2 末尾・`docs/routing.md` §8）:
+- **例外（3つ）** — いずれも **Grok / Composer は Fast オフを明示**（本ファイル §2.1 の Fast 手順、`docs/routing.md` §8）:
   - **機密（Flag: Private）**: **Composer 2.5**（`fastMode: false` を明示した T3 / 非 Fast CLI）。
   - **Visual QA フォールバック**: Gemini 3.8 Flash のあと、目視 QA に **Grok 4.7**（`docs/routing.md` §3 Visual QA）。
-  - **Opus 5.5 が使えないときのオーケストレーター代行**: **Grok 4.7**（Team / `claude` が使えない局面のみ。平常時の司令塔にしない）。
+  - **Opus 5.5 が使えないときのオーケストレーター代行**: **Grok 4.7**（Team / `claude` が使えない局面のみ。代行できるのが Grok だけだが枠のリセットまでが長いため、平常時は Opus・用途はこの2例外に限定して温存）。
 - **Composer / Grok は申請不要。ただし Fast オフを明示した呼び出しに限る**（下記）。Fable は Other Models 専用・要許可。Opus 5.5 を Cursor で呼ぶのは禁止（`claude` を使う）。
 - **Cursor モデル（Composer / Grok）は Fast を使わない**。T3 `delegate_task` は options 無しだと Fast で動く（2026-10-23 にダッシュボードで確認。UI は Fast オフと表示するが信用しない）。`target.options` に `fastMode: false` を**必ず**明示し、応答の `options` で確認する。CLI は `-fast` 無しの ID。明示せずに呼んだ場合は申請不要の範囲外（無許可の Fast 利用）として扱う。詳細は `docs/routing.md` §8 および `rules/delegation.md` §8。
 - **Argon は `antigravity` 固定**。cursor のカタログに `gemini-4-argon` が出るが選ばない（Other Models は Fable 専用）。固定表は `docs/routing.md` §4。
@@ -54,7 +54,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### 司令塔
 
-- **オーケストレーターは Opus 5.5（Claude Team）**。旧記述の Flash / Grok 司令塔は廃止。Opus が使えないときだけ §2.1 の **Grok 4.7 代行**。
+- **オーケストレーターは Opus 5.5（Claude Team）**。旧記述の Flash / Grok 司令塔は廃止。Opus が使えないときだけ §2.1 の **Grok 4.7 代行**（Opus 不在時に代行できるのが Grok のみ・Grok 枠はリセットまで長いので温存）。
 
 ### 設計・仕様（大きなループ）
 
@@ -142,4 +142,4 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 4. ゴール固定・敵対レビュー
 
 - 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
-- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)**（T1 直後・T2–T3。**Gemini 3.8 Flash は敵対レビューに使わない**）。**Opus 5.5 はループ末と引き上げのみ**（通常 Breaker にしない）。T1 は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
+- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)**（**W1 直後の T1**・T2–T3。**Gemini 3.8 Flash は敵対レビューに使わない**）。**Opus 5.5 はループ末と引き上げのみ**（通常 Breaker にしない）。T1 は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
