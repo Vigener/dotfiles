@@ -22,22 +22,22 @@ description: >-
   - 単なる難癖・却下（REJECT）で終わらせず、**具体的代替案や上位互換の設計**を提示させる。
 - **diff 優先**: 入力の主軸は git diff とする。
 - **トリガー駆動**: 毎ターン回さない。
-- **大きなループの最後**: **Opus 5.5 で 1 回**レビューする（要許可 §3.6）。Sonnet medium との本流 2 本立てと役割を分ける（Opus は統合・裁定寄り）。
+- **大きなループの最後**: **Opus 5.5 で 1 回**レビューする（§3.6 **申請不要**）。本流の Sonnet medium 監査のあとに回す。
 - **agy Opus は原則使わない**。**Opus 5.5 は `claude`（Team）優先**。
-- **要許可モデルは呼ぶ前に確認**: Opus 5.5（全部）/ Sonnet 5 の `high` / Fable 5.1
-- **effort は既定 medium**: ルーブリック・DoD・差分を渡せる監査は Sonnet medium で足りる。Opus レビューは high（要許可）。
+- **要許可モデルは呼ぶ前に確認**: Opus 5.5（**§3.6 申請不要の3用途以外**）/ Sonnet 5 の `high` / Fable 5.1
+- **effort は既定 medium**: ルーブリック・DoD・差分を渡せる監査は Sonnet medium で足りる。ループ末 Opus レビューは high（§3.6 申請不要）。
 - **委譲チャネル**: 実装ループは `rules/delegation.md` の方針に従う。本スキル（敵対レビュー・採点）は Task / CLI 可。
 
 ## 役割分担（許可モデル）
 
 | 役割 | モデル | 使うとき |
 |---|---|---|
-| **発想・問いの立て直し** | **Argon medium**（agy） / Opus 5.5 / Fable 5.1（要許可） | アイデアのみ。**設計・仕様の正本には Argon を使わない** |
-| **敵対レビュー（本流）** | **Sonnet 5.5 medium + Opus 5.5**（Opus は high・要許可） | T2–T3、Diff 監査。必要なら **Grok 4.7**（非 Fast）を追加 |
-| **ループ最終レビュー** | **Opus 5.5**（1 回・要許可） | 大きなループの締め |
+| **発想・問いの立て直し** | **Argon medium**（agy） / Opus 5.5 / Fable 5.1（Opus・Fable は §3.6 要申請） | アイデアのみ。**設計・仕様の正本には Argon を使わない** |
+| **敵対レビュー（本流）** | **Sonnet 5.5 medium** | T1–T3、Diff 監査。必要なら **Grok 4.7**（非 Fast） |
+| **ループ最終レビュー** | **Opus 5.5**（1 回・§3.6 申請不要） | 大きなループの締め |
 | 日常・中間（T1） | `pi` / Gemini Flash | 軽い diff のみ |
 
-**high の同役二重は禁止**。Sonnet medium + Opus（別役）が既定。発想は Argon / Opus / Fable。Sonnet を発想役にしない。
+**high の同役二重は禁止**。本流は Sonnet medium。ループ末 Opus は 1 回（§3.6 申請不要）。発想は Argon / Opus / Fable。Sonnet を発想役にしない。
 
 ## ティア
 
@@ -45,13 +45,13 @@ description: >-
 |---|---|---|---|
 | T1 | コミット前・軽い草案 | `git diff` のみ | `pi` / `agy` gemini-flash |
 | T2 | 主張・設計判断・status 更新 | diff + 関連1–2ファイル | Sonnet 5 medium |
-| T3 | T2 で major+、または節目 | 広め | **Sonnet 5 medium + Opus 5.5**（Opus 要許可）。必要なら Grok 4.7 追加 |
+| T3 | T2 で major+、または節目 | 広め | **Sonnet 5 medium**（必要なら Grok 4.7）。ループ末 Opus は手順 4 以降 |
 
 T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に載る言い方 / 計画の前提が大きく変わった。
 
 ## 手順
 
-1. ティアを決める（迷ったら T1）。T3 なら **Sonnet medium + Opus**（Opus は呼ぶ前に許可）。Grok 4.7 を足すかは Maker-Breaker と `routing.md` を見る。
+1. ティアを決める（迷ったら T1）。T3 なら **Sonnet medium** で走らせる。ループ末 **Opus** は §3.6 申請不要（呼ぶ前に手順 2 の宣言を更新）。
    - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。
 2. **モデル名を先頭に（必須・呼び出し前）**:
    - Cursor Task: `description` を `{通称} {作業}` にする（例: `Sonnet T2 diff review`）。
@@ -73,7 +73,7 @@ git diff --stat
 git diff > /tmp/adv-review.diff
 ```
 
-4. レビューを走らせる（T3 は Sonnet と Opus に同等プロンプト。Opus はループ末の統合レビューでもよい）。
+4. レビューを走らせる（T3 は Sonnet。ループ末は **Opus 1 回**・§3.6 申請不要）。
 
 5. triage: blocker/major だけ修正。nit は溜めて無視可。
 6. 結果を `inbox/REVIEWS/` または sandbox `docs/logs/` に残す（任意）。

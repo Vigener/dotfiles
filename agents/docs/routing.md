@@ -8,7 +8,7 @@
 ## 1. 判定順序
 
 1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は §3 Cloud Agent を先に適用する。
-2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（要許可）または Sonnet 5.5 medium を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
+2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（§3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 medium を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
 3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、§3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
 5. **チャネル**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
@@ -18,11 +18,11 @@
 
 | Task / Flag | 役割 | 第一候補 | 代替 |
 |---|---|---|---|
-| **Design（ループ頭）** | 方向・骨子・DoD | `claude: Opus 5.5`（high・要許可） | — |
+| **Design（ループ頭）** | 方向・骨子・DoD | `claude: Opus 5.5`（high・§3.6 申請不要） | — |
 | **Design（細部）** | 仕様・疑似コード | `agy: Sonnet 5.5` (medium) | `claude: Sonnet 5.5` (Team) |
 | **Design（発想）** | アイデア・問いの立て直し | `agy: Gemini 4 Argon` (medium) | Web Argon |
 | **Implement（中段）** | 打鍵・実装・リファクタ（W1） | `dsh-sub`（`deepseek-flash`） | — |
-| **Implement（後段）** | Diff 敵対監査 | Sonnet 5.5 (medium) + Opus 5.5（要許可） | + Grok 4.7（非 Fast） |
+| **Implement（後段）** | Diff 敵対監査 | Sonnet 5.5 (medium) | ループ末 Opus（§3.6 申請不要）。+ Grok 4.7（非 Fast） |
 | **Extract / W2** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | DeepSeek Free（OpenCode・常用しない） |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
 | **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | — |
@@ -33,12 +33,12 @@
 
 | 役割 | 第一候補 | 代替 | チャネル |
 |---|---|---|---|
-| 司令塔（オーケストレーター） | **Opus 5.5**（Claude Team・要許可） | — | T3 / `claude` |
-| 設計（ループ最初の 1 回） | Opus 5.5（high・要許可） | — | claudeAgent / `claude` |
+| 司令塔（オーケストレーター） | **Opus 5.5**（Claude Team） | — | T3 / `claude` |
+| 設計（ループ最初の 1 回） | Opus 5.5（high・§3.6 申請不要） | — | claudeAgent / `claude` |
 | 細かい仕様 | Sonnet 5.5 (medium) | Team Sonnet | agy / claudeAgent |
 | 発想のみ | Argon (medium) | Web Argon | agy |
-| 敵対レビュー（本流） | Sonnet 5.5 (medium) + Opus 5.5 | Grok 4.7（非 Fast）を追加可 | agy / T3 / claudeAgent |
-| ループ最後のレビュー | Opus 5.5（1 回・要許可） | — | claudeAgent |
+| 敵対レビュー（本流） | Sonnet 5.5 (medium) | Grok 4.7（非 Fast）を追加可 | agy / T3 / claudeAgent |
+| ループ最後のレビュー | Opus 5.5（1 回・§3.6 申請不要） | — | claudeAgent |
 | 実装ループ（W1） | **`dsh-sub`**（DeepSeek-V4.1-Flash-1017） | — | CLI |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | **Opus 5.5**（前提崩れ・同指摘2回） | claudeAgent / agy |
 | 探索・走査（W2） | Gemini 3.8 Flash | DeepSeek Free | agy / opencode |
@@ -129,7 +129,7 @@
 
 | モデル | 役割 | 設定 | 原則 |
 |---|---|---|---|
-| Opus 5.5 | オーケストレーター・ループ頭の設計・ループ末レビュー・裁定 | `effort: high` | 要許可（§3.6） |
+| Opus 5.5 | オーケストレーター・ループ頭の設計・ループ末レビュー・裁定 | `effort: high` | ループ頭/末・引き上げは §3.6 申請不要。それ以外は要申請 |
 | Sonnet 5.5 | 細仕様・W3・敵対レビュー（Sonnet 側） | `effort: medium` | DoD まで自律完遂 |
 | Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
 | Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini Flash |
@@ -138,7 +138,7 @@
 
 **昇格**
 
-- 同じ指摘が 2 回続く / 設計の前提が崩れた → **Opus**（Sonnet high より優先。要許可）
+- 同じ指摘が 2 回続く / 設計の前提が崩れた → **Opus**（Sonnet high より優先。**§3.6 申請不要**）
 - 論文の主張・章立てに触れる
 - セキュリティ・再現性・計算量の判断
 - 敵対レビューで `major` 以上

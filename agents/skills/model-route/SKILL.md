@@ -18,7 +18,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
 1. **環境**: Cursor **Cloud Agent** かローカルか。
    - Cloud → 設計 **Grok 4.7**、実装 **Composer 2.5**（いずれも非 Fast）。`routing.md` §3 Cloud Agent。
 2. **Phase-First**: 教員報告前・数理難所・章立て・仕様策定の山場か？
-   → Yes なら **Opus 5.5**（要許可）または Sonnet 5.5 medium。Argon は設計に使わない。
+   → Yes なら **Opus 5.5**（§3.6 **要申請**。ループ頭設計と別）または Sonnet 5.5 medium。Argon は設計に使わない。
 3. **Task**: Design / Implement / Extract のどれか。
    - Design（大きなループ）: 頭 1 回 **Opus**（方向・DoD）→ 細部 **Sonnet medium**。
    - Implement（W1）: ローカルは **`dsh-sub`** のみ。
@@ -33,7 +33,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
 5. **監査で Gemini/Claude 以外が要る**: **Grok 4.7**（Cursor・非 Fast）。Fast は使わない（`docs/routing.md` §8）。
 6. **環境指定**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）。
    省略時は `routing.md` §4 のフォールバック順。
-7. **昇格**: 前提崩れ・同指摘 2 回 → **Opus**（Sonnet high より優先）。回数と理由を記録（RES-23）。
+7. **昇格**: 前提崩れ・同指摘 2 回 → **Opus**（§3.6 **申請不要**）。回数と理由を記録（RES-23）。
 
 **やらないこと**: 残量ペースでモデルを動的に切り替える（旧手順 5 を廃止）。必要なら `update-ai-usage` で使い切り防止のみ確認する。
 
@@ -42,7 +42,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
 ```markdown
 ### 🎯 モデル選定判定
 - **推奨モデル**: `dsh-sub`（W1） / `claude: Opus 5.5`（オーケストレーター） 等
-- **effort**: medium（high は「成功条件が開いている」案件だけ。Opus は §3.6 で要許可）
+- **effort**: medium（high は「成功条件が開いている」案件。ループ頭/末 Opus は §3.6 申請不要）
 - **判定理由**: [Task / Flag と根拠を1〜2文]
 - **推奨アクション**: [次にどう指示するか]
 - **記録**:  Opus 昇格時は回数・理由を残す（RES-23）
