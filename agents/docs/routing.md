@@ -123,7 +123,7 @@
 - **オーケストレーション**: Opus 5.5（Team）。
 - **設計**: Opus 5.5（ループ頭 1 回）→ Sonnet 5.5 (medium)（細部）→ 前提崩れ・同指摘 2 回で Opus 5.5。
 - **実装（W1）**: `dsh-sub` のみ。
-- **探索・Search**: Gemini 3.8 Flash。
+- **探索・Search・Extract・整形**: Gemini 3.8 Flash。
 - **Claude**: Sonnet 5.5 は agy → Team。Opus 5.5 は Team 優先。
 
 公式 API への自動フォールバックは禁止（明示指示があるときのみ）。
