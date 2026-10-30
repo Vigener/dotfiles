@@ -61,10 +61,11 @@ T3 の「childThreadId は別のレビューラウンドの宛先ではない」
 
 プラットフォーム内蔵の委譲が使えない場合、またはターミナルから直叩きする場合は、Bash 経由で外部 CLI を別プロセス起動する。
 
-- 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
-- コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`
-- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
-- **DeepSeek 従量 API を Worker に使う**: `dsh-sub --repo <dir> --prompt "..."`（既定 `deepseek-flash` / effort `high`）。フラグ・出力JSON・exit code・権限はスキル `deepseek-harness` が正本。使う条件と予算は `rules/models.md` §2.5。
+- 探索・Web 走査・W2（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
+- **W1 実装・テスト修正（主力）**: `dsh-sub --repo <dir> --prompt "..."`（既定 `deepseek-flash` / effort `high`）。フラグ・出力JSON・exit code・権限はスキル `deepseek-harness` が正本。方針は `rules/models.md` §2.5（RES-23 計測中）。
+- 機密タスク（Private）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`（非 Fast ID のみ）
+- 発想のみ（Argon 週枠・設計正本には使わない）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
+- オーケストレーション・ループ頭尾の設計/レビュー: `claude -p` / T3 `claudeAgent`（Opus 5.5・要許可）
 
 effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
 
@@ -79,9 +80,10 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 
 - 最初に指定・意図されたモデルと完全に同一のモデルを CLI 引数に指定する。
 - 勝手に別モデルへ昇格・降格しない。
-  - `flash` 指定 → `agy --model gemini-3.8-flash-high`
-  - `composer` 指定 → `cursor-agent --model composer-2.5`
-  - `argon` 指定 → `agy --model gemini-4-argon-medium`（high は明示指示があるときだけ `-high`）
+  - `w1` / `dsh-sub` 指定 → `dsh-sub --repo …`（`deepseek-flash`）
+  - `flash` 指定 → `agy --model gemini-3.8-flash-high`（探索・W2・Search。W1 ではない）
+  - `composer` 指定 → `cursor-agent --model composer-2.5`（Private / Cloud Agent 実装のみ）
+  - `argon` 指定 → `agy --model gemini-4-argon-medium`（発想のみ。high は明示指示があるときだけ `-high`）
 - 指定モデルの枠（クォータ・コスト）を厳守する。
 
 ## 7. 親の振る舞い

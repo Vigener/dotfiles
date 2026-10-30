@@ -17,9 +17,10 @@
 ## 役割・モデル構成
 
 - 正本: `rules/models.md`（方針）と `docs/routing.md`（対応表）。
-- Cursor の標準は打鍵・量産: `cursor-agent --model composer-2.5`。Composer / Grok は申請不要。
+- **ローカル**: オーケストレーターは **Opus（Claude Team）**。W1 実装は **`dsh-sub`**。Gemini Flash は探索・Search・yomiyasu のみ。Composer / Grok は Private と監査例外のみ（申請不要・非 Fast 明示）。
+- **Cursor Cloud Agent**（変更なし）: 設計 **Grok 4.7**、実装 **Composer 2.5**（いずれも非 Fast）。
 - Cursor の Other Models は **Fable 5.1 専用**（事前許可制）。Opus 5.5 を Cursor で呼ばない（`claude` を使う）。
-- 設計・敵対監査は agy Argon に委譲する。
+- 設計の骨子・DoD は Opus、細仕様は Sonnet medium。Argon は発想のみ。敵対レビューは Sonnet + Opus（必要時 Grok 4.7）。
 
 ## チャット出力フォーマット
 
