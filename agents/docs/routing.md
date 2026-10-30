@@ -22,7 +22,7 @@
 | **Design（細部）** | 仕様・疑似コード | `agy: Sonnet 5.5` (medium) | `claude: Sonnet 5.5` (Team) |
 | **Design（発想）** | アイデア・問いの立て直し | `agy: Gemini 4 Argon` (medium) | Web Argon |
 | **Implement（中段）** | 打鍵・実装・リファクタ（W1） | `dsh-sub`（`deepseek-flash`） | — |
-| **Implement（後段）** | Diff 敵対監査 | T1=`dsh-sub`、T2=Grok 4.7、T3=Sonnet 5.5 (medium) | ループ末 Opus 5.5（`models.md` §3.6 申請不要） |
+| **Implement（後段）** | Diff 敵対監査 | T1=`dsh-sub`、T2=Sonnet 5.5 (medium)、T3=Sonnet 5.5 (medium) | ループ末 Opus 5.5（`models.md` §3.6 申請不要） |
 | **Extract / W2** | 大量走査・ログ要約・一覧化・整形 | `agy: Gemini 3.8 Flash` | DeepSeek Free（OpenCode・常用しない） |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
 | **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | — |
@@ -38,13 +38,13 @@
 | 細かい仕様 | Sonnet 5.5 (medium) | Sonnet 5.5 (Team) | agy / claudeAgent |
 | 発想のみ | Gemini 4 Argon (medium) | Web Argon | agy |
 | 敵対レビュー T1 | **`dsh-sub`**（1017） | W1 直後は Sonnet 5.5 (medium) | CLI |
-| 敵対レビュー T2 | **Grok 4.7**（非 Fast） | — | cursor / T3（RES-23 試行） |
+| 敵対レビュー T2 | Sonnet 5.5 (medium) | — | agy / claudeAgent |
 | 敵対レビュー T3 | Sonnet 5.5 (medium) | — | agy / claudeAgent |
 | ループ最後のレビュー | Opus 5.5（1 回・`models.md` §3.6 申請不要） | — | claudeAgent |
 | 実装ループ（W1） | **`dsh-sub`**（DeepSeek-V4.1-Flash-1017） | — | CLI |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | **Opus 5.5**（前提崩れ・同指摘2回） | claudeAgent / agy |
 | 探索・走査（W2） | Gemini 3.8 Flash | DeepSeek Free | agy / opencode |
-| 非 Gemini/Claude 監査 | Grok 4.7（Cursor・非 Fast） | — | cursor / T3 |
+| Visual QA フォールバック / Opus 不在時の司令塔代行 | Grok 4.7（Cursor・非 Fast） | — | cursor / T3 |
 | 機械的採点 | ローカル Python (pytest) | — | — |
 
 - effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` 3.5）。
@@ -80,10 +80,10 @@
 
 ### Grok 4.7（ローカルでの位置づけ）
 
-- **司令塔・設計の主軸にしない**（オーケストレーターは Opus 5.5）。
-- **用途**: 敵対レビュー **T2**（RES-23 試行）、Visual QA フォールバック、Gemini/Claude 以外が要る監査。
+- **司令塔・設計の主軸にしない**（平常時のオーケストレーターは Opus 5.5）。
+- **用途（この2つのみ）**: **Visual QA フォールバック**（Flash のあと）、**Opus 5.5 が使えないときのオーケストレーター代行**（Grok の月枠リセットが遠いため温存）。
 - **Fast は使わない**（`rules/models.md` §2、`rules/delegation.md` §8）。T3 `delegate_task` は `fastMode: false` 必須。
-- Maker-Breaker: W1 が DeepSeek のとき Breaker に Grok 4.7（T2）や Sonnet 5.5 (medium)（T3 / W1 直後 T1）を組む。
+- Maker-Breaker: W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)**（W1 直後 T1・T2–T3）。
 
 ### yomiyasu
 
@@ -100,7 +100,7 @@
 | `sonnet in agy` | Google AI Pro（Claude 週枠） | `agy --model claude-sonnet-5-5-medium` |
 | `opus in claude` | **Claude Team** | T3 `claudeAgent` / `claude -p`（オーケストレーター・ループ頭尾） |
 | `composer in cursor` | Cursor Pro | **Private のみ**（非 Fast 明示） |
-| `grok in cursor` | Cursor Pro | 監査追加席（非 Fast）。Cloud 設計は Cloud Agent 経路 |
+| `grok in cursor` | Cursor Pro | Visual QA フォールバック・Opus 不在時の司令塔代行（非 Fast）。Cloud 設計は Cloud Agent 経路 |
 | `fable in cursor` | Cursor Other Models | 要許可 |
 | `deepseek in opencode` | OpenCode Free | W2 補助のみ。W1 にしない |
 | `cloud design` | Cursor Cloud | Grok 4.7 非 Fast |
@@ -115,7 +115,7 @@
 | Sonnet 5.5 | `agy` → Team | cursor |
 | Opus 5.5 | `claudeAgent` / Team | cursor、agy（余剰時のみ・要許可） |
 | Fable 5.1 | `cursor` のみ | それ以外 |
-| Composer / Grok | `cursor` | ローカル W1・設計には使わない（Private / Cloud / 監査例外） |
+| Composer / Grok | `cursor` | ローカル W1・設計には使わない（Private / Cloud / §2.1 の Grok 例外のみ） |
 | Gemini 3.8 Flash | `agy` | 実装 W1 |
 
 **環境省略時（ローカル）**:
@@ -133,7 +133,7 @@
 | モデル | 役割 | 設定 | 原則 |
 |---|---|---|---|
 | Opus 5.5 | オーケストレーター・ループ頭の設計・ループ末レビュー・**裁定** | `effort: high` | ループ頭/末・引き上げは `models.md` §3.6 申請不要。**裁定のみ等は要申請** |
-| Sonnet 5.5 | 細仕様・W3・敵対レビュー **T3** | `effort: medium` | DoD まで自律完遂。T2 は Grok 4.7（RES-23） |
+| Sonnet 5.5 | 細仕様・W3・敵対レビュー **T2–T3** | `effort: medium` | DoD まで自律完遂 |
 | Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
 | Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini 3.8 Flash |
 
@@ -149,7 +149,7 @@
 **降格**
 
 - 仕様が固まり、実装が機械的（W1 `dsh-sub`）
-- テストが通り、残りが整形・ログ要約（Gemini 3.8 Flash）。人が読む文章の推敲は yomiyasu（§2.8）
+- テストが通り、残りが整形・ログ要約（Gemini 3.8 Flash）。人が読む文章の推敲は yomiyasu（`rules/models.md` §2.8）
 - 同じモデルで 2 回連続して新しい指摘が出ない
 
 昇格回数・理由をログに残す（RES-23）。
@@ -172,8 +172,8 @@
 - 明示指示なしに Anthropic / OpenAI の従量 API を使う。
 - 指定モデルを勝手に昇格・降格する。
 - Free を W1 の唯一経路にしない。
-- **Cursor Cloud 以外で Grok を設計主軸にする**。
-- **Cursor の Fast を使う**（Cloud / Private / 監査でも off 明示）。
+- **Cursor Cloud 以外で Grok を設計主軸にする**（Visual QA フォールバック・Opus 不在時の代行を除く）。
+- **Cursor の Fast を使う**（Cloud / Private / Grok 例外でも off 明示）。
 
 ### Grok / Composer の Fast ガード（T3・CLI）
 

@@ -23,15 +23,15 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
    - Design（大きなループ）: 頭 1 回 **Opus 5.5**（方向・DoD）→ 細部 **Sonnet 5.5 (medium)**。
    - Implement（W1）: ローカルは **`dsh-sub`** のみ（Private は Composer）。
    - Extract / W2 / 整形: **Gemini 3.8 Flash**。
-   - 敵対レビュー: **T1** `dsh-sub`（**W1 直後は Sonnet 5.5 (medium)**）/ **T2** Grok 4.7 / **T3** Sonnet 5.5 (medium) / ループ末 Opus 5.5。
+   - 敵対レビュー: **T1** `dsh-sub`（**W1 直後は Sonnet 5.5 (medium)**）/ **T2–T3** Sonnet 5.5 (medium) / ループ末 Opus 5.5。
 3.5. **Visual**: 成果物の合否は見た目で決まるか。
-    → Yes なら W1 は `dsh-sub` のまま、目視 QA は **Gemini 3.8 Flash** → フォールバック **Grok 4.7**（PNG 能力は未確認）。2 回目は **Opus 5.5 引き上げ**（`routing.md` §3 Visual QA）。
+    → Yes なら W1 は `dsh-sub` のまま、目視 QA は **Gemini 3.8 Flash** → フォールバック **Grok 4.7**（Cursor・非 Fast。PNG 能力は未確認）。2 回目は **Opus 5.5 引き上げ**（`routing.md` §3 Visual QA）。
 4. **Flag**:
    - Private → **Composer 2.5**（Cursor・非 Fast）。
    - Search → **Gemini 3.8 Flash**。
-   - Orchestration → **Opus 5.5**（Team）。
+   - Orchestration → **Opus 5.5**（Team）。Opus が使えないときのみ **Grok 4.7 代行**（`models.md` §2.1）。
    - 人が読む日本語推敲 → **yomiyasu + Gemini 3.8 Flash**（RES-24 試行中。ログ要約とは別）。
-5. **監査で Gemini/Claude 以外が要る**: **Grok 4.7**（Cursor・非 Fast）。Fast は使わない（`docs/routing.md` §8）。
+5. **Grok 4.7（ローカル）**: **Visual QA フォールバック**または **Opus 不在時の司令塔代行**のみ。Fast は使わない（`docs/routing.md` §8）。
 6. **環境指定**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）。
    省略時は `routing.md` §4 のフォールバック順。
 7. **昇格**: 前提崩れ・同指摘 2 回 → **Opus 5.5**（`models.md` §3.6 **申請不要**）。回数と理由を記録（RES-23）。

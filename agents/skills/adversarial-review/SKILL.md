@@ -1,7 +1,7 @@
 ---
 name: adversarial-review
 description: >-
-  Cursor auto-review の代わりに dsh-sub / Grok 4.7 / Sonnet 5.5 / Opus 5.5 で敵対レビューする。
+  Cursor auto-review の代わりに dsh-sub / Sonnet 5.5 / Opus 5.5 で敵対レビューする。
   「レビューして」「敵対レビュー」「差分レビュー」で発動。
   hook には載せない（コスト爆発防止）。
 ---
@@ -12,9 +12,9 @@ description: >-
 
 - **Maker-Breaker 異種ファミリー原則**:
   - 実装（W1 **`dsh-sub` / DeepSeek**）を行った Maker と**異なるモデルファミリー／プロバイダ**を Breaker に選定する。
-  - **Gemini 3.8 Flash は敵対レビューに使わない**（探索・W2・整形・Visual QA・yomiyasu 専用。`rules/models.md` §2.3）。
+  - **Gemini 3.8 Flash は敵対レビューに使わない**（探索・W2・整形・Visual QA 第一候補・yomiyasu 専用。`rules/models.md` §2.3）。
   - **T1**: 既定 **`dsh-sub`**（軽い diff）。**直前 Maker が W1 `dsh-sub` なら Sonnet 5.5 (medium)**。
-  - **T2**: **Grok 4.7**（非 Fast）第一候補（RES-23 試行・Claude Team 分散）。
+  - **T2**: **Sonnet 5.5 (medium)**。
   - **T3**: **Sonnet 5.5 (medium)**。
   - **Opus 5.5** は**ループ末 1 回**と**引き上げ**のみ。通常の Breaker にしない。
   - レビューモデルとテスト作成モデルを細分化（3者分離）せず、Breaker への1回の委譲で「Diff敵対監査 ＋ 意地悪境界値テスト生成」を一括依頼してよい。
@@ -36,7 +36,7 @@ description: >-
 | 役割 | モデル | 使うとき |
 |---|---|---|
 | **発想・問いの立て直し** | **Gemini 4 Argon (medium)** / Opus 5.5 / Fable 5.1 | Opus・Fable は **models.md §3.6 により要申請**（発想のみ。設計正本に Argon を使わない） |
-| **敵対レビュー T2** | **Grok 4.7**（非 Fast） | RES-23 試行 |
+| **敵対レビュー T2** | **Sonnet 5.5 (medium)** | 主張・設計判断 |
 | **敵対レビュー T3** | **Sonnet 5.5 (medium)** | 節目・major+ |
 | **ループ最終レビュー** | **Opus 5.5**（1 回） | `models.md` §3.6 申請不要 |
 | 日常・中間（T1） | **`dsh-sub`**（1017） | 軽い diff。W1 直後は Sonnet 5.5 (medium) |
@@ -48,17 +48,17 @@ description: >-
 | ティア | いつ | 渡すもの | モデル例 |
 |---|---|---|---|
 | T1 | コミット前・軽い草案 | `git diff` のみ | **`dsh-sub`**。W1 直後は Sonnet 5.5 (medium) |
-| T2 | 主張・設計判断・status 更新 | diff + 関連1–2ファイル | **Grok 4.7**（非 Fast） |
+| T2 | 主張・設計判断・status 更新 | diff + 関連1–2ファイル | **Sonnet 5.5 (medium)** |
 | T3 | T2 で major+、または節目 | 広め | **Sonnet 5.5 (medium)**。ループ末 Opus 5.5 は手順 4 以降 |
 
 T3 トリガー例: 主張が変わった / hooks・スキル変更 / 論文に載る言い方 / 計画の前提が大きく変わった。
 
 ## 手順
 
-1. ティアを決める（迷ったら T1）。T2 は **Grok 4.7**、T3 は **Sonnet 5.5 (medium)**。ループ末 **Opus 5.5** は §3.6 申請不要。
+1. ティアを決める（迷ったら T1）。T2–T3 は **Sonnet 5.5 (medium)**。ループ末 **Opus 5.5** は §3.6 申請不要。
    - スコープ: `~/dotfiles/agents/rules/delegation.md` の「敵対レビューのスコープ」。
 2. **モデル名を先頭に（必須・呼び出し前）**:
-   - Cursor Task: `description` を `{通称} {作業}` にする（例: `Grok T2 diff review`）。
+   - Cursor Task: `description` を `{通称} {作業}` にする（例: `Sonnet T2 diff review`）。
    - `dsh-sub` / agy / claude / cursor: 起動**直前**にチャットへ宣言。
 
 ```text
@@ -94,7 +94,7 @@ T1（`dsh-sub`）例。**headless の `dsh-sub` に read-only 専用モードは
   | dsh-sub --repo . --prompt -
 ```
 
-T2 は Grok 4.7（同等プロンプト・非 Fast）。T3 は Sonnet 5.5 (medium)。ループ末は **Opus 5.5 1 回**（§3.6 申請不要）。
+T2–T3 は Sonnet 5.5 (medium)（同等プロンプト・agy または `claude`）。ループ末は **Opus 5.5 1 回**（§3.6 申請不要）。
 
 5. triage: blocker/major だけ修正。nit は溜めて無視可。
 6. 結果を `inbox/REVIEWS/` または sandbox `docs/logs/` に残す（任意）。
