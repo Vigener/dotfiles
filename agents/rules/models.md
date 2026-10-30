@@ -14,7 +14,8 @@ HPC 境界は `rules/hpc.md` を参照。
 - **このファイルに残量（%・$）を書かない。** 数値は日単位で陳腐化するため、判断には必ずコマンドの現在値を引用する。
 - agy の枠は「Gemini」「Claude/GPT」「Argon」の3グループに分かれる。**Argon は別枠**。
 - **残量のペースでモデルを動的に振り分けない**（手順は `model-route` から外した）。`update-ai-usage` は使い切り防止の確認に使ってよい。
-- **計測期間（Linear RES-23、〜2026-11-07）**: W1 の `dsh-sub` 使用量は記録する。期間中は日次上限を設けない（旧「緊急時 $1〜2/日」は廃止）。
+- **DeepSeek API の日次上限（旧「緊急時 $1〜2/日」）は廃止**した。
+- **計測期間（Linear RES-23、〜2026-11-07）**: W1 の `dsh-sub` 使用量と **Claude Team 残量**を記録する。期間中は日次上限を設けない。期間後は RES-23 の結果を見て本人が方針を決める。
 
 ## 1. Gemini 4 Argon（agy 独立週枠）— アイデア出しのみ
 
@@ -31,7 +32,7 @@ HPC 境界は `rules/hpc.md` を参照。
   - **機密（Flag: Private）**: これまでどおり **Composer 2.5**（`fastMode: false` を明示した T3 / 非 Fast CLI）。
   - **Gemini 系・Claude 系以外のモデルが要る監査**: **Grok 4.7**（Fast 無効）。設計・日常司令塔には使わない。
 - **Composer / Grok は申請不要。ただし Fast オフを明示した呼び出しに限る**（下記）。Fable は Other Models 専用・要許可。Opus 5.5 を Cursor で呼ぶのは禁止（`claude` を使う）。
-- **Cursor モデル（Composer / Grok）は Fast を使わない**。T3 `delegate_task` は options 無しだと Fast で動く（2026-10-23 にダッシュボードで確認。UI は Fast オフと表示するが信用しない）。`target.options` に `fastMode: false` を**必ず**明示し、応答の `options` で確認する。CLI は `-fast` 無しの ID。明示せずに呼んだ場合は申請不要の範囲外（無許可の Fast 利用）として扱う。詳細は `docs/routing.md` §3。
+- **Cursor モデル（Composer / Grok）は Fast を使わない**。T3 `delegate_task` は options 無しだと Fast で動く（2026-10-23 にダッシュボードで確認。UI は Fast オフと表示するが信用しない）。`target.options` に `fastMode: false` を**必ず**明示し、応答の `options` で確認する。CLI は `-fast` 無しの ID。明示せずに呼んだ場合は申請不要の範囲外（無許可の Fast 利用）として扱う。詳細は `docs/routing.md` §8 および `rules/delegation.md` §8。
 - **Argon は `antigravity` 固定**。cursor のカタログに `gemini-4-argon` が出るが選ばない（Other Models は Fable 専用）。固定表は `docs/routing.md` §4。
 
 ### 2.2 Cursor Cloud Agent（作業エージェント）
@@ -43,8 +44,8 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### 2.3 Gemini 3.8 Flash（agy）
 
-- **実装（W1）から外す**。
-- **担当**: ファイル探索、Web 検索（Flag: Search）、日本語推敲（yomiyasu、§2.8）、W2 の大文脈偵察。
+- **実装（W1）から外す**（2026-10-31 の Flash 週次枠更新後から運用。それでも週次枠を使い切る場合は、役割をさらに減らすことを検討する）。
+- **担当**: ファイル探索、Web 検索（Flag: Search）、横断検索、全体把握（W2）、ログ要約、一覧化、整形。**人が読む日本語の推敲（yomiyasu、§2.8）** — ログ要約と混同しない。
 
 ## 2.5 Worker（実装役）とオーケストレーション
 
@@ -63,12 +64,15 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - **第一候補**: `dsh-sub`（DeepSeek-V4.1-Flash-1017、`deepseek-flash` / effort `high`）。スキル `deepseek-harness`。
 - DeepSeek V4.1 Flash Free（T3 `opencode`）は期間限定・SLA なし・OpenCode 内限定。W1 の代替経路にしない。
-- 難所（W3）: Sonnet 5.5 medium → 上記の条件で Opus。
+- 難所（W3）: Sonnet 5.5 (medium) → 上記の条件で Opus 5.5。
 
 ### 敵対的レビュー
 
-- **本流**: Sonnet 5.5 **(medium)**（Diff 監査・T2–T3）。必要なら **Grok 4.7**（非 Fast）を加える。
-- **大きなループの最後に Opus で 1 回**（high・§3.6 **申請不要**）。手順はスキル `adversarial-review`。
+- **T1**: `dsh-sub`（DeepSeek-V4.1-Flash-1017）。**直前の Maker が W1 `dsh-sub` なら Sonnet 5.5 (medium)**（Maker-Breaker）。
+- **T2**: **Grok 4.7**（非 Fast）第一候補（RES-23 試行：Claude Team 消費の分散）。
+- **T3**: **Sonnet 5.5 (medium)**。
+- **Opus 5.5**: 大きなループの**最後に 1 回**（§3.6 申請不要）と、**引き上げ**（前提崩れ・同指摘 2 回）のときだけ。通常の diff 敵対監査の Breaker には使わない。
+- **RES-23（〜2026-11-07）**: W1 `dsh-sub` と **Claude Team 残量**を記録する。足りなければ、週後半の Anthropic API 従量課金または Claude Pro 契約を検討する。
 
 ### DeepSeek API（`dsh-sub`）
 
@@ -103,7 +107,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - 開いている（何が良いか自体を決める）: high。
 - 機械的（整形・分類・抽出）: low。
 - モデルと effort は別軸。モデルを上げる前に effort を下げられないか考える。
-- **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/ 細仕様 = Sonnet 5.5 (medium) / 実装 = `dsh-sub`（W1）/ Cloud 実装 = Composer 2.5 / 敵対レビュー = Sonnet 5.5 (medium) + ループ末 Opus 5.5（§3.6 申請不要）/ 探索・推敲 = Gemini 3.8 Flash。
+- **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/ 細仕様 = Sonnet 5.5 (medium) / 実装 = `dsh-sub`（W1・effort `high`）/ Cloud 実装 = Composer 2.5 / 敵対レビュー = T1 `dsh-sub`・T2 Grok 4.7・T3 Sonnet 5.5 (medium)・ループ末 Opus 5.5 / Flash = W2・Extract・整形（yomiyasu は §2.8 のみ）。
 - **effort を変えるときは新しいスレッドで始める**。同一スレッドの途中で変えると、それまでの履歴を読み直すうえキャッシュも効きにくい（Antigravity の運用知見）。
 - medium と high の品質差は小さいという報告が複数ある。差の有無は**モック実験ではなく普段の使用感**（返答の質・トークンの減り方）で判断する（2026-10-21 決定）。
 
@@ -135,4 +139,4 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 4. ゴール固定・敵対レビュー
 
 - 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
-- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)** / **Opus 5.5** / **Grok 4.7** 等（**Gemini 3.8 Flash は使わない**）。T1 軽量 diff は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
+- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)** / **Grok 4.7** 等（**Gemini 3.8 Flash は敵対レビューに使わない**）。**Opus 5.5 はループ末と引き上げのみ**（通常 Breaker にしない）。T1 は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。

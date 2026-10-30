@@ -8,7 +8,7 @@
 ## 1. 判定順序
 
 1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は §3 Cloud Agent を先に適用する。
-2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（§3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
+2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
 3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、§3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
 5. **チャネル**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
@@ -18,12 +18,12 @@
 
 | Task / Flag | 役割 | 第一候補 | 代替 |
 |---|---|---|---|
-| **Design（ループ頭）** | 方向・骨子・DoD | `claude: Opus 5.5`（high・§3.6 申請不要） | — |
+| **Design（ループ頭）** | 方向・骨子・DoD | `claude: Opus 5.5`（high・`models.md` §3.6 申請不要） | — |
 | **Design（細部）** | 仕様・疑似コード | `agy: Sonnet 5.5` (medium) | `claude: Sonnet 5.5` (Team) |
 | **Design（発想）** | アイデア・問いの立て直し | `agy: Gemini 4 Argon` (medium) | Web Argon |
 | **Implement（中段）** | 打鍵・実装・リファクタ（W1） | `dsh-sub`（`deepseek-flash`） | — |
-| **Implement（後段）** | Diff 敵対監査 | Sonnet 5.5 (medium) | T1=`dsh-sub`。ループ末 Opus 5.5（§3.6 申請不要）。+ Grok 4.7 |
-| **Extract / W2** | 大量走査・ログ要約・一覧化 | `agy: Gemini 3.8 Flash` | DeepSeek Free（OpenCode・常用しない） |
+| **Implement（後段）** | Diff 敵対監査 | T1=`dsh-sub`、T2=Grok 4.7、T3=Sonnet 5.5 (medium) | ループ末 Opus 5.5（`models.md` §3.6 申請不要） |
+| **Extract / W2** | 大量走査・ログ要約・一覧化・整形 | `agy: Gemini 3.8 Flash` | DeepSeek Free（OpenCode・常用しない） |
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
 | **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | — |
 | **Flag: Orchestration** | サブエージェント指揮・並行管理 | `claude: Opus 5.5`（Team） | T3 `delegate_task` |
@@ -34,12 +34,13 @@
 | 役割 | 第一候補 | 代替 | チャネル |
 |---|---|---|---|
 | 司令塔（オーケストレーター） | **Opus 5.5**（Claude Team） | — | T3 / `claude` |
-| 設計（ループ最初の 1 回） | Opus 5.5（high・§3.6 申請不要） | — | claudeAgent / `claude` |
+| 設計（ループ最初の 1 回） | Opus 5.5（high・`models.md` §3.6 申請不要） | — | claudeAgent / `claude` |
 | 細かい仕様 | Sonnet 5.5 (medium) | Sonnet 5.5 (Team) | agy / claudeAgent |
 | 発想のみ | Gemini 4 Argon (medium) | Web Argon | agy |
 | 敵対レビュー T1 | **`dsh-sub`**（1017） | W1 直後は Sonnet 5.5 (medium) | CLI |
-| 敵対レビュー（本流） | Sonnet 5.5 (medium) | Grok 4.7（非 Fast）を追加可 | agy / T3 / claudeAgent |
-| ループ最後のレビュー | Opus 5.5（1 回・§3.6 申請不要） | — | claudeAgent |
+| 敵対レビュー T2 | **Grok 4.7**（非 Fast） | — | cursor / T3（RES-23 試行） |
+| 敵対レビュー T3 | Sonnet 5.5 (medium) | — | agy / claudeAgent |
+| ループ最後のレビュー | Opus 5.5（1 回・`models.md` §3.6 申請不要） | — | claudeAgent |
 | 実装ループ（W1） | **`dsh-sub`**（DeepSeek-V4.1-Flash-1017） | — | CLI |
 | 難所の実装（W3） | Sonnet 5.5 (medium) | **Opus 5.5**（前提崩れ・同指摘2回） | claudeAgent / agy |
 | 探索・走査（W2） | Gemini 3.8 Flash | DeepSeek Free | agy / opencode |
@@ -61,27 +62,28 @@
 | 層 | 既定 | 代替 | 使う場面 |
 |---|---|---|---|
 | **W1 日常実装** | **`dsh-sub`**（`deepseek-flash` / effort `high`） | `deepseek-v4-pro` + `max`（難所・常用禁止） | 編集 → テスト → 修正 |
-| **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（OpenCode） | 全体把握・ログ要約・横断検索 |
-| **W3 難所** | Sonnet 5.5 (medium) | Opus 5.5 | 仕様が曖昧、設計判断、2 回失敗、前提崩れ |
+| **W2 大文脈の偵察** | Gemini 3.8 Flash（agy） | DeepSeek Free（OpenCode） | 全体把握・ログ要約・一覧化・整形 |
+| **W3 難所** | Sonnet 5.5 (medium) | Opus 5.5 | 前提が崩れた、または同じ指摘が 2 回 |
 
 - Free は **期間限定・SLA なし・OpenCode 内限定**。W1 の代替にしない。
 - ローカルでは **Composer 2.5 を W1 に使わない**（Private と Cloud Agent 実装を除く）。
 
 ### Visual QA（図・PNG・HTML レイアウト）
 
-成果物の合否が「見て決まる」仕事（matplotlib の論文図、凡例、キャプション、HTML の重なり）は、スクリプト実装と目視を分ける。
+成果物の合否が「見て決まる」仕事（matplotlib の論文図、凡例、キャプション、HTML の重なり）は、スクリプト実装と目視を分ける。Task 列に Visual は足さない。画像生成モデルも経路に入れない。Composer を図禁止にもしない。
 
 - **スクリプト・数値・フォント・再現性**: W1（`dsh-sub`）。ここは閉じた Implement。
-- **PNG / 画面の目視**: W1 の自己申告は証拠にしない。親、または **Sonnet 5.5 (medium)** / **Opus 5.5** が画像を Read する。DeepSeek / Composer / Gemini 3.8 Flash に「PNG を見て…」とだけ頼まない。
-- **最初の 1 回の見た目直しは想定内**。同じ見た目クラスが 2 回目 → W1 を止め、Opus または W3 へ（§6）。
-- overlap のプログラム検査は初回 brief に入れる。
+- **PNG / 画面の目視**: W1 の自己申告は証拠にしない。**第一候補は Gemini 3.8 Flash**（agy・マルチモーダル）。**フォールバックは Grok 4.7**（Cursor・非 Fast）。Grok 4.7 がローカルで PNG をどこまで判断できるかは**未確認**（試す前に期待値を上げない）。DeepSeek / Composer に「PNG を見て重なりなしと報告せよ」とだけ頼まない。**通常の Visual QA に Opus 5.5 は使わない**（引き上げ時のみ `models.md` §3.6）。
+- **最初の 1 回の見た目直しは想定内**。同じ見た目クラス（重なり・余白・改行）が 2 回目に出たら W1 ループを止める（§6 の「同じ指摘が 2 回続く」を図にも適用）。親が figsize / `subplots_adjust` / fontsize / overlap assert を閉じてから W1 に 1 通り出すか、**Opus 5.5 へ引き上げ**する。
+- overlap のプログラム検査は初回 brief に入れる。検査を通すために目盛りを消すのは不合格。
+- 論文図は matplotlib。T3 の `html_preview` はチャット用 HTML であり、論文 PNG の代替にしない。
 
 ### Grok 4.7（ローカルでの位置づけ）
 
 - **司令塔・設計の主軸にしない**（オーケストレーターは Opus 5.5）。
-- **用途**: 敵対レビューの追加席、Gemini/Claude 以外が要る監査。
+- **用途**: 敵対レビュー **T2**（RES-23 試行）、Visual QA フォールバック、Gemini/Claude 以外が要る監査。
 - **Fast は使わない**（`rules/models.md` §2、`rules/delegation.md` §8）。T3 `delegate_task` は `fastMode: false` 必須。
-- Maker-Breaker: W1 が DeepSeek のとき Breaker に Grok 4.7 を足せる。Grok 4.6 と 4.7 は同一ファミリー（組み合わせ注意は §4 表の Grok 節を参照）。
+- Maker-Breaker: W1 が DeepSeek のとき Breaker に Grok 4.7（T2）や Sonnet 5.5 (medium)（T3 / W1 直後 T1）を組む。
 
 ### yomiyasu
 
@@ -93,7 +95,7 @@
 | 記法 | 契約 | 実行 |
 |---|---|---|
 | `w1 in api` | DeepSeek 従量（1017） | `dsh-sub --repo … --prompt …`（スキル `deepseek-harness`） |
-| `flash in agy` | Google AI Pro（Gemini 枠） | 探索・Search・yomiyasu・W2。T3 `antigravity` / `gemini-3.8-flash-high` または `agy` |
+| `flash in agy` | Google AI Pro（Gemini 枠） | 探索・Search・W2・Extract・整形・Visual QA・yomiyasu（推敲）。`gemini-3.8-flash-high` / `agy` |
 | `argon in agy` | Argon 独立週枠 | **発想のみ** `gemini-4-argon-medium` |
 | `sonnet in agy` | Google AI Pro（Claude 週枠） | `agy --model claude-sonnet-5-5-medium` |
 | `opus in claude` | **Claude Team** | T3 `claudeAgent` / `claude -p`（オーケストレーター・ループ頭尾） |
@@ -130,8 +132,8 @@
 
 | モデル | 役割 | 設定 | 原則 |
 |---|---|---|---|
-| Opus 5.5 | オーケストレーター・ループ頭の設計・ループ末レビュー・裁定 | `effort: high` | ループ頭/末・引き上げは §3.6 申請不要。それ以外は要申請 |
-| Sonnet 5.5 | 細仕様・W3・敵対レビュー（Sonnet 側） | `effort: medium` | DoD まで自律完遂 |
+| Opus 5.5 | オーケストレーター・ループ頭の設計・ループ末レビュー・**裁定** | `effort: high` | ループ頭/末・引き上げは `models.md` §3.6 申請不要。**裁定のみ等は要申請** |
+| Sonnet 5.5 | 細仕様・W3・敵対レビュー **T3** | `effort: medium` | DoD まで自律完遂。T2 は Grok 4.7（RES-23） |
 | Fable 5.1 | 特別顧問 | `effort: high` | 日常禁止。軸崩壊時のみ |
 | Haiku 5.5 | 配管（非推奨） | `effort: low` | 探索は Gemini 3.8 Flash |
 
@@ -139,7 +141,7 @@
 
 **昇格**
 
-- 同じ指摘が 2 回続く / 設計の前提が崩れた → **Opus 5.5**（Sonnet 5.5 high より優先。**§3.6 申請不要**）
+- 同じ指摘が 2 回続く / 設計の前提が崩れた → **Opus 5.5**（Sonnet 5.5 high より優先。**`models.md` §3.6 申請不要**）
 - 論文の主張・章立てに触れる
 - セキュリティ・再現性・計算量の判断
 - 敵対レビューで `major` 以上
@@ -147,7 +149,7 @@
 **降格**
 
 - 仕様が固まり、実装が機械的（W1 `dsh-sub`）
-- テストが通り、残りが整形・ログ要約（Gemini 3.8 Flash / yomiyasu）
+- テストが通り、残りが整形・ログ要約（Gemini 3.8 Flash）。人が読む文章の推敲は yomiyasu（§2.8）
 - 同じモデルで 2 回連続して新しい指摘が出ない
 
 昇格回数・理由をログに残す（RES-23）。
@@ -158,6 +160,7 @@
 - **Cursor 月枠**: 周期末に **数 % 残す**（Cloud Agent 用）。「1 週間前に使い切る」方針は廃止。
 - **agy 週枠 / Cursor 月次**: リセット前に余っていても、**本人が明示的に呼ぶまで**追加消費しない。
 - Other Models（Fable）は許可時のみ。
+- **計測期間 RES-23（〜2026-11-07）**: W1 `dsh-sub` と Claude Team 残量を記録（`rules/models.md` §0）。
 - 実測は `update-ai-usage`。数値は本書に書かない。
 
 ## 8. 禁止
