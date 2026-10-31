@@ -8,7 +8,7 @@
 ## 1. 判定順序
 
 1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は本書 §3「Cursor Cloud Agent」を先に適用する。
-2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` 3.5）。
+2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` §3.5）。
 3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、本書 §3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
 5. **チャネル**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
@@ -47,7 +47,7 @@
 | Visual QA フォールバック / Opus 不在時の司令塔代行 | Grok 4.7（Cursor・非 Fast） | — | cursor / T3 |
 | 機械的採点 | ローカル Python (pytest) | — | — |
 
-- effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` 3.5）。
+- effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` §3.5）。
 - 前提崩れ・同じ指摘 2 回 → **Sonnet 5.5 high ではなく Opus 5.5** へ。回数と理由を記録（RES-23 と合わせて分析）。
 
 ### Cursor Cloud Agent（変更しない）
