@@ -21,7 +21,10 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
    → Yes なら **Opus 5.5**（`models.md` §3.6 **要申請**。ループ頭設計と別）または Sonnet 5.5 (medium)（名指し時）。Argon は設計に使わない。
 3. **Task**: Design / Implement / Extract のどれか。
    - Design（大きなループ）: 頭 1 回 **Opus 5.5**（方向・DoD）→ 細部 **Codex（`codex-sub`）**。
-   - Implement（W1）: ローカルは **`codex-sub`**（Private は Composer。**`codex` CLI が無い**ときだけラッパーが `dsh-sub` へ）。
+   - Implement（W1）: ローカルは **`codex-sub`**。**Private** は Codex に出さず **Composer 2.5**（非 Fast）。
+     `codex-sub` が **`dsh-sub` へ自動フォールバック**するのは次のとき:
+     `codex` CLI が無い / 未ログイン / API キー認証 / 利用上限 /
+     `~/.codex/config.toml` で Fast 有効 / exec タイムアウト（スキル `codex-harness`）。
    - Extract / W2 / 整形: **Gemini 3.8 Flash**。
    - 敵対レビュー: **T1/T2/T3 なし**。Breaker は**ループ末 Opus 5.5** のみ（§3.6 申請不要）。
 3.5. **Visual**: 成果物の合否は見た目で決まるか。

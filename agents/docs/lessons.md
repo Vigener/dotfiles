@@ -70,7 +70,8 @@
 
 - **`OPENAI_API_KEY`** やプロジェクトの **`.env`** にキーがあると、
   ChatGPT ログインより API キー認証が優先され、**従量課金**になる事例がある。
-- **`codex exec`** では `-c 'preferred_auth_method="chatgpt"'` を付ける。
-  実行前に **`codex login status`**（終了コード 0）でログインを確認する。
+- `preferred_auth_method` は上流で**削除済み**の設定キー。代わりに **`codex login status`**
+  が **`Logged in using ChatGPT`** であることを確かめ、子プロセスの環境から
+  **`OPENAI_API_KEY` と `CODEX_API_KEY` を外す**（`bin/codex-sub` が行う）。
 - **`codex login status` の表示文言**で ChatGPT と API キーを判別するロジックは、
   契約後に本人マシンで確認すること（`bin/codex-sub` は保守的ヒューリスティック）。
