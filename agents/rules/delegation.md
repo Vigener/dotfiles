@@ -4,6 +4,7 @@
 
 - 親エージェントのコンテキスト汚染（大量の打鍵・ログ・ツール実行による Context Rot）を防ぐ。
 - 司令塔（Commander）と作業役（Worker）の関心事を厳密に分離する。
+- **オーケストレーターのハンドオフ**: 司令塔（Opus）が `docs/routing.md` に従い Worker・探索・レビュアへ `delegate_task` / CLI / `dsh-sub` で委譲するのは**本人が許可済み**。都度のユーザー申請は不要（Opus の追加用途は `rules/models.md` §3.6）。
 
 ## 2. インライン引き受けの禁止
 
@@ -61,10 +62,11 @@ T3 の「childThreadId は別のレビューラウンドの宛先ではない」
 
 プラットフォーム内蔵の委譲が使えない場合、またはターミナルから直叩きする場合は、Bash 経由で外部 CLI を別プロセス起動する。
 
-- 打鍵・スキャフォールディング・探索（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
-- コーディング・実装・テスト修正（Cursor Pro）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`
-- 超高度設計・数理仕様化・敵対監査（Argon 週枠）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
-- **DeepSeek 従量 API を Worker に使う**: `dsh-sub --repo <dir> --prompt "..."`（既定 `deepseek-flash` / effort `high`）。フラグ・出力JSON・exit code・権限はスキル `deepseek-harness` が正本。使う条件と予算は `rules/models.md` §2.5。
+- 探索・Web 走査・W2（Google AI Pro 枠）: `agy --dangerously-skip-permissions --model gemini-3.8-flash-high --print "..." < /dev/null`
+- **W1 実装・テスト修正（主力）**: `dsh-sub --repo <dir> --prompt "..."`（既定 `deepseek-flash` / effort `high`）。フラグ・出力JSON・exit code・権限はスキル `deepseek-harness` が正本。方針は `rules/models.md` §2.5（RES-23 計測中）。
+- 機密タスク（Private）: `cursor-agent -p --yolo --model composer-2.5 "..." < /dev/null`（非 Fast ID のみ）
+- 発想のみ（Argon 週枠・設計正本には使わない）: `agy --dangerously-skip-permissions --model gemini-4-argon-medium --print "..." < /dev/null`
+- オーケストレーション・ループ頭尾の設計/レビュー: `claude -p` / T3 `claudeAgent`（Opus 5.5・§3.6 申請不要の用途に限る）
 
 effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
 
@@ -79,9 +81,10 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 
 - 最初に指定・意図されたモデルと完全に同一のモデルを CLI 引数に指定する。
 - 勝手に別モデルへ昇格・降格しない。
-  - `flash` 指定 → `agy --model gemini-3.8-flash-high`
-  - `composer` 指定 → `cursor-agent --model composer-2.5`
-  - `argon` 指定 → `agy --model gemini-4-argon-medium`（high は明示指示があるときだけ `-high`）
+  - `w1` / `dsh-sub` 指定 → `dsh-sub --repo …`（`deepseek-flash`）
+  - `flash` 指定 → `agy --model gemini-3.8-flash-high`（探索・W2・Search。W1 ではない）
+  - `composer` 指定 → `cursor-agent --model composer-2.5`（Private / Cloud Agent 実装のみ）
+  - `argon` 指定 → `agy --model gemini-4-argon-medium`（発想のみ。high は明示指示があるときだけ `-high`）
 - 指定モデルの枠（クォータ・コスト）を厳守する。
 
 ## 7. 親の振る舞い
@@ -90,10 +93,10 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 
 ## 8. チャネルの目安
 
-優先の目安であり、Cursor Task による実装を全面禁止しない。
+優先の目安。**ローカル W1 実装は `dsh-sub` のみ**（Private は Composer 2.5）。Cursor Task / CLI で Composer を W1 に回さない。
 
-1. **実装・多段（編集→pytest→修正）**: T3 `delegate_task`（別スレッド）または Cursor Task。
-2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: `delegate_task`（Argon / Claude 等）または CLI（`agy`）。`pi` は使わない。
+1. **実装・多段（編集→pytest→修正）**: ローカル W1 は **`dsh-sub` のみ**（`rules/models.md` §2.5）。機密（Private）は **Composer 2.5**（非 Fast）。T3 `delegate_task` または CLI。
+2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: T1 **`dsh-sub`**（W1 直後は Sonnet 5.5 (medium)）、T2 **Sonnet 5.5 (medium)**、T3 **Sonnet 5.5 (medium)**。`pi` / Gemini 3.8 Flash は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。モデル切替は `/model`。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。
 5. **Cursor を `delegate_task` で呼ぶとき**: `target.options` に `{"fastMode": false}` を必ず明示し、応答の `options` で確認する。未指定は Fast で動く（2026-10-23 実測。T3 の UI は Fast オフと表示するが信用しない）。`rules/models.md` §2。
