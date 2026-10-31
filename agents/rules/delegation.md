@@ -4,7 +4,7 @@
 
 - 親エージェントのコンテキスト汚染（大量の打鍵・ログ・ツール実行による Context Rot）を防ぐ。
 - 司令塔（Commander）と作業役（Worker）の関心事を厳密に分離する。
-- **オーケストレーターのハンドオフ**: 司令塔（Opus）が `docs/routing.md` に従い Worker・探索・レビュアへ `delegate_task` / CLI / `dsh-sub` で委譲するのは**本人が許可済み**。都度のユーザー申請は不要（Opus の追加用途は `rules/models.md` §3.6）。
+- **オーケストレーターのハンドオフ**: 司令塔（Opus）が `docs/routing.md` に従い Worker（W1 **`codex-sub`**）・探索・レビュアへ `delegate_task` / CLI で委譲するのは**本人が許可済み**。明示 **`dsh-sub`** とラッパー内フォールバックは DeepSeek 直叩き。都度のユーザー申請は不要（Opus の追加用途は `rules/models.md` §3.6）。
 
 ## 2. インライン引き受けの禁止
 

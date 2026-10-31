@@ -67,23 +67,7 @@ git diff > /tmp/adv-review.diff
 
 ## 参考: T1 を本人が再開したとき（既定手順外）
 
-Maker が **Codex** で、本人が **T1 相当の軽い diff 監査**を再開するときだけ。既定の Breaker 手順の代わりにはしない。
-
-```bash
-{ echo "あなたは敵対的レビュアー。以下 diff に対し（編集・ファイル書き込み禁止）:
-1. 反例を1つ以上（なければ「なし」）
-2. 暗黙の前提と崩れる条件
-出力フォーマット:
-- severity: blocker|major|minor|nit
-- location:
-- claim / evidence:
-- suggested_fix:
-- better_alternative: （あれば）
-総評・お世辞禁止。"; cat /tmp/adv-review.diff; } \
-  | dsh-sub --repo . --prompt -
-```
-
-**headless の `dsh-sub` に read-only 専用モードは無い**。編集禁止はプロンプトとオーケストレータ側の triage で守る（スキル `deepseek-harness`）。
+Maker が **Codex** で、本人が **T1 相当の軽い diff 監査**を再開するときだけ。既定の Breaker 手順の代わりにはしない。手順・プロンプトはその都度本人が足す（本スキルに bash 例は置かない）。
 
 ## hook にしない理由
 

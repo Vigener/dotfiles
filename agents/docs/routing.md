@@ -8,10 +8,10 @@
 ## 1. 判定順序
 
 1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は本書 §3「Cursor Cloud Agent」を先に適用する。
-2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）または Sonnet 5.5 (medium) を投入する。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` §3.5）。
+2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、**Opus 5.5**（`models.md` §3.6 **要申請**、ループ頭設計と別）を投入する。Sonnet 5.5 (medium) は**名指しのときだけ**。Argon は設計に使わない。モデルと effort は別軸（`rules/models.md` §3.5）。
 3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は Task を増やさず、本書 §3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
-5. **チャネル**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
+5. **チャネル**: `in agy` / `in claude` / `codex-sub` / `dsh-sub`（明示 DeepSeek）/ `in cursor`（例外のみ）の指定を確認。省略時は下のフォールバック順。
 6. **残量**: 動的振り分けはしない。使い切り防止の確認に `update-ai-usage` を使う（`rules/models.md` §2.9）。
 
 ## 2. Task × Flag 早見表（ローカル）
