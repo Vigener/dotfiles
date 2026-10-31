@@ -21,7 +21,7 @@
 
 - `thinking: disabled` / `tool_choice: any|tool` / Assistant Prefill は不可。軽くしたいときは
   `effort: low`。`Think step-by-step` は書かない。Haiku に `effort: max` を渡さない。
-- 無指定の罠（Sonnet は high、Opus / Fable は medium）は `rules/models.md` 3.5 の表を見る。
+- 無指定の罠（Sonnet は high、Opus / Fable は medium）は `rules/models.md` §3.5 の表を見る。
 
 ## 4. 残量を読むときは生の値を見る（2026-10-21）
 

@@ -28,3 +28,18 @@
   後者は配管なら Flash で足り、Claude 枠を割く価値が無い。
 - **DeepSeek 従量口座のゼロ化**: 2026-10-21 に `dsh-sub` を配備したため保留（試験運用）。
   ただし予算は月 $2 に固定（`rules/models.md` §2.5）。
+
+## 3. 2026-10-30〜31 のルーティング改定
+
+- **T2 敵対レビューを Grok から Sonnet 5.5 (medium) に戻した**（2026-10-30 本人決定）。
+  Grok 4.7 の用途は **Visual QA フォールバック**と **Opus 不在時の司令塔代行**の2つだけに限定し、
+  汎用の敵対レビュー・「非 Gemini/Claude 監査」からは外した。RES-23 の T2 Grok 試行は撤回。
+- **Gemini 3.8 Flash を W1 実装から外した**（2026-10-30 即時）。2026-10-31 の週次リセット後も
+  実装なしで残りの役割（探索・W2・整形・Visual QA 第一候補・yomiyasu）だけを試し、
+  それでも週次枠を使い切るなら役割をさらに減らす。
+- **yomiyasu は本体を使う**（2026-10-30 決定、10-31 反映）。mini は使わない。
+  RES-24 の試行は本体前提で品質・コストの記録だけ残す。
+- **W1 `dsh-sub` の effort は `high` で統一**。**T1 `dsh-sub` に read-only 専用フラグは無く、
+  編集禁止はプロンプトとオーケストレータ側の triage で守る**ことを 2026-10-31 に再確認
+  （規範は `rules/models.md`・スキル `adversarial-review`）。
+- 反映 PR: https://github.com/Vigener/dotfiles/pull/1

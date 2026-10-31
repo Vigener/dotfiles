@@ -49,8 +49,8 @@ description: >-
 
 | 作業 | 推奨 |
 |------|------|
-| スキル草案・ルール短文・差分整理 | `agy --model gemini-3.6-flash-high` または `pi --model opencode-go/kimi-k3 --no-tools` |
-| 破壊的・インフラ・Git 危険操作の監査 | Cursor Sonnet / agy `claude-sonnet-4-6` |
+| スキル草案・ルール短文・差分整理 | `agy --model gemini-3.8-flash-high`（整形・要約。`rules/models.md` §2.3） |
+| 破壊的・インフラ・Git 危険操作の監査 | 敵対レビュー T1=`dsh-sub`、T2–T3=Sonnet 5.5 (medium)（スキル `adversarial-review`） |
 | 単純ファイル配置・symlink 確認 | 現行エージェントで十分 |
 
 ## ステップ 4: 検証
