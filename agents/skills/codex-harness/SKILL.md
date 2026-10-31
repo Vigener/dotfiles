@@ -19,34 +19,35 @@ codex-sub --repo . --prompt -
 | --- | --- |
 | `--repo <dir>` | 必須。`codex exec --cd` / 子 cwd |
 | `--prompt <text\|->` | タスク本文。`-` で stdin |
-| `--timeout <sec>` | 既定 900。超過時は dsh-sub へフォールバック |
+| `--timeout <sec>` | 既定 900。Codex 超過時と dsh-sub 呼び出しの両方に渡す |
 
 ## Codex exec（成功経路）
 
-モデル名は付けない。次のフラグのみ。
+モデル名は付けない。`preferred_auth_method` 等の削除済み `-c` は**付けない**（未知キーで exec 全体が失敗しうる）。
 
 ```sh
 codex exec --json --cd "$repo" \
   --sandbox workspace-write --ask-for-approval never \
-  -c 'preferred_auth_method="chatgpt"' \
   -c 'model_reasoning_effort="medium"' \
   --output-last-message "$tmpdir/last.txt" -
 ```
 
-**使わない**: `--dangerously-bypass-approvals-and-sandbox` / `--approve-for-me` / `--full-auto` / Fast / 明示的モデル ID。
+子プロセスの環境から **`OPENAI_API_KEY` / `CODEX_API_KEY` を除去**する（シェルにキーが残っていても ChatGPT ログインを優先）。
+
+**Fast**: exec 引数では切らない。実行前に `~/.codex/config.toml` を読み、`service_tier = "fast"` または `[features] fast_mode = true` なら **exec せず dsh-sub**（理由を `reason` に書く）。契約後に `[features] fast_mode = false` 等を本人マシンで確認すること。
+
+**使わない**: `--dangerously-bypass-approvals-and-sandbox` / `--approve-for-me` / `--full-auto` / 明示的モデル ID / Fast tier。
 
 ## フォールバック条件（→ `dsh-sub`）
 
 1. `command -v codex` 失敗
 2. `codex login status` が 0 以外
-3. **ChatGPT 認証でない** — 保守的判定: 環境に `OPENAI_API_KEY` がある、
-   または status 出力が API キー従量を示す（**文言は契約後に本人マシンで
-   `codex login status` を確認**）
-4. stderr / JSONL に `You've hit your usage limit` または
-   `usage limit reached`（その回は Codex 成果を採用せず dsh-sub へ）
-5. 本人が「今日は Codex を止める」と明示
+3. status が **`Logged in using ChatGPT` を含まない**、または **`Logged in using an API key`**
+4. stderr または JSONL の**エラー種イベント**に `You've` / `You\u2019ve hit your usage limit` または `usage limit reached`（**モデル本文の stdout では判定しない**）
+5. `~/.codex/config.toml` で Fast が有効
+6. 本人が「今日は Codex を止める」と明示
 
-`rate limit exceeded` **だけ**では落とさない。クレジット購入・`OPENAI_API_KEY` への切替はしない。
+`rate limit exceeded` **だけ**では落とさない。クレジット購入・API キーへの切替はしない。
 
 ## 出力契約
 
@@ -76,17 +77,17 @@ stdout は**常に1行 JSON**。診断は stderr。
 | 3 | 実行失敗 |
 | 4 | タイムアウト |
 
-`dsh-sub` と同じ。
+`dsh-sub` の 5（契約違反）はラッパーを通してそのまま返る。
 
 ## プロンプト末尾（ラッパーが自動付与）
 
-返答に次を義務づける: 変更ファイル / 実行したテストと結果 /
-確認したこと / やっていないこと / 残る不安。
+Codex 成功経路と **dsh-sub フォールバック**の両方で、返答に次を義務づける:
+変更ファイル / 実行したテストと結果 / 確認したこと / やっていないこと / 残る不安。
 
 ## 禁止
 
-- **OpenAI 従量 API**（`OPENAI_API_KEY` 経由の Codex）
-- **Codex Fast**（サブスク枠 2.5 倍消費）
+- **OpenAI 従量 API**（子環境に API キーを残したまま exec）
+- **Codex Fast**（config で有効なら exec 前にフォールバック）
 - **Private タスクを Codex に出す**（Private は Composer 2.5）
 - ネットワーク必須・ワークスペース外操作を Codex に期待する（`--ask-for-approval never` + workspace-write の範囲外）
 
