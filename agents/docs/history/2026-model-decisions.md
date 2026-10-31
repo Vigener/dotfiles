@@ -42,4 +42,7 @@
 - **W1 `dsh-sub` の effort は `high` で統一**。**T1 `dsh-sub` に read-only 専用フラグは無く、
   編集禁止はプロンプトとオーケストレータ側の triage で守る**ことを 2026-10-31 に再確認
   （規範は `rules/models.md`・スキル `adversarial-review`）。
+- **2026-11-01（RES-23）**: ローカル W1 の第一候補を **Codex（`codex-sub`）** に移行。
+  `dsh-sub` は契約前・枠切れの**控え**として残す。敵対レビューの **T2 Sonnet** は停止
+  （Breaker はループ末 Opus のみ）。規範は `rules/models.md`。数値目標は書かない。
 - 反映 PR: https://github.com/Vigener/dotfiles/pull/1
