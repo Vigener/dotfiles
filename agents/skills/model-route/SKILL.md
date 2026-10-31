@@ -30,7 +30,7 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
    - Private → **Composer 2.5**（Cursor・非 Fast）。
    - Search → **Gemini 3.8 Flash**。
    - Orchestration → **Opus 5.5**（Team）。Opus が使えないときのみ **Grok 4.7 代行**（`models.md` §2.1）。
-   - 人が読む日本語推敲 → **yomiyasu + Gemini 3.8 Flash**（RES-24 試行中。ログ要約とは別）。
+   - 人が読む日本語推敲 → **yomiyasu（本体） + Gemini 3.8 Flash**（2026-10-30 決定。ログ要約とは別）。
 5. **Grok 4.7（ローカル）**: **Visual QA フォールバック**または **Opus 不在時の司令塔代行**のみ。Fast は使わない（`docs/routing.md` §8）。
 6. **環境指定**: `in agy` / `in claude` / `dsh-sub` / `in cursor`（例外のみ）。
    省略時は `routing.md` §4 のフォールバック順。

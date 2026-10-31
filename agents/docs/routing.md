@@ -27,7 +27,7 @@
 | **Flag: Private** | 機密・生活メモ・認証情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
 | **Flag: Search** | Web 調査・最新動向 | `agy: Gemini 3.8 Flash` | — |
 | **Flag: Orchestration** | サブエージェント指揮・並行管理 | `claude: Opus 5.5`（Team） | T3 `delegate_task` |
-| **推敲（ループ末）** | 人が読む日本語 | yomiyasu + **Gemini 3.8 Flash** | 本体/mini は RES-24 試行中 |
+| **推敲（ループ末）** | 人が読む日本語 | yomiyasu（本体） + **Gemini 3.8 Flash** | — |
 
 ## 3. 役割別モデル（ローカル）
 
@@ -87,7 +87,7 @@
 
 ### yomiyasu
 
-- 大きなループの**終わり**、Gemini 3.8 Flash が推敲を担当。CLI は `nanaism/yomiyasu`（詳細は RES-24）。
+- 大きなループの**終わり**、Gemini 3.8 Flash が推敲を担当。CLI は `nanaism/yomiyasu` の**本体**（2026-10-30 決定。詳細は RES-24）。
 - 【】接頭辞・見出し・箇条書き・番号・数値を保持。推敲後 diff 確認。
 
 ## 4. 環境の指定とフォールバック
