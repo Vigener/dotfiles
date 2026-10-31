@@ -7,8 +7,8 @@
  *
  * Exit codes (aligned with dsh-sub): 0 ok / 2 usage / 3 run failed / 4 timeout
  *
- * ChatGPT vs API-key detection in checkCodexReady() is conservative; exact
- * `codex login status` wording is unverified in CI — confirm on your machine after Plus contract.
+ * ChatGPT status phrase and Fast in ~/.codex/config.toml are conservative;
+ * confirm on your machine after Plus contract.
  */
 
 'use strict'
@@ -30,7 +30,7 @@ const FOOTER = `
 - 残る不安
 `
 
-const USAGE_LIMIT_RE = /you'?ve hit your usage limit|usage limit reached/i
+const USAGE_LIMIT_RE = /you[\u2019']ve hit your usage limit|usage limit reached/i
 const RATE_LIMIT_ONLY_RE = /^rate limit exceeded$/i
 
 function fail(message, code = EXIT.usage) {
@@ -89,7 +89,20 @@ function scriptDir() {
 }
 
 function dshSubPath() {
-  return path.join(scriptDir(), 'dsh-sub')
+  try {
+    const self = fs.realpathSync(process.argv[1])
+    return path.join(path.dirname(self), 'dsh-sub')
+  } catch {
+    return path.join(scriptDir(), 'dsh-sub')
+  }
+}
+
+/** Strip API key vars so codex child cannot prefer pay-as-you-go auth. */
+function codexChildEnv() {
+  const env = { ...process.env }
+  delete env.OPENAI_API_KEY
+  delete env.CODEX_API_KEY
+  return env
 }
 
 function hasCodexBinary() {
@@ -97,24 +110,45 @@ function hasCodexBinary() {
   return r.status === 0 && Boolean(r.stdout.trim())
 }
 
+function codexConfigPath() {
+  const home = process.env.HOME || os.homedir()
+  return path.join(home, '.codex', 'config.toml')
+}
+
 /**
- * Returns { ready: boolean, reason: string }.
- * Conservative: OPENAI_API_KEY in env → not ChatGPT subscription path.
- * Status text heuristics are best-effort until verified post-contract.
+ * Refuse exec when ~/.codex/config.toml enables Fast (2.5x burn).
+ * Does not pass unverified -c flags to codex exec.
+ */
+function checkCodexFastConfig() {
+  let text
+  try {
+    text = fs.readFileSync(codexConfigPath(), 'utf8')
+  } catch {
+    return { ok: true }
+  }
+  if (/^\s*service_tier\s*=\s*["']?fast["']?\s*$/im.test(text)) {
+    return { ok: false, reason: 'codex config.toml service_tier=fast (refuse Fast tier)' }
+  }
+  if (/^\s*fast_mode\s*=\s*true\s*$/im.test(text)) {
+    return { ok: false, reason: 'codex config.toml fast_mode=true (refuse Fast)' }
+  }
+  return { ok: true }
+}
+
+/**
+ * Returns { ready, reason }.
+ * Exec only when `codex login status` exits 0 and output includes
+ * `Logged in using ChatGPT` (exact upstream phrase; verify locally if CLI changes).
  */
 function checkCodexReady() {
   if (!hasCodexBinary()) {
     return { ready: false, reason: 'codex binary not found' }
   }
 
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim()) {
-    return { ready: false, reason: 'OPENAI_API_KEY set; refuse pay-as-you-go Codex' }
-  }
-
   const status = spawnSync('codex', ['login', 'status'], {
     encoding: 'utf8',
     timeout: 30_000,
-    env: process.env,
+    env: codexChildEnv(),
   })
   const combined = `${status.stdout ?? ''}\n${status.stderr ?? ''}`.trim()
 
@@ -122,19 +156,32 @@ function checkCodexReady() {
     return { ready: false, reason: 'codex login status non-zero (not logged in or unavailable)' }
   }
 
-  const lower = combined.toLowerCase()
-  if (/api[\s_-]?key/.test(lower) || lower.includes('pay as you go') || lower.includes('billing')) {
-    return { ready: false, reason: 'login status suggests API-key auth (heuristic; verify locally)' }
+  if (combined.includes('Logged in using an API key')) {
+    return { ready: false, reason: 'codex login status: API key auth' }
   }
 
-  return { ready: true, reason: null, statusText: combined }
+  if (!combined.includes('Logged in using ChatGPT')) {
+    return { ready: false, reason: 'codex login status is not ChatGPT (verify locally)' }
+  }
+
+  const fast = checkCodexFastConfig()
+  if (!fast.ok) {
+    return { ready: false, reason: fast.reason }
+  }
+
+  return { ready: true, reason: null }
 }
 
-function runDshSub(repo, prompt, fallbackReason) {
+function promptWithFooter(prompt) {
+  return prompt + FOOTER
+}
+
+function runDshSub(repo, prompt, fallbackReason, timeoutSec) {
   const dsh = dshSubPath()
+  const args = ['--repo', repo, '--prompt', promptWithFooter(prompt), '--timeout', String(timeoutSec)]
   let child
   try {
-    child = spawnSync(dsh, ['--repo', repo, '--prompt', prompt], {
+    child = spawnSync(dsh, args, {
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
       env: process.env,
@@ -172,10 +219,26 @@ function runDshSub(repo, prompt, fallbackReason) {
   process.exit(code)
 }
 
-function hitUsageLimit(text) {
-  if (!text) return false
-  if (!USAGE_LIMIT_RE.test(text)) return false
-  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
+function jsonlErrorBlob(jsonlRaw) {
+  let out = ''
+  for (const line of jsonlRaw.split('\n')) {
+    if (!line.trim()) continue
+    try {
+      const ev = JSON.parse(line)
+      const t = String(ev.type ?? '')
+      if (/error/i.test(t) || ev.error != null) {
+        out += `${line}\n`
+      }
+    } catch { /* skip non-JSON */ }
+  }
+  return out
+}
+
+function hitUsageLimit(stderr, jsonlRaw) {
+  const blob = `${stderr}\n${jsonlErrorBlob(jsonlRaw)}`
+  if (!blob.trim()) return false
+  if (!USAGE_LIMIT_RE.test(blob)) return false
+  const lines = blob.split('\n').map((l) => l.trim()).filter(Boolean)
   if (lines.length === 1 && RATE_LIMIT_ONLY_RE.test(lines[0])) return false
   return true
 }
@@ -191,7 +254,6 @@ function runCodexExec(repo, prompt, timeoutSec) {
       '--cd', repo,
       '--sandbox', 'workspace-write',
       '--ask-for-approval', 'never',
-      '-c', 'preferred_auth_method="chatgpt"',
       '-c', 'model_reasoning_effort="medium"',
       '--output-last-message', lastFile,
       '-',
@@ -199,7 +261,7 @@ function runCodexExec(repo, prompt, timeoutSec) {
 
     const child = spawn('codex', args, {
       cwd: repo,
-      env: process.env,
+      env: codexChildEnv(),
       stdio: ['pipe', 'pipe', 'pipe'],
       detached: true,
     })
@@ -243,7 +305,8 @@ function runCodexExec(repo, prompt, timeoutSec) {
       if (stderr.length > 16384) stderr = stderr.slice(-16384)
     })
 
-    child.stdin.end(prompt + FOOTER)
+    child.stdin.on('error', () => {})
+    child.stdin.end(promptWithFooter(prompt))
 
     child.on('close', (exitCode) => {
       clearTimeout(timer)
@@ -300,18 +363,17 @@ async function main() {
 
   const ready = checkCodexReady()
   if (!ready.ready) {
-    runDshSub(repo, task, ready.reason)
+    runDshSub(repo, task, ready.reason, opts.timeout)
   }
 
   const run = await runCodexExec(repo, task, opts.timeout)
-  const blob = `${run.stderr}\n${run.stdout}\n${run.jsonlRaw}`
 
   if (run.timedOut) {
-    runDshSub(repo, task, `codex exec timeout (${opts.timeout}s)`)
+    runDshSub(repo, task, `codex exec timeout (${opts.timeout}s)`, opts.timeout)
   }
 
-  if (hitUsageLimit(blob)) {
-    runDshSub(repo, task, 'Codex usage limit reached')
+  if (hitUsageLimit(run.stderr, run.jsonlRaw)) {
+    runDshSub(repo, task, 'Codex usage limit reached', opts.timeout)
   }
 
   const ok = run.exitCode === 0 && Boolean(run.text.trim())
