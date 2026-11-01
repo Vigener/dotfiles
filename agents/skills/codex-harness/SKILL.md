@@ -91,6 +91,11 @@ Codex 成功経路と **dsh-sub フォールバック**の両方で、返答に�
 - **Private タスクを Codex に出す**（Private は Composer 2.5）
 - ネットワーク必須・ワークスペース外操作を Codex に期待する（`--ask-for-approval never` + workspace-write の範囲外）
 
+## T3 Code ネイティブ委譲（`delegate_task`）との関係
+
+- **スプリント試行期間（本スキル）**: CLI 経由（`codex-sub`）で `codex exec` を呼び出し、利用枠の手触り・モデル挙動・`dsh-sub` 自動フォールバックを検証する。
+- **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex プロバイダを有効化し、司令塔から `delegate_task`（`providerInstanceId: "codex"`）で `codex app-server` を子スレッドとして常駐・委譲する運用へ移行する。
+
 ## 正本
 
 - 方針: `rules/models.md` §2.5

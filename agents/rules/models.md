@@ -65,8 +65,14 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### W1 日常実装
 
-- **第一候補**: `codex-sub`（Codex CLI、`codex login` / ChatGPT Plus 枠、effort medium）。スキル `codex-harness`。
-- **代替（控え）**: `codex` が無い・未ログイン・API キー認証・利用上限のとき **`dsh-sub`**（ラッパーが自動フォールバック）。
+- **形態（2段階）**:
+  - **スプリント初期（試行・操作感検証）**: CLI 経由 `codex-sub`（Codex CLI、`codex login` / ChatGPT Plus 枠、effort medium）。上限到達時は自動で `dsh-sub` へフォールバックする。スキル `codex-harness`。
+  - **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex プロバイダを有効化し、司令塔から `delegate_task`（`providerInstanceId: "codex"`）で `codex app-server` の子スレッドとして常駐・委譲する形態へ移行。
+- **モデル系統**:
+  - ChatGPT Plus の主力は **`gpt-6.1-sol` / `gpt-6.1-terra` / `gpt-6.1-luna`**（`gpt-6-astra` は Plus には付帯しない）。
+  - `codex-sub` ではモデル名を引数に固定せず、ChatGPT Plus ログインアカウントの既定（6.1 系列）に任せる。
+  - T3 Code のネイティブ委譲では、Codex 接続時の動的モデル一覧（`model/list`）から選択される。
+- **代替（控え）**: `codex` が無い・未ログイン・API キー認証・利用上限のとき **`dsh-sub`**（`codex-sub` 実行時はラッパーが自動フォールバック）。
 - DeepSeek V4.1 Flash Free（T3 `opencode`）は期間限定・SLA なし・OpenCode 内限定。W1 の代替経路にしない。
 - 難所（W3）: 上記の条件で **Opus 5.5**（Sonnet 経路は既定から外す）。
 

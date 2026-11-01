@@ -35,16 +35,19 @@
 |---|---|---|---|
 | 司令塔（オーケストレーター） | **Opus 5.5**（Claude Team） | — | T3 / `claude` |
 | 設計（ループ最初の 1 回） | Opus 5.5（high・`models.md` §3.6 申請不要） | — | claudeAgent / `claude` |
-| 細かい仕様 | `codex-sub` | `dsh-sub` | CLI |
+| 細かい仕様 | `codex-sub` | `dsh-sub` | CLI / T3 |
 | 発想のみ | Gemini 4 Argon (medium) | Web Argon | agy |
 | 敵対レビュー T1/T2/T3 | —（当面なし） | — | — |
 | ループ最後のレビュー | Opus 5.5（1 回・`models.md` §3.6 申請不要） | — | claudeAgent |
-| 実装ループ（W1） | **`codex-sub`** | **`dsh-sub`**（控え） | CLI |
+| 実装ループ（W1） | **Codex（`codex-sub`）** | **`dsh-sub`**（控え） | CLI / T3（移行後 `delegate_task`） |
 | 難所の実装（W3） | **Opus 5.5**（前提崩れ・同指摘2回） | — | claudeAgent |
 | 探索・走査（W2） | Gemini 3.8 Flash | DeepSeek Free | agy / opencode |
 | Visual QA フォールバック / Opus 不在時の司令塔代行 | Grok 4.7（Cursor・非 Fast） | — | cursor / T3 |
 | 機械的採点 | ローカル Python (pytest) | — | — |
 
+- **Codex W1 の 2 段階移行**:
+  - **スプリント初期（試行）**: CLI 経由 `codex-sub`（上限到達時は自動で `dsh-sub` へフォールバック）。
+  - **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex を有効化し `delegate_task`（`providerInstanceId: "codex"`、内部で `codex app-server` が稼働）へ移行。
 - effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` §3.5）。
 - 前提崩れ・同じ指摘 2 回 → **Sonnet 5.5 high ではなく Opus 5.5** へ。回数と理由を記録（RES-23 と合わせて分析）。
 
