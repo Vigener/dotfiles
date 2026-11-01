@@ -27,7 +27,7 @@ codex-sub --repo . --prompt -
 
 ```sh
 codex exec --json --cd "$repo" \
-  --sandbox workspace-write --ask-for-approval never \
+  --sandbox workspace-write \
   -c 'model_reasoning_effort="medium"' \
   --output-last-message "$tmpdir/last.txt" -
 ```
@@ -89,7 +89,7 @@ Codex 成功経路と **dsh-sub フォールバック**の両方で、返答に�
 - **OpenAI 従量 API**（子環境に API キーを残したまま exec）
 - **Codex Fast**（config で有効なら exec 前にフォールバック）
 - **Private タスクを Codex に出す**（Private は Composer 2.5）
-- ネットワーク必須・ワークスペース外操作を Codex に期待する（`--ask-for-approval never` + workspace-write の範囲外）
+- ネットワーク必須・ワークスペース外操作を Codex に期待する（workspace-write の範囲外）
 
 ## T3 Code ネイティブ委譲（`delegate_task`）との関係
 

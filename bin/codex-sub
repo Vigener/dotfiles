@@ -253,7 +253,6 @@ function runCodexExec(repo, prompt, timeoutSec) {
       'exec', '--json',
       '--cd', repo,
       '--sandbox', 'workspace-write',
-      '--ask-for-approval', 'never',
       '-c', 'model_reasoning_effort="medium"',
       '--output-last-message', lastFile,
       '-',
