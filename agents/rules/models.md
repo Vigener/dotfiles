@@ -65,14 +65,19 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### W1 日常実装
 
-- **形態（2段階）**:
-  - **スプリント初期（試行・操作感検証）**: CLI 経由 `codex-sub`（Codex CLI、`codex login` / ChatGPT Plus 枠、effort medium）。上限到達時は自動で `dsh-sub` へフォールバックする。スキル `codex-harness`。
-  - **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex プロバイダを有効化し、司令塔から `delegate_task`（`providerInstanceId: "codex"`）で `codex app-server` の子スレッドとして常駐・委譲する形態へ移行。
+- **実行チャネル（環境による分岐）**:
+  - **T3 Code 環境（`delegate_task` が利用可能、または `com.t3tools.t3code` / `T3CODE_CLI_PATH` 検知時）**:
+    - **第一候補**: T3 ネイティブ委譲 `delegate_task`（`providerInstanceId: "codex"`, `model: "gpt-6.1-sol"`）を優先使用する。
+    - **設定**: `target.options` に `{"reasoningEffort": "medium", "serviceTier": "default"}` を指定（Fast 禁止）。
+    - **フォールバック**: Codex 利用上限時・エラー時は、オーケストレーターが `delegate_task`（`opencode/deepseek-v4.1-flash-free` または `deepseek` プロバイダ）へフォールバックする。
+  - **非 T3 Code 環境（Claude Desktop Code モード / Cursor / 端末 CLI 等、`delegate_task` が利用できない場合）**:
+    - **第一候補**: CLI ラッパー `codex-sub --repo <dir> --prompt "..."`（ChatGPT Plus ログイン、effort medium）。
+    - **フォールバック**: `codex-sub` 内部の自動判定により、上限時・未ログイン時は自動的に `dsh-sub`（DeepSeek API）へフォールバックする。スキル `codex-harness`。
 - **モデル系統**:
-  - ChatGPT Plus の主力は **`gpt-6.1-sol` / `gpt-6.1-terra` / `gpt-6.1-luna`**（`gpt-6-astra` は Plus には付帯しない）。
+  - ChatGPT Plus の主力は **`gpt-6.1-sol` / `gpt-6.1-terra` / `gpt-6-luna`**（`gpt-6-astra` は Plus には付帯しない）。
   - `codex-sub` ではモデル名を引数に固定せず、ChatGPT Plus ログインアカウントの既定（6.1 系列）に任せる。
-  - T3 Code のネイティブ委譲では、Codex 接続時の動的モデル一覧（`model/list`）から選択される。
-- **代替（控え）**: `codex` が無い・未ログイン・API キー認証・利用上限のとき **`dsh-sub`**（`codex-sub` 実行時はラッパーが自動フォールバック）。
+  - T3 Code のネイティブ委譲では、`gpt-6.1-sol` を既定とする。
+- **代替（控え）**: `codex` が無い・未ログイン・API キー認証・利用上限のとき **`dsh-sub`**（T3 では DeepSeek 委譲、CLI では `codex-sub` が自動フォールバック）。
 - DeepSeek V4.1 Flash Free（T3 `opencode`）は期間限定・SLA なし・OpenCode 内限定。W1 の代替経路にしない。
 - 難所（W3）: 上記の条件で **Opus 5.5**（Sonnet 経路は既定から外す）。
 
@@ -131,7 +136,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の消費％を推定して申請しない。
 - **オーケストレーターのハンドオフ**（`rules/delegation.md` §1）: 司令塔が `docs/routing.md` に従い Worker（W1 `codex-sub` 等）・探索・レビュアへ `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
 - **要申請**: Fable 5.1 / Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**（例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、agy 週枠の Opus 5.5）。
-- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium)（**名指し時**）/ DeepSeek Free / **W1 の Codex（ChatGPT ログイン、`codex-sub`）** / **W1 の `dsh-sub`（フォールバック・明示指定）** / **Opus 5.5 の次の用途**:
+- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium)（**名指し時**）/ DeepSeek Free / **W1 の Codex（ChatGPT ログイン、T3 `delegate_task` または `codex-sub`）** / **W1 の DeepSeek / `dsh-sub`（フォールバック・明示指定）** / **Opus 5.5 の次の用途**:
   - 大きなループの最初の設計（方向・仕様骨子・DoD）
   - 大きなループの最後の敵対的レビュー（1 回）
   - 同一タスク内で前提が崩れたとき、または同じ指摘が 2 回出たときの、**Codex（フォールバック時は `dsh-sub`）から Opus 5.5 への引き上げ**

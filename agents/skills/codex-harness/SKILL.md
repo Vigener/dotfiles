@@ -93,8 +93,8 @@ Codex 成功経路と **dsh-sub フォールバック**の両方で、返答に�
 
 ## T3 Code ネイティブ委譲（`delegate_task`）との関係
 
-- **スプリント試行期間（本スキル）**: CLI 経由（`codex-sub`）で `codex exec` を呼び出し、利用枠の手触り・モデル挙動・`dsh-sub` 自動フォールバックを検証する。
-- **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex プロバイダを有効化し、司令塔から `delegate_task`（`providerInstanceId: "codex"`）で `codex app-server` を子スレッドとして常駐・委譲する運用へ移行する。
+- **T3 Code 環境（`delegate_task` 利用可能時）**: 司令塔（Opus 等）から `delegate_task`（`providerInstanceId: "codex"`, `model: "gpt-6.1-sol"`, `serviceTier: "default"`）で直接委譲する。UI での追跡・ワークツリー機能との統合を最優先とする。
+- **非 T3 Code 環境（Claude Desktop Code モード / Cursor / 端末 CLI、本スキル）**: CLI ラッパー `codex-sub` を経由して `codex exec` を呼び出し、利用枠判定と `dsh-sub` 自動フォールバックを活用する。
 
 ## 正本
 

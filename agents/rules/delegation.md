@@ -94,9 +94,12 @@ effort は既定 **medium**。high は「成功条件が開いている」案件
 
 ## 8. チャネルの目安
 
-優先の目安。**ローカル W1 実装は `codex-sub`**（Private は Composer 2.5）。Cursor Task / CLI で Composer を W1 に回さない。
+優先の目安。**ローカル W1 実装は Codex**（T3 では `delegate_task`、非 T3 では `codex-sub`。Private は Composer 2.5）。Cursor Task / CLI で Composer を W1 に回さない。
 
-1. **実装・多段（編集→pytest→修正）**: ローカル W1 は **`codex-sub`**（`rules/models.md` §2.5）。機密（Private）は **Composer 2.5**（非 Fast）。T3 `delegate_task` または CLI。
+1. **実装・多段（編集→pytest→修正）**:
+   - **T3 Code 環境（`delegate_task` 利用可能時）**: T3 ネイティブ委譲 `delegate_task`（`providerInstanceId: "codex"`, `model: "gpt-6.1-sol"`, options: `{"reasoningEffort": "medium", "serviceTier": "default"}`）を最優先。上限・エラー時は DeepSeek 委譲へ切り替え。
+   - **非 T3 Code 環境（Claude Desktop Code モード / Cursor / 端末 CLI）**: CLI ラッパー **`codex-sub --repo <dir> --prompt "..."`**（`rules/models.md` §2.5）。上限時はラッパー内で自動 `dsh-sub` フォールバック。
+   - **機密（Private）**: **Composer 2.5**（非 Fast）。T3 `delegate_task` または CLI。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**: **ループ末 Opus 5.5 のみ**（T1/T2/T3 は当面なし）。`pi` / Gemini 3.8 Flash は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。モデル切替は `/model`。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は `{通称} {短い作業}`（例: `Fable open-artifact audit`）。UI の「Running N agents…」に出る。通称は人が呼ぶ名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前にチャットへ `{通称} を呼び出します` を1行。

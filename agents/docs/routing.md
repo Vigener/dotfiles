@@ -39,15 +39,15 @@
 | 発想のみ | Gemini 4 Argon (medium) | Web Argon | agy |
 | 敵対レビュー T1/T2/T3 | —（当面なし） | — | — |
 | ループ最後のレビュー | Opus 5.5（1 回・`models.md` §3.6 申請不要） | — | claudeAgent |
-| 実装ループ（W1） | **Codex（`codex-sub`）** | **`dsh-sub`**（控え） | CLI / T3（移行後 `delegate_task`） |
+| 実装ループ（W1） | **Codex（`gpt-6.1-sol` / `codex-sub`）** | **DeepSeek / `dsh-sub`**（控え） | T3（`delegate_task`） / CLI（`codex-sub`） |
 | 難所の実装（W3） | **Opus 5.5**（前提崩れ・同指摘2回） | — | claudeAgent |
 | 探索・走査（W2） | Gemini 3.8 Flash | DeepSeek Free | agy / opencode |
 | Visual QA フォールバック / Opus 不在時の司令塔代行 | Grok 4.7（Cursor・非 Fast） | — | cursor / T3 |
 | 機械的採点 | ローカル Python (pytest) | — | — |
 
-- **Codex W1 の 2 段階移行**:
-  - **スプリント初期（試行）**: CLI 経由 `codex-sub`（上限到達時は自動で `dsh-sub` へフォールバック）。
-  - **メイン運用（ネイティブ委譲）**: 数日試行後、T3 Code 設定で Codex を有効化し `delegate_task`（`providerInstanceId: "codex"`、内部で `codex app-server` が稼働）へ移行。
+- **Codex W1 の実行チャネル（環境による分岐）**:
+  - **T3 Code 環境（`delegate_task` 利用可能時）**: T3 ネイティブ委譲 `delegate_task`（`providerInstanceId: "codex"`, `model: "gpt-6.1-sol"`, options: `{"reasoningEffort": "medium", "serviceTier": "default"}`）を使用。上限・エラー時は DeepSeek 委譲へフォールバック。
+  - **非 T3 Code 環境（Claude Desktop Code モード / Cursor / 端末 CLI）**: CLI ラッパー `codex-sub`（ChatGPT Plus 枠、effort medium）を使用。上限時は内部で自動 `dsh-sub` フォールバック。
 - effort は既定 **medium**。high は「何が良いか自体を決める」案件だけ（`rules/models.md` §3.5）。
 - 前提崩れ・同じ指摘 2 回 → **Sonnet 5.5 high ではなく Opus 5.5** へ。回数と理由を記録（RES-23 と合わせて分析）。
 

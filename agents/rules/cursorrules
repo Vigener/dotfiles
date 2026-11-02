@@ -17,7 +17,7 @@
 ## 役割・モデル構成
 
 - 正本: `rules/models.md`（方針）と `docs/routing.md`（対応表）。
-- **ローカル**: オーケストレーターは **Opus 5.5（Claude Team）**。W1 実装は **`codex-sub`**（`codex` 無し・未ログイン・枠切れ時は **`dsh-sub`** に自動フォールバック。Private は Composer 2.5・非 Fast 明示）。Gemini 3.8 Flash は探索・W2・Extract・整形・Visual QA 第一候補・yomiyasu（推敲）。**Grok 4.7** は **Visual QA フォールバック**と **Opus 不在時の司令塔代行**のみ（いずれも Cursor・**非 Fast** 明示）。
+- **ローカル**: オーケストレーターは **Opus 5.5（Claude Team）**。W1 実装は **Codex**（T3 では `delegate_task`、非 T3 では `codex-sub`。未ログイン・枠切れ時は **DeepSeek / `dsh-sub`** にフォールバック。Private は Composer 2.5・非 Fast 明示）。Gemini 3.8 Flash は探索・W2・Extract・整形・Visual QA 第一候補・yomiyasu（推敲）。**Grok 4.7** は **Visual QA フォールバック**と **Opus 不在時の司令塔代行**のみ（いずれも Cursor・**非 Fast** 明示）。
 - **Cursor Cloud Agent**（変更なし）: 設計 **Grok 4.7**、実装 **Composer 2.5**（いずれも非 Fast）。
 - Cursor の Other Models は **Fable 5.1 専用**（事前許可制）。Opus 5.5 を Cursor で呼ばない（`claude` を使う）。
 - 設計の骨子・DoD は Opus 5.5（`models.md` §3.6 申請不要）、細部・実装・軽いセルフレビューは **Codex（`codex-sub`）**。Argon は発想のみ。敵対レビュー（Breaker）は **ループ末 Opus 5.5 のみ**（§3.6 申請不要。T1/T2/T3 は当面なし）。
