@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 update-ai-usage
-Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, and Claude (Team),
+Fetch usage and quota limits for Antigravity, Cursor, DeepSeek, Claude (Team), and Codex,
 calculate weekly burn rates (pacing & depletion ETA), trigger desktop alerts,
 write RunCat Neo custom metrics JSON, and format output for Raycast / CLI.
 """
@@ -307,6 +307,163 @@ def fetch_claude_usage():
     return result
 
 
+CODEX_AUTH_PATH = "~/.codex/auth.json"
+CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage"
+CODEX_CACHE_TTL_SEC = 900
+CODEX_CACHE_MAX_STALE_SEC = 6 * 3600
+CODEX_CACHE_PATH = "~/.cache/update-ai-usage/codex-usage.json"
+
+
+def read_codex_auth():
+    """Read Codex OAuth access token and account id from ~/.codex/auth.json."""
+    auth_path = os.path.expanduser(CODEX_AUTH_PATH)
+    if not os.path.exists(auth_path):
+        return None, None
+    try:
+        with open(auth_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if data.get("auth_mode") not in ("chatgpt", None):
+            return None, None
+        tokens = data.get("tokens") or {}
+        access_token = tokens.get("access_token")
+        account_id = tokens.get("account_id")
+        if access_token:
+            return access_token, account_id
+    except Exception:
+        pass
+    return None, None
+
+
+def read_codex_cache():
+    try:
+        with open(os.path.expanduser(CODEX_CACHE_PATH), "r", encoding="utf-8") as f:
+            cached = json.load(f)
+        if isinstance(cached, dict) and isinstance(cached.get("data"), dict):
+            return cached
+    except Exception:
+        pass
+    return None
+
+
+def write_codex_cache(data):
+    path = os.path.expanduser(CODEX_CACHE_PATH)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        temp_fd, temp_path = tempfile.mkstemp(
+            dir=os.path.dirname(path), prefix="codex_", suffix=".tmp"
+        )
+        with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
+            json.dump(
+                {"fetched_at": datetime.now(timezone.utc).timestamp(), "data": data}, f
+            )
+        os.replace(temp_path, path)
+    except Exception:
+        pass
+
+
+def codex_cache_suffix(codex):
+    """Describe how old the served value is when it came from the cache."""
+    if not codex or not codex.get("cached"):
+        return ""
+    age = codex.get("cache_age_sec") or 0
+    if age < 60:
+        return ""
+    fetched_at = datetime.now(timezone.utc).timestamp() - age
+    stamp = datetime.fromtimestamp(fetched_at).strftime("%H:%M")
+    return f" · {stamp}時点"
+
+
+def fetch_codex_usage():
+    """
+    Fetch Codex subscription rate-limit usage via ChatGPT's wham usage endpoint.
+    Reports primary window (typically 5-hour) and secondary window (typically 7-day).
+    """
+    cached = read_codex_cache()
+    cache_age = None
+    if cached:
+        cache_age = max(
+            0.0,
+            datetime.now(timezone.utc).timestamp() - float(cached.get("fetched_at", 0)),
+        )
+        if cache_age < CODEX_CACHE_TTL_SEC:
+            return {**cached["data"], "cached": True, "cache_age_sec": round(cache_age)}
+
+    def stale_fallback(error):
+        if cached and cache_age is not None and cache_age < CODEX_CACHE_MAX_STALE_SEC:
+            return {
+                **cached["data"],
+                "cached": True,
+                "stale": True,
+                "cache_age_sec": round(cache_age),
+                "error": error,
+            }
+        return {"error": error}
+
+    token, account_id = read_codex_auth()
+    if not token:
+        return stale_fallback("Codex auth credentials not found")
+
+    try:
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "Codex-CLI",
+            "Accept": "application/json",
+        }
+        if account_id:
+            headers["ChatGPT-Account-Id"] = account_id
+
+        req = urllib.request.Request(
+            CODEX_USAGE_URL,
+            headers=headers,
+            method="GET",
+        )
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CONTEXT) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        return stale_fallback(f"HTTP {e.code}")
+    except Exception as e:
+        return stale_fallback(str(e))
+
+    def parse_window(win):
+        if not win or not isinstance(win, dict):
+            return None
+        used = win.get("used_percent")
+        reset_after = win.get("reset_after_seconds")
+        reset_at = win.get("reset_at")
+        resets_at_iso = None
+        if reset_at:
+            try:
+                resets_at_iso = datetime.fromtimestamp(reset_at, tz=timezone.utc).isoformat()
+            except Exception:
+                pass
+        return {
+            "used_pct": float(used) if used is not None else None,
+            "reset_after_seconds": reset_after,
+            "reset_at": reset_at,
+            "resets_at": resets_at_iso,
+            "limit_window_seconds": win.get("limit_window_seconds"),
+        }
+
+    rate_limit = data.get("rate_limit") or {}
+    primary = parse_window(rate_limit.get("primary_window"))
+    secondary = parse_window(rate_limit.get("secondary_window"))
+
+    result = {
+        "plan": data.get("plan_type", "chatgpt"),
+        "primary_window": primary,
+        "secondary_window": secondary,
+        "allowed": rate_limit.get("allowed", True),
+        "limit_reached": rate_limit.get("limit_reached", False),
+    }
+
+    reset_credits = data.get("rate_limit_reset_credits") or {}
+    if reset_credits:
+        result["reset_credits"] = reset_credits
+
+    write_codex_cache(result)
+    return result
+
+
 def format_time_remaining(reset_time_str):
     """Calculate remaining human-readable time from an ISO timestamp."""
     if not reset_time_str:
@@ -460,17 +617,17 @@ def classify_agy_group(group_name):
         return "claude"
 
 
-def build_metrics_bar(agy, cursor, deepseek, claude=None):
+def build_metrics_bar(agy, cursor, deepseek, claude=None, codex=None):
     """
     Compact one-line status shared by the RunCat menu bar and Raycast inline.
 
-    Grammar: `Agy[G:0% Ar:34% C:0%] Cu:2%/0% Cl:100% DS:$1.22`
+    Grammar: `Agy[G:0% Ar:34% C:0%] Cu:2%/0% Cl:100% Cx:93% DS:$1.22`
       - percentages keep their `%`; a bare `0` is too easy to misread
       - lowercase `w` marks the weekly window (`G:0%(w0%)`) so it never reads
-        like another service tag (G/Ar/C/Cl/Cu/DS)
+        like another service tag (G/Ar/C/Cl/Cu/Cx/DS)
       - weekly detail appears only when it matters (<= 50% or overburning)
         and differs from the primary number (`G:0%(w0%)` collapses to `G:0%`)
-      - Claude compares its weekly against 5h, so `Cl:100%(w0%)` keeps the 0
+      - Claude/Codex compare their weekly against 5h, so `Cl:100%(w0%)` keeps the 0
       - 🔥 burn-rate is dropped once weekly hits 0% (no pace left to manage)
       - reset countdowns appear only when a window is nearly empty
     """
@@ -558,6 +715,24 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
                     item += f":{rem_time}"
             parts.append(item)
 
+    if codex and "primary_window" in codex:
+        pw = codex.get("primary_window") or {}
+        sw = codex.get("secondary_window") or {}
+        used = pw.get("used_pct")
+        if used is not None:
+            left = max(0.0, min(100.0, 100.0 - float(used)))
+            item = f"Cx:{left:.0f}%"
+            used_w = sw.get("used_pct")
+            if used_w is not None:
+                left_w = max(0.0, min(100.0, 100.0 - float(used_w)))
+                if left_w <= WEEKLY_WARN_THRESHOLD and int(round(left_w)) != int(round(left)):
+                    item += f"(w{left_w:.0f}%)"
+            if left <= ALERT_THRESHOLD:
+                rem_time = format_time_remaining(pw.get("resets_at", ""))
+                if rem_time:
+                    item += f":{rem_time}"
+            parts.append(item)
+
     if "balance_infos" in deepseek and deepseek["balance_infos"]:
         b_info = deepseek["balance_infos"][0]
         symbol = "$" if b_info.get("currency", "USD") == "USD" else "¥"
@@ -566,7 +741,7 @@ def build_metrics_bar(agy, cursor, deepseek, claude=None):
     return " ".join(parts) if parts else "---"
 
 
-def build_runcat_payload(agy, cursor, deepseek, claude=None):
+def build_runcat_payload(agy, cursor, deepseek, claude=None, codex=None):
     metrics = []
     agy_g_pacing = None
 
@@ -702,7 +877,37 @@ def build_runcat_payload(agy, cursor, deepseek, claude=None):
             "formattedValue": claude["error"],
         })
 
-    metrics_bar = build_metrics_bar(agy, cursor, deepseek, claude)
+    # Codex (OpenAI ChatGPT rate limits: 5-hour session + weekly windows)
+    if codex and "primary_window" in codex:
+        pw = codex.get("primary_window") or {}
+        sw = codex.get("secondary_window") or {}
+        used_5h = pw.get("used_pct")
+        used_7d = sw.get("used_pct")
+        if used_5h is not None:
+            left_5h = max(0.0, min(100.0, 100.0 - float(used_5h)))
+            left_7d = None if used_7d is None else max(0.0, min(100.0, 100.0 - float(used_7d)))
+            suffix = codex_cache_suffix(codex)
+
+            rem_time = format_time_remaining(pw.get("resets_at", ""))
+            metrics.append({
+                "title": f"Codex (5h, left){suffix}",
+                "formattedValue": f"{left_5h:.0f}%" + (f" ({rem_time}後)" if rem_time else ""),
+                "normalizedValue": round(left_5h / 100.0, 3),
+            })
+            if left_7d is not None:
+                w_time = format_time_remaining(sw.get("resets_at", ""))
+                metrics.append({
+                    "title": f"Codex (weekly, left){suffix}",
+                    "formattedValue": f"{left_7d:.0f}%" + (f" ({w_time}後)" if w_time else ""),
+                    "normalizedValue": round(left_7d / 100.0, 3),
+                })
+    elif codex and "error" in codex:
+        metrics.append({
+            "title": "Codex (unavailable)",
+            "formattedValue": codex["error"],
+        })
+
+    metrics_bar = build_metrics_bar(agy, cursor, deepseek, claude, codex)
 
     return {
         "title": "AI Quotas",
@@ -713,12 +918,12 @@ def build_runcat_payload(agy, cursor, deepseek, claude=None):
     }
 
 
-def format_inline(agy, cursor, deepseek, claude=None):
+def format_inline(agy, cursor, deepseek, claude=None, codex=None):
     """Raycast inline mode: same compact line as the RunCat menu bar."""
-    return build_metrics_bar(agy, cursor, deepseek, claude)
+    return build_metrics_bar(agy, cursor, deepseek, claude, codex)
 
 
-def format_markdown(agy, cursor, deepseek, claude=None):
+def format_markdown(agy, cursor, deepseek, claude=None, codex=None):
     lines = ["# 🧠 AI Quotas & Usage Summary\n"]
 
     # Antigravity section
@@ -844,6 +1049,31 @@ def format_markdown(agy, cursor, deepseek, claude=None):
     else:
         lines.append("> ⚠️ Claude: no usage data\n")
 
+    # Codex section
+    plan_label = (codex.get("plan") or "Codex").capitalize() if codex else "Codex"
+    lines.append(f"## Codex ({plan_label}){codex_cache_suffix(codex)}")
+    if codex and "primary_window" in codex:
+        for key, name in (("primary_window", "Session (5h)"), ("secondary_window", "Weekly (7d)")):
+            bucket = codex.get(key) or {}
+            used = bucket.get("used_pct")
+            if used is None:
+                continue
+            left = max(0.0, min(100.0, 100.0 - float(used)))
+            rem_time = format_time_remaining(bucket.get("resets_at", ""))
+            reset_badge = f" `[リセットまで {rem_time}]`" if rem_time else ""
+            lines.append(
+                f"- **{name}**: `{left:.1f}% left` `[{format_progress_bar(left, 12)}]`{reset_badge}"
+            )
+        credits = codex.get("reset_credits") or {}
+        avail_credits = credits.get("available_count")
+        if avail_credits is not None and avail_credits > 0:
+            lines.append(f"- **Reset Credits**: `{avail_credits}`")
+        lines.append("")
+    elif codex and "error" in codex:
+        lines.append(f"> ⚠️ Codex: `{codex.get('error')}`\n")
+    else:
+        lines.append("> ⚠️ Codex: no usage data\n")
+
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lines.append(f"---\n_Last updated: {now_str}_")
     return "\n".join(lines)
@@ -902,11 +1132,12 @@ def main():
     cursor = fetch_cursor_usage()
     deepseek = fetch_deepseek_balance()
     claude = fetch_claude_usage()
+    codex = fetch_codex_usage()
 
     if args.notify:
         check_and_send_critical_notifications(agy)
 
-    runcat_payload = build_runcat_payload(agy, cursor, deepseek, claude)
+    runcat_payload = build_runcat_payload(agy, cursor, deepseek, claude, codex)
 
     if args.write_runcat:
         try:
@@ -915,15 +1146,16 @@ def main():
             sys.stderr.write(f"Warning: Failed to write RunCat JSON: {e}\n")
 
     if args.format == "markdown":
-        print(format_markdown(agy, cursor, deepseek, claude))
+        print(format_markdown(agy, cursor, deepseek, claude, codex))
     elif args.format == "inline":
-        print(format_inline(agy, cursor, deepseek, claude))
+        print(format_inline(agy, cursor, deepseek, claude, codex))
     elif args.format == "json":
         print(json.dumps({
             "antigravity": agy,
             "cursor": cursor,
             "deepseek": deepseek,
             "claude": claude,
+            "codex": codex,
         }, indent=2, ensure_ascii=False))
     elif args.format == "runcat":
         print(json.dumps(runcat_payload, indent=2, ensure_ascii=False))

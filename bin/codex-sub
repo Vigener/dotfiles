@@ -1,0 +1,404 @@
+#!/usr/bin/env node
+/**
+ * codex-sub: W1 wrapper — Codex CLI (ChatGPT login) with fallback to dsh-sub.
+ *
+ * Usage:
+ *   codex-sub --repo <dir> --prompt <text|->
+ *
+ * Exit codes (aligned with dsh-sub): 0 ok / 2 usage / 3 run failed / 4 timeout
+ *
+ * ChatGPT status phrase and Fast in ~/.codex/config.toml are conservative;
+ * confirm on your machine after Plus contract.
+ */
+
+'use strict'
+
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { spawn, spawnSync } = require('node:child_process')
+
+const EXIT = { ok: 0, usage: 2, failed: 3, timeout: 4 }
+const FOOTER = `
+
+---
+返答の末尾に必ず次の見出し付きで書くこと:
+- 変更ファイル
+- 実行したテストと結果
+- 確認したこと
+- やっていないこと
+- 残る不安
+`
+
+const USAGE_LIMIT_RE = /you[\u2019']ve hit your usage limit|usage limit reached/i
+const RATE_LIMIT_ONLY_RE = /^rate limit exceeded$/i
+
+function fail(message, code = EXIT.usage) {
+  process.stderr.write(`codex-sub: ${message}\n`)
+  process.stdout.write(JSON.stringify({ ok: false, provider: 'codex-sub', code: 'USAGE', message }) + '\n')
+  process.exit(code)
+}
+
+function parseArgs(argv) {
+  const out = { timeout: 900 }
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]
+    const next = () => {
+      const value = argv[i + 1]
+      if (value === undefined) fail(`${arg} requires a value`)
+      i += 1
+      return value
+    }
+    switch (arg) {
+      case '--repo': out.repo = next(); break
+      case '--prompt': out.prompt = next(); break
+      case '--timeout': out.timeout = Number(next()); break
+      case '-h': case '--help': out.help = true; break
+      default:
+        if (arg.startsWith('--')) fail(`unknown option: ${arg}`)
+        fail(`unexpected argument: ${arg}`)
+    }
+  }
+  return out
+}
+
+const HELP = `Usage: codex-sub --repo <dir> --prompt <text|->
+
+  --repo <dir>        workspace root (required)
+  --prompt <text|->   task text; '-' reads stdin
+  --timeout <sec>     wall-clock limit for codex exec (default: 900)
+
+Prints one JSON line on stdout. Falls back to dsh-sub when codex is missing,
+not logged in, API-key auth, or usage limit hit.
+
+See skill codex-harness for flags and contract.
+`
+
+function readStdin() {
+  return new Promise((resolve, reject) => {
+    let data = ''
+    process.stdin.setEncoding('utf8')
+    process.stdin.on('data', (chunk) => { data += chunk })
+    process.stdin.on('end', () => resolve(data))
+    process.stdin.on('error', reject)
+  })
+}
+
+function scriptDir() {
+  return path.dirname(process.argv[1])
+}
+
+function dshSubPath() {
+  try {
+    const self = fs.realpathSync(process.argv[1])
+    return path.join(path.dirname(self), 'dsh-sub')
+  } catch {
+    return path.join(scriptDir(), 'dsh-sub')
+  }
+}
+
+/** Strip API key vars so codex child cannot prefer pay-as-you-go auth. */
+function codexChildEnv() {
+  const env = { ...process.env }
+  delete env.OPENAI_API_KEY
+  delete env.CODEX_API_KEY
+  return env
+}
+
+function hasCodexBinary() {
+  const r = spawnSync('sh', ['-c', 'command -v codex'], { encoding: 'utf8' })
+  return r.status === 0 && Boolean(r.stdout.trim())
+}
+
+function codexConfigPath() {
+  const home = process.env.HOME || os.homedir()
+  return path.join(home, '.codex', 'config.toml')
+}
+
+/**
+ * Refuse exec when ~/.codex/config.toml enables Fast (2.5x burn).
+ * Does not pass unverified -c flags to codex exec.
+ */
+function checkCodexFastConfig() {
+  let text
+  try {
+    text = fs.readFileSync(codexConfigPath(), 'utf8')
+  } catch {
+    return { ok: true }
+  }
+  if (/^\s*service_tier\s*=\s*["']?fast["']?\s*$/im.test(text)) {
+    return { ok: false, reason: 'codex config.toml service_tier=fast (refuse Fast tier)' }
+  }
+  if (/^\s*fast_mode\s*=\s*true\s*$/im.test(text)) {
+    return { ok: false, reason: 'codex config.toml fast_mode=true (refuse Fast)' }
+  }
+  return { ok: true }
+}
+
+/**
+ * Returns { ready, reason }.
+ * Exec only when `codex login status` exits 0 and output includes
+ * `Logged in using ChatGPT` (exact upstream phrase; verify locally if CLI changes).
+ */
+function checkCodexReady() {
+  if (!hasCodexBinary()) {
+    return { ready: false, reason: 'codex binary not found' }
+  }
+
+  const status = spawnSync('codex', ['login', 'status'], {
+    encoding: 'utf8',
+    timeout: 30_000,
+    env: codexChildEnv(),
+  })
+  const combined = `${status.stdout ?? ''}\n${status.stderr ?? ''}`.trim()
+
+  if (status.status !== 0) {
+    return { ready: false, reason: 'codex login status non-zero (not logged in or unavailable)' }
+  }
+
+  if (combined.includes('Logged in using an API key')) {
+    return { ready: false, reason: 'codex login status: API key auth' }
+  }
+
+  if (!combined.includes('Logged in using ChatGPT')) {
+    return { ready: false, reason: 'codex login status is not ChatGPT (verify locally)' }
+  }
+
+  const fast = checkCodexFastConfig()
+  if (!fast.ok) {
+    return { ready: false, reason: fast.reason }
+  }
+
+  return { ready: true, reason: null }
+}
+
+function promptWithFooter(prompt) {
+  return prompt + FOOTER
+}
+
+function runDshSub(repo, prompt, fallbackReason, timeoutSec) {
+  const dsh = dshSubPath()
+  const args = ['--repo', repo, '--prompt', promptWithFooter(prompt), '--timeout', String(timeoutSec)]
+  let child
+  try {
+    child = spawnSync(dsh, args, {
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      env: process.env,
+    })
+  } catch (err) {
+    const out = {
+      ok: false,
+      provider: 'dsh-sub',
+      fallback: 'dsh-sub',
+      reason: fallbackReason ?? 'dsh-sub spawn failed',
+      code: 'SPAWN_FAILED',
+      message: String(err?.message ?? err),
+    }
+    process.stdout.write(JSON.stringify(out) + '\n')
+    process.exit(EXIT.failed)
+  }
+
+  const line = (child.stdout || '').trim().split('\n').filter(Boolean).pop() || ''
+  let parsed
+  try {
+    parsed = line ? JSON.parse(line) : { ok: false, code: 'EMPTY', message: 'dsh-sub produced no JSON' }
+  } catch {
+    parsed = { ok: false, code: 'INVALID_JSON', message: line.slice(0, 500) }
+  }
+
+  parsed.provider = 'dsh-sub'
+  if (fallbackReason) {
+    parsed.fallback = 'dsh-sub'
+    parsed.reason = fallbackReason
+  }
+
+  process.stdout.write(JSON.stringify(parsed) + '\n')
+  const code = child.status
+  if (code === null || code === undefined) process.exit(EXIT.failed)
+  process.exit(code)
+}
+
+function jsonlErrorBlob(jsonlRaw) {
+  let out = ''
+  for (const line of jsonlRaw.split('\n')) {
+    if (!line.trim()) continue
+    try {
+      const ev = JSON.parse(line)
+      const t = String(ev.type ?? '')
+      if (/error/i.test(t) || ev.error != null) {
+        out += `${line}\n`
+      }
+    } catch { /* skip non-JSON */ }
+  }
+  return out
+}
+
+function hitUsageLimit(stderr, jsonlRaw) {
+  const blob = `${stderr}\n${jsonlErrorBlob(jsonlRaw)}`
+  if (!blob.trim()) return false
+  if (!USAGE_LIMIT_RE.test(blob)) return false
+  const lines = blob.split('\n').map((l) => l.trim()).filter(Boolean)
+  if (lines.length === 1 && RATE_LIMIT_ONLY_RE.test(lines[0])) return false
+  return true
+}
+
+function runCodexExec(repo, prompt, timeoutSec) {
+  return new Promise((resolve) => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-sub-'))
+    const lastFile = path.join(tmp, 'last.txt')
+    const jsonlFile = path.join(tmp, 'stream.jsonl')
+
+    const args = [
+      'exec', '--json',
+      '--cd', repo,
+      '--sandbox', 'workspace-write',
+      '-c', 'model_reasoning_effort="medium"',
+      '--output-last-message', lastFile,
+      '-',
+    ]
+
+    const child = spawn('codex', args, {
+      cwd: repo,
+      env: codexChildEnv(),
+      stdio: ['pipe', 'pipe', 'pipe'],
+      detached: true,
+    })
+
+    let stdout = ''
+    let stderr = ''
+    let timedOut = false
+    let session = null
+
+    const timer = setTimeout(() => {
+      timedOut = true
+      killTree('SIGTERM')
+      setTimeout(() => killTree('SIGKILL'), 5000).unref()
+    }, timeoutSec * 1000)
+
+    function killTree(signal) {
+      if (!child.pid) return
+      try { process.kill(-child.pid, signal) } catch {
+        try { child.kill(signal) } catch { /* gone */ }
+      }
+    }
+
+    child.stdout.on('data', (chunk) => {
+      const s = chunk.toString()
+      stdout += s
+      if (stdout.length > 8_388_608) stdout = stdout.slice(-8_388_608)
+      for (const line of s.split('\n')) {
+        if (!line.trim()) continue
+        try {
+          fs.appendFileSync(jsonlFile, line + '\n')
+        } catch { /* ignore */ }
+        let ev
+        try { ev = JSON.parse(line) } catch { continue }
+        if (ev.type === 'thread.started' && ev.thread_id) session = ev.thread_id
+        if (ev.type === 'thread.started' && ev.id) session = ev.id
+      }
+    })
+
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString()
+      if (stderr.length > 16384) stderr = stderr.slice(-16384)
+    })
+
+    child.stdin.on('error', () => {})
+    child.stdin.end(promptWithFooter(prompt))
+
+    child.on('close', (exitCode) => {
+      clearTimeout(timer)
+      let text = ''
+      try {
+        text = fs.readFileSync(lastFile, 'utf8')
+      } catch { /* no file */ }
+
+      let jsonlRaw = ''
+      try { jsonlRaw = fs.readFileSync(jsonlFile, 'utf8') } catch { /* empty */ }
+
+      fs.rmSync(tmp, { recursive: true, force: true })
+
+      resolve({
+        exitCode: exitCode ?? -1,
+        stdout,
+        stderr,
+        text,
+        jsonlRaw,
+        session,
+        timedOut,
+      })
+    })
+  })
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2))
+  if (opts.help) {
+    process.stdout.write(HELP)
+    process.exit(EXIT.ok)
+  }
+
+  if (!opts.repo) fail('--repo is required')
+  if (opts.prompt === undefined) fail('--prompt is required')
+
+  const repo = path.resolve(opts.repo)
+  let stat
+  try { stat = fs.statSync(repo) } catch { fail(`--repo does not exist: ${repo}`) }
+  if (!stat.isDirectory()) fail(`--repo is not a directory: ${repo}`)
+
+  if (!Number.isFinite(opts.timeout) || opts.timeout <= 0) {
+    fail(`--timeout must be a positive number: ${opts.timeout}`)
+  }
+
+  let task = opts.prompt
+  if (task === '-') {
+    if (process.stdin.isTTY) fail('--prompt - expects piped stdin')
+    task = await readStdin()
+    if (!task.trim()) fail('stdin was empty')
+  } else if (!task.trim()) {
+    fail('--prompt was blank')
+  }
+
+  const ready = checkCodexReady()
+  if (!ready.ready) {
+    runDshSub(repo, task, ready.reason, opts.timeout)
+  }
+
+  const run = await runCodexExec(repo, task, opts.timeout)
+
+  if (run.timedOut) {
+    runDshSub(repo, task, `codex exec timeout (${opts.timeout}s)`, opts.timeout)
+  }
+
+  if (hitUsageLimit(run.stderr, run.jsonlRaw)) {
+    runDshSub(repo, task, 'Codex usage limit reached', opts.timeout)
+  }
+
+  const ok = run.exitCode === 0 && Boolean(run.text.trim())
+  const result = {
+    ok,
+    provider: 'codex',
+    text: run.text,
+    session: run.session,
+  }
+
+  if (!ok) {
+    result.code = 'RUN_FAILED'
+    result.message = (run.stderr.trim().split('\n').pop() || `codex exited ${run.exitCode}`)
+    result.exitCode = run.exitCode
+    process.stdout.write(JSON.stringify(result) + '\n')
+    process.exit(run.timedOut ? EXIT.timeout : EXIT.failed)
+  }
+
+  process.stdout.write(JSON.stringify(result) + '\n')
+  process.exit(EXIT.ok)
+}
+
+main().catch((err) => {
+  process.stderr.write(`codex-sub: ${err?.stack ?? err}\n`)
+  process.stdout.write(JSON.stringify({
+    ok: false, provider: 'codex-sub', code: 'INTERNAL', message: String(err?.message ?? err),
+  }) + '\n')
+  process.exit(EXIT.failed)
+})

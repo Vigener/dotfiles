@@ -15,7 +15,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - agy の枠は「Gemini」「Claude/GPT」「Argon」の3グループに分かれる。**Argon は別枠**。
 - **残量のペースでモデルを動的に振り分けない**（手順は `model-route` から外した）。`update-ai-usage` は使い切り防止の確認に使ってよい。
 - **DeepSeek API の日次上限（旧「緊急時 $1〜2/日」）は廃止**した。
-- **計測期間（Linear RES-23、〜2026-11-07）**: W1 の `dsh-sub` 使用量と **Claude Team 残量**を記録する。期間中は日次上限を設けない。期間後は RES-23 の結果を見て本人が方針を決める。
+- **計測期間（Linear RES-23、〜2026-11-07）**: 毎晩1行で **Codex 残**（ダッシュボードか `/status`）、**Codex に渡したタスク数**と **Opus の差戻回数・理由**、**Claude Team 残**、**Cursor 残**、**Gemini 残**、**DeepSeek USD** を記録する（詳細は `logs/res23/README.md`）。期間中は日次上限を設けない。`dsh-sub` は消さない（契約前・枠切れの控え）。期間後は RES-23 の結果を見て本人が方針を決める。
 - **枠が足りないとき**: RES-23 の計測を見て、週後半に **Anthropic API 従量課金**または **Claude Pro 契約**を足すか本人が決める（§2.5 敵対レビュー・§3 と同趣旨）。
 
 ## 1. Gemini 4 Argon（agy 独立週枠）— アイデア出しのみ
@@ -28,7 +28,7 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ### 2.1 ローカル（T3 / `cursor-agent`）
 
-- **Composer / Grok は原則使わない**（ローカルの W1 は `dsh-sub`。§2.5）。
+- **Composer / Grok は原則使わない**（ローカルの W1 は `codex-sub`。§2.5）。
 - **例外（3つ）** — いずれも **Grok / Composer は Fast オフを明示**（本ファイル §2.1 の Fast 手順、`docs/routing.md` §8）:
   - **機密（Flag: Private）**: **Composer 2.5**（`fastMode: false` を明示した T3 / 非 Fast CLI）。
   - **Visual QA フォールバック**: Gemini 3.8 Flash のあと、目視 QA に **Grok 4.7**（`docs/routing.md` §3 Visual QA）。
@@ -59,27 +59,38 @@ HPC 境界は `rules/hpc.md` を参照。
 ### 設計・仕様（大きなループ）
 
 - **ループ最初に 1 回**: Opus が方向・仕様の骨子・完了条件（DoD）を決める（§3.6 **申請不要**）。
-- **細かい仕様**: Sonnet 5.5 **(medium)**（agy の Claude 週枠 → Team）。
-- **Opus 5.5 へ上げる**（Sonnet 5.5 high ではなく Opus 5.5）: 同一タスク内で前提が崩れたとき、または**同じ指摘が 2 回**出たとき（§3.6 **申請不要**）。
-- 上げた**回数と理由を記録**する。多い場合は「最初から Sonnet 5.5 high にする」切り替えを長い目で検討する（RES-23 の計測と合わせて見る）。
+- **細かい仕様・実装・軽いセルフレビュー**: **Codex**（`codex-sub`、ChatGPT ログイン・effort medium）。スキル `codex-harness`。
+- **Opus 5.5 へ上げる**: 同一タスク内で前提が崩れたとき、または**同じ指摘が 2 回**出たとき（§3.6 **申請不要**）。
+- 上げた**回数と理由を記録**する（RES-23 の計測と合わせて見る）。
 
 ### W1 日常実装
 
-- **第一候補**: `dsh-sub`（DeepSeek-V4.1-Flash-1017、`deepseek-flash` / effort `high`）。スキル `deepseek-harness`。
+- **実行チャネル（環境による分岐）**:
+  - **T3 Code 環境（`delegate_task` が利用可能、または `com.t3tools.t3code` / `T3CODE_CLI_PATH` 検知時）**:
+    - **第一候補**: T3 ネイティブ委譲 `delegate_task`（`providerInstanceId: "codex"`, `model: "gpt-6.1-sol"`）を優先使用する。
+    - **設定**: `target.options` に `{"reasoningEffort": "medium", "serviceTier": "default"}` を指定（Fast 禁止）。
+    - **フォールバック**: Codex 利用上限時・エラー時は、オーケストレーターが `delegate_task`（`opencode/deepseek-v4.1-flash-free` または `deepseek` プロバイダ）へフォールバックする。
+  - **非 T3 Code 環境（Claude Desktop Code モード / Cursor / 端末 CLI 等、`delegate_task` が利用できない場合）**:
+    - **第一候補**: CLI ラッパー `codex-sub --repo <dir> --prompt "..."`（ChatGPT Plus ログイン、effort medium）。
+    - **フォールバック**: `codex-sub` 内部の自動判定により、上限時・未ログイン時は自動的に `dsh-sub`（DeepSeek API）へフォールバックする。スキル `codex-harness`。
+- **モデル系統**:
+  - ChatGPT Plus の主力は **`gpt-6.1-sol` / `gpt-6.1-terra` / `gpt-6-luna`**（`gpt-6-astra` は Plus には付帯しない）。
+  - `codex-sub` ではモデル名を引数に固定せず、ChatGPT Plus ログインアカウントの既定（6.1 系列）に任せる。
+  - T3 Code のネイティブ委譲では、`gpt-6.1-sol` を既定とする。
+- **代替（控え）**: `codex` が無い・未ログイン・API キー認証・利用上限のとき **`dsh-sub`**（T3 では DeepSeek 委譲、CLI では `codex-sub` が自動フォールバック）。
 - DeepSeek V4.1 Flash Free（T3 `opencode`）は期間限定・SLA なし・OpenCode 内限定。W1 の代替経路にしない。
-- 難所（W3）: Sonnet 5.5 (medium) → 上記の条件で Opus 5.5。
+- 難所（W3）: 上記の条件で **Opus 5.5**（Sonnet 経路は既定から外す）。
 
 ### 敵対的レビュー
 
-- **T1**: `dsh-sub`（DeepSeek-V4.1-Flash-1017）。**直前の Maker が W1 `dsh-sub` なら Sonnet 5.5 (medium)**（Maker-Breaker）。
-- **T2**: **Sonnet 5.5 (medium)**。
-- **T3**: **Sonnet 5.5 (medium)**。
-- **Opus 5.5**: 大きなループの**最後に 1 回**（§3.6 申請不要）と、**引き上げ**（前提崩れ・同指摘 2 回）のときだけ。通常の diff 敵対監査の Breaker には使わない。
-- **RES-23（〜2026-11-07）**: W1 `dsh-sub` と **Claude Team 残量**を記録する。足りなければ、週後半の Anthropic API 従量課金または Claude Pro 契約を検討する。
+- **T1・T2・T3**: 当面**呼ばない**。Codex のセルフレビューは Maker の報告であり Breaker ではない。
+- **Breaker**: 大きなループの**最後に Opus 5.5 を 1 回**（§3.6 申請不要）。**引き上げ**（前提崩れ・同指摘 2 回）も Opus 5.5。
+- Maker が `dsh-sub`（フォールバック）のときも **T1 を `dsh-sub` にしない**（同系統の二重チェックを避ける）。
+- **RES-23（〜2026-11-07）**: §0 の 5 系統を記録。Claude Team が足りなければ、週後半の Anthropic API 従量課金または Claude Pro 契約を検討する。
 
 ### DeepSeek API（`dsh-sub`）
 
-- **W1 の主力**。`bin/dsh-sub`。既定 `deepseek-flash` / effort `high`。難所は `deepseek-v4-pro` / `effort max`（常用禁止）。無料枠と混同しない。Auto-reload は OFF。
+- **控え**（W1 フォールバック・明示 `dsh-sub` 指定時）。`bin/dsh-sub` は残す。既定 `deepseek-flash` / effort `high`。難所は `deepseek-v4-pro` / `effort max`（常用禁止）。無料枠と混同しない。Auto-reload は OFF。呼び出し契約はスキル `deepseek-harness`。
 
 ## 2.8 yomiyasu（`nanaism/yomiyasu`）
 
@@ -96,7 +107,7 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 3. Claude（Sonnet は agy、Opus は Team）
 
 - **認証の確認**: `claude auth status` が `subscriptionType: "team"` なら、`claude` CLI と T3 の `claudeAgent` は **Team シート（サブスク）** で動く。従量 API ではない。
-- **モデル別の置き場所**: **Sonnet 5.5 は agy（Google AI Pro の Claude 週枠）優先**、次点が Team。**Opus 5.5 は Team 優先**（オーケストレーター・ループ頭尾の設計/レビュー）、agy は週枠が余っているときだけ（事前許可制）。
+- **モデル別の置き場所**: **Sonnet 5.5** は既定経路から外す。**名指し**（agy / Team）のときだけ使う。**Opus 5.5 は Team 優先**（オーケストレーター・ループ頭尾の設計/レビュー）、agy は週枠が余っているときだけ（事前許可制）。
 - **Team は研究優先**: dotfiles / life-brain などの生活タスクで Team を使うのは、agy が枯れていて代替が無いときだけ。研究タスクは Team 優先。
 - **認証の優先順位**: Team シート > Anthropic 従量 API（agy の Claude/GPT 週枠は別契約枠。全体の順序は `docs/routing.md`）。
 - **API に切り替わる条件**: `ANTHROPIC_API_KEY` が設定されている、または `CLAUDE_CODE_SIMPLE=1` を使うと従量 API になる。使う前に `claude auth status` と環境変数を確認する。
@@ -110,7 +121,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - 開いている（何が良いか自体を決める）: high。
 - 機械的（整形・分類・抽出）: low。
 - モデルと effort は別軸。モデルを上げる前に effort を下げられないか考える。
-- **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/ 細仕様 = Sonnet 5.5 (medium) / 実装 = `dsh-sub`（W1・effort `high`）/ Cloud 実装 = Composer 2.5 / 敵対レビュー = T1 `dsh-sub`・T2–T3 Sonnet 5.5 (medium)・ループ末 Opus 5.5 / Flash = W2・Extract・整形・Visual QA 第一候補（yomiyasu は §2.8 のみ）。ローカル Grok 4.7 = Visual QA フォールバック・Opus 不在時の司令塔代行のみ（§2.1）。
+- **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/ 細部・W1・セルフレビュー = Codex（`codex-sub`）/ 控え = `dsh-sub` / Cloud 実装 = Composer 2.5 / 敵対レビュー = ループ末 Opus 5.5 のみ / Flash = W2・Extract・整形・Visual QA 第一候補（yomiyasu は §2.8 のみ）。ローカル Grok 4.7 = Visual QA フォールバック・Opus 不在時の司令塔代行のみ（§2.1）。
 - **effort を変えるときは新しいスレッドで始める**。同一スレッドの途中で変えると、それまでの履歴を読み直すうえキャッシュも効きにくい（Antigravity の運用知見）。
 - medium と high の品質差は小さいという報告が複数ある。差の有無は**モック実験ではなく普段の使用感**（返答の質・トークンの減り方）で判断する（2026-10-21 決定）。
 
@@ -123,12 +134,12 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 3.6 許可の所在
 
 - 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の消費％を推定して申請しない。
-- **オーケストレーターのハンドオフ**（`rules/delegation.md` §1）: 司令塔が `docs/routing.md` に従い Worker（W1 `dsh-sub` 等）・探索・レビュアへ `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
-- **要申請**: Fable 5.1 / Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**（例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、agy 週枠の Opus 5.5）。
-- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium) / DeepSeek Free / **W1 の `dsh-sub`（DeepSeek-V4.1-Flash-1017、常用）** / **Opus 5.5 の次の用途**:
+- **オーケストレーターのハンドオフ**（`rules/delegation.md` §1）: 司令塔が `docs/routing.md` に従い Worker（W1 `codex-sub` 等）・探索・レビュアへ `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
+- **要申請**: Fable 5.1 / Sonnet 5.5 の high / Argon high（格上げ、3.7）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**（例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、agy 週枠の Opus 5.5）。
+- **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/ Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium)（**名指し時**）/ DeepSeek Free / **W1 の Codex（ChatGPT ログイン、T3 `delegate_task` または `codex-sub`）** / **W1 の DeepSeek / `dsh-sub`（フォールバック・明示指定）** / **Opus 5.5 の次の用途**:
   - 大きなループの最初の設計（方向・仕様骨子・DoD）
   - 大きなループの最後の敵対的レビュー（1 回）
-  - 同一タスク内で前提が崩れたとき、または同じ指摘が 2 回出たときの、Sonnet 5.5 から Opus 5.5 への引き上げ
+  - 同一タスク内で前提が崩れたとき、または同じ指摘が 2 回出たときの、**Codex（フォールバック時は `dsh-sub`）から Opus 5.5 への引き上げ**
 - **依頼者がモデル/effort を名指しした場合は、その1回分の許可とみなす**（提案も再確認も不要。例:「Argon high で設計して」）。
 
 ## 3.7 格上げの提案（名指しされたモデルは勝手に変えない）
@@ -142,4 +153,4 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 4. ゴール固定・敵対レビュー
 
 - 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
-- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。W1 が DeepSeek のとき Breaker は **Sonnet 5.5 (medium)**（**W1 直後の T1**・T2–T3。**Gemini 3.8 Flash は敵対レビューに使わない**）。**Opus 5.5 はループ末と引き上げのみ**（通常 Breaker にしない）。T1 は `dsh-sub`（W1 直後を除く）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
+- 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。**Maker** は Codex（`codex-sub`、フォールバック時は DeepSeek **`dsh-sub`**）。**Breaker** はループ末の **Opus 5.5**（T1/T2/T3 は当面なし。**Gemini 3.8 Flash は敵対レビューに使わない**）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。

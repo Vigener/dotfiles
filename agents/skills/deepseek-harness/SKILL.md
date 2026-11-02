@@ -5,6 +5,9 @@ description: "DeepSeek Harness (dsh) を CLI サブエージェントとして�
 
 # deepseek-harness (`dsh-sub`)
 
+**W1 の控え。** `codex-sub` が無い・未ログイン・利用上限のときに呼ばれる（ラッパーが自動実行）。
+明示 `dsh-sub` 指定時もこの契約。主力 W1 は Codex（スキル `codex-harness`）。
+
 オーケストレータから DeepSeek Harness を**ワンショットのサブエージェント**として呼ぶための契約。
 対話 UI は前提にしない。1タスク1プロセスで完結させる。
 

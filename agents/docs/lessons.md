@@ -65,3 +65,13 @@
   目安は保守側の **5:1** で見る（5h 2% ≒ 週 0.4%）。
 - 通常は **5h が先に当たる**（週枠が残り少ないときは週枠が律速になるので、両方見る）。
 - 注意: モデル（Sonnet / Opus）・effort・キャッシュで変わる。断定せず、ズレたらこの節を更新する。
+
+## 7. Codex は API キー環境で従量に落ちうる（2026-11-01）
+
+- **`OPENAI_API_KEY`** やプロジェクトの **`.env`** にキーがあると、
+  ChatGPT ログインより API キー認証が優先され、**従量課金**になる事例がある。
+- `preferred_auth_method` は上流で**削除済み**の設定キー。代わりに **`codex login status`**
+  が **`Logged in using ChatGPT`** であることを確かめ、子プロセスの環境から
+  **`OPENAI_API_KEY` と `CODEX_API_KEY` を外す**（`bin/codex-sub` が行う）。
+- **`codex login status` の表示文言**で ChatGPT と API キーを判別するロジックは、
+  契約後に本人マシンで確認すること（`bin/codex-sub` は保守的ヒューリスティック）。
