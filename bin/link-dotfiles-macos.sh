@@ -111,6 +111,13 @@ fi
 mkdir -p "$HOME/.gemini/config/skills"
 link_file "$DOTFILES/agents/skills/md-to-html" "$HOME/.gemini/config/skills/md-to-html"
 
+# Typst: add this skill only; preserve all other skills and existing directories.
+for skill_dir in "$HOME/.claude/skills" "$HOME/.codex/skills" "$HOME/.gemini/config/skills"; do
+  link_file "$DOTFILES/agents/skills/typst-workflow" "$skill_dir/typst-workflow"
+done
+# Cursor already uses the agents/skills directory link above.
+
+
 if command -v git >/dev/null; then
   git config --global core.excludesfile "$HOME/.gitignore_global"
   echo "git: core.excludesfile=$HOME/.gitignore_global"

@@ -191,3 +191,15 @@
 DeepSeek Free vs Composer 2.5 の比較は `logs/worker-bakeoff-2026-10-21.md`。
 **2026-10-30**: ローカル W1 を **`dsh-sub`（1017）** に固定。Flash / Composer の W1 順序は廃止。
 **2026-11-01**: RES-23 に合わせ W1 の第一候補を **Codex（`codex-sub`）** に移行。契約前・枠切れは **`dsh-sub` 控え**。T2 の Sonnet 敵対レビューは停止（Breaker はループ末 Opus のみ）。
+
+## Typstの分担（共通workflow）
+
+| 作業 | 担当 |
+|---|---|
+| 論旨・主張・章立て | Opus |
+| 確定材料から本文下書き/修正・図表・体裁・テンプレ移植 | Codex medium |
+| 推敲（意味・数値・引用diff） | Flash + yomiyasu本体 |
+| PNG目視 | Flash → Grok（能力未確認）、同問題2回でOpus |
+| ループ末の独立review | Opus |
+
+各担当は `agents/skills/typst-workflow/SKILL.md` を明示readする。T3は `delegate_task` codex（`target.options: {"serviceTier": "default", "reasoningEffort": "medium"}`）が基本、CLI `codex-sub` は非T3補助。全Fast/priority禁止、Claude/Cursorは `fastMode: false` を明示し応答options確認。Geminiの未公開Fast off optionsは発明・実行しない。API禁止時は `dsh-sub` 自動fallbackを使わず停止、再委譲は許可されたモデルのみ（詳細: `rules/models.md`「Typst」）。

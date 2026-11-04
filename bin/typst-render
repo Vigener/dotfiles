@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Compile with Typst 0.15.0 into an isolated, complete PDF/PNG run."""
+import argparse
+import json
+import math
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source', type=Path)
+    parser.add_argument('--output-dir', required=True, type=Path,
+                        help='Parent directory; each run gets a unique subdirectory')
+    parser.add_argument('--root', type=Path, help='Project root (default: source directory)')
+    parser.add_argument('--pages', help='PNG pages only, e.g. 1,3-5; PDF always includes all pages')
+    parser.add_argument('--ppi', type=float, default=144)
+    parser.add_argument('--font-path', action='append', default=[], type=Path)
+    args = parser.parse_args()
+    if args.ppi <= 0 or not math.isfinite(args.ppi):
+        parser.error('--ppi must be finite and positive')
+    source = args.source.resolve(strict=True)
+    root = (args.root or source.parent).resolve(strict=True)
+    source.relative_to(root)  # Refuse an input outside the explicit project root.
+    executable = shutil.which('typst')
+    if not executable:
+        mise = shutil.which('mise')
+        if mise:
+            result = subprocess.run([mise, 'which', 'typst'], capture_output=True, text=True)
+            if result.returncode == 0:
+                executable = result.stdout.strip()
+    if not executable:
+        raise RuntimeError('typst missing: activate PATH/mise with Typst 0.15.0 first')
+    version = subprocess.check_output([executable, '--version'], text=True).strip()
+    if version.split()[1] != '0.15.0':
+        raise RuntimeError(f'Expected Typst 0.15.0, found {version}')
+    output = args.output_dir.resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    # Never reuse a prior run or delete user files. No stable "latest" alias.
+    stage = Path(tempfile.mkdtemp(prefix='.typst-incomplete-', dir=output))
+    try:
+        common = [executable, 'compile', '--root', str(root)]
+        if args.font_path:
+            common += ['--font-path', os.pathsep.join(str(p.resolve(strict=True)) for p in args.font_path)]
+        subprocess.run(common + [str(source), str(stage / 'document.pdf')], check=True)
+        png = common + ['--ppi', str(args.ppi)]
+        if args.pages:
+            png += ['--pages', args.pages]
+        subprocess.run(png + [str(source), str(stage / 'page-{0p}.png')], check=True)
+        images = sorted(stage.glob('page-*.png'))
+        if not images:
+            raise RuntimeError('No PNG pages produced')
+        final = output / stage.name.replace('.typst-incomplete-', 'typst-run-', 1)
+        stage.rename(final)
+    except BaseException:
+        shutil.rmtree(stage)  # Only this invocation's private temporary directory.
+        raise
+    print(json.dumps({'source': str(source), 'version': version,
+                      'pdf': str(final / 'document.pdf'),
+                      'png': [str(final / p.name) for p in images]}, ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print(f'typst-render FAILED; no current artifacts published: {error}', file=sys.stderr)
+        sys.exit(1)

@@ -154,3 +154,13 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - 長作業の開始時は、Goal・成功条件・制約・Next を短く書き出してから着手する（`now/TODO.md` か作業ノート。専用スキルは置かない）。
 - 意地悪テスト生成・敵対的監査は「Maker-Breaker原則（実装と検証は異種モデル・コンテキスト完全隔離）」を遵守すること。**Maker** は Codex（`codex-sub`、フォールバック時は DeepSeek **`dsh-sub`**）。**Breaker** はループ末の **Opus 5.5**（T1/T2/T3 は当面なし。**Gemini 3.8 Flash は敵対レビューに使わない**）。選定と詳細手順はスキル `adversarial-review` および `model-route` を参照。
+
+## Typst（共通スキルの分担・実行制約）
+
+- 共通手順は `agents/skills/typst-workflow/SKILL.md` を各エージェントが明示readする。
+- 論旨・主張・章立ては **Opus**。確定材料からの本文下書き/修正・図表・体裁・テンプレ移植は **Codex medium**。
+- 推敲は **Flash + yomiyasu本体**。意味・数値・引用を元文とのdiffで確認する。
+- PNG目視は **Flash → Grok（画像判断能力は未確認）**。同じ問題が2回なら **Opus**。ループ末は **Opusの独立review**（Makerの自己確認とは別）。
+- T3では `delegate_task` のcodexが基本。`target.options` は `{"serviceTier": "default", "reasoningEffort": "medium"}`。CLI `codex-sub` は非T3の補助経路。
+- **全Fast/priority禁止**。Claude/Cursorは `target.options.fastMode: false` を明示し、Codexを含め応答の `options` を確認する。GeminiはFast off設定が公開されていないため、勝手なoptionsを発明・実行しない。確認できない場合は停止して報告する。
+- タスクでAPI禁止なら `dsh-sub` 自動fallbackのあるラッパーを使わず停止する。再委譲はそのタスクで許可されたモデルのみ。CLI AI/追加委譲禁止も優先し、独立reviewを勝手に実行しない。

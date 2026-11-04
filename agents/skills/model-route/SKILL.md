@@ -64,3 +64,8 @@ description: "タスク内容や質問に応じて、最適な AI モデル（Op
 - Argon を設計・仕様に割り当てない（発想のみ）。
 - Gemini 3.8 Flash を敵対レビューに割り当てない。
 - Maker が Codex のあいだ **Sonnet / `dsh-sub` を Breaker にしない**（ループ末 Opus のみ）。
+
+## Typst判定
+
+共通作業前に `../typst-workflow/SKILL.md` を明示read。論旨・主張・章立て=Opus、確定材料から本文下書き/修正・図表・体裁・テンプレ移植=Codex medium、推敲=Flash+yomiyasu本体（意味・数値・引用diff）、PNG目視=Flash→Grok（能力未確認）・同問題2回=Opus、ループ末独立review=Opus。
+T3では `delegate_task` codexを基本に `target.options: {"serviceTier": "default", "reasoningEffort": "medium"}`、CLI `codex-sub` は非T3補助。全Fast/priority禁止、Claude/Cursorは `fastMode: false` と応答options確認。Geminiの未公開Fast off設定は発明・実行しない。API禁止時は `dsh-sub` 自動fallbackを使わず停止し、再委譲は許可されたモデルのみ。タスク固有のCLI AI/追加委譲禁止を優先する（`models.md`「Typst」）。
