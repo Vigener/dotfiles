@@ -271,3 +271,13 @@ Cursor 3 以降、IDE と Agents Window が別ウィンドウとして共存す�
 - `karabiner/rules/launcher.ts`:
   - `APP_REGISTRY` に `"T3 Code (Beta)": "^com\\.t3tools\\.t3code$"` を追加（旧バージョンの `"T3 Code (Alpha)"` も資産として温存）。
   - `launcherRules` 内の `かな + J` および `かな + T` の起動対象を `"T3 Code (Beta)"` に更新。
+
+## 2026年11月4日: 右Cmd → 右Shift 変換の廃止（元の右Cmdに復帰）
+
+### 背景と課題
+2026年7月24日に腱鞘炎対策として導入した「右Cmd → 右Shift」だったが、「右Cmd+クリック」が「Shift+クリック」として認識されてしまい、ブラウザやエディタ等で通常の Cmd+クリック（新規タブ等）と挙動が異なる不便さが生じていた。
+
+### 対応内容
+- `karabiner/rules/sys.ts`: `【SYS】右Cmdを右Shiftに変換（かな押下中は除外）` ルールを削除。
+- 通常時の右CmdはOS標準の `Right Command` に復帰。
+- `かな + Right Cmd` による Raycast Switch Windows（`window.ts`）はそのまま維持。
