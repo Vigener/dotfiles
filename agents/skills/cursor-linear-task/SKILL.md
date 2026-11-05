@@ -21,7 +21,7 @@ Linear へのタスク（Issue）起票と `now/TODO.md` への反映パイプ�
 実行環境に応じて起票経路を判定する。
 
 | 実行環境 | 起票経路 | 備考 |
-|---|---|---|
+| --- | --- | --- |
 | **OpenCode / Claude** | **Linear MCP を直接使用** | 接続済み MCP で起票し、ID / URL を取得 |
 | **agy / Cursor 等** | **`cursor-agent` CLI への委譲** | 非対話 CLI 経由で起票し、TODO へ反映 |
 
@@ -65,7 +65,7 @@ cursor-agent -p --force --approve-mcps --trust --model auto "起票内容と TOD
 ```
 
 | オプション | 役割 |
-|---|---|
+| --- | --- |
 | `-p` / `--print` | 非対話出力モード（標準出力に出力） |
 | `-f` / `--force` | ツール自動承認（入力待ちハングを防止） |
 | `--approve-mcps` | MCP ツールの実行自動承認 |

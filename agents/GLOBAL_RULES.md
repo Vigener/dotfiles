@@ -1,35 +1,55 @@
 # Global AI Agent Rules (Tier 0)
 
-すべてのプロジェクトに常時適用される最小ルール。プロジェクト固有の `AGENTS.md` / `CLAUDE.md` が優先する。
+すべてのプロジェクトに常時適用される最小ルール。プロジェクト固有の
+`AGENTS.md` / `CLAUDE.md` が優先する。
 詳細は必要時に `~/dotfiles/agents/rules/` を読む（下の参照表）。
 
 ## 1. 安全・禁止
 
-- **HPC**: 生の `sbatch` / `qsub`、Miyabi / Pegasus / Sirius への `ssh` / `scp` / `rsync` は禁止。必ず harness 経由（`ppx_harness` / `miyabi_harness --dry-run`）。実ログインは人間。→ `rules/hpc.md`
-- **高額 API**: 明示指示なしに Anthropic / OpenAI の従量 API を使わない。サブスク枠を優先する。**ChatGPT Plus の Codex** は `codex login` のサブスク枠。**`OPENAI_API_KEY` での Codex** は従量なので、明示指示があるときだけ。→ `rules/models.md`
-- **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、明示指示があるときだけ。
-- **Cursor の Fast（2 倍課金）**: Composer / Grok を T3 `delegate_task` で呼ぶときは `target.options` に `{"fastMode": false}` を必ず明示し、応答の `options` で確認する。未指定は Fast で動く（T3 の UI は Fast オフと表示するが信用しない）。既存スレッドへの追補は先に `t3_thread_configure`。CLI は `-fast` 付き ID を使わない。→ `rules/delegation.md` §8
+- **HPC**: 生の `sbatch` / `qsub`、Miyabi / Pegasus / Sirius への `ssh` /
+  `scp` / `rsync` は禁止。必ず harness 経由（`ppx_harness` /
+  `miyabi_harness --dry-run`）。実ログインは人間。→ `rules/hpc.md`
+- **高額 API**: 明示指示なしに Anthropic / OpenAI の従量 API を使わない。
+  サブスク枠を優先する。**ChatGPT Plus の Codex** は `codex login` の
+  サブスク枠。**`OPENAI_API_KEY` での Codex** は従量なので、明示指示が
+  あるときだけ。→ `rules/models.md`
+- **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、
+  明示指示があるときだけ。
+- **Cursor の Fast（2 倍課金）**: Composer / Grok を T3 `delegate_task` で
+  呼ぶときは `target.options` に `{"fastMode": false}` を必ず明示し、
+  応答の `options` で確認する。未指定は Fast で動く（T3 の UI は Fast オフと
+  表示するが信用しない）。既存スレッドへの追補は先に `t3_thread_configure`。
+  CLI は `-fast` 付き ID を使わない。→ `rules/delegation.md` §8
 
 ## 2. 委譲
 
-- 子エージェントの失敗を、親がインラインで引き受けてはならない（コンテキスト分離が壊れる）。
+- 子エージェントの失敗を、親がインラインで引き受けてはならない
+  （コンテキスト分離が壊れる）。
 - 実装と検証は異種モデル・別コンテキストで行う（Maker-Breaker）。
 - 指定されたモデルを勝手に昇格・降格しない（Strict Model Fidelity）。
 - 子には会話履歴が渡らない。brief に前提・制約・完了条件を全部書く。
-- 子の追補は台帳の `childThreadId` に送る。台帳に無いときだけ新規起票する。→ `rules/delegation.md`
+- 子の追補は台帳の `childThreadId` に送る。台帳に無いときだけ新規起票する。
+  → `rules/delegation.md`
 
 ## 3. 成果物
 
-- 人間レビュー用 HTML は `wiki/`（Markdown や差分で足りれば HTML 必須ではない）、作業ログは `logs/` または `scratch/`、図表は `images/`（ファイル成果物を保持）。
+- 人間レビュー用 HTML は `wiki/`（Markdown や差分で足りれば HTML 必須ではない）、
+  作業ログは `logs/` または `scratch/`、図表は `images/`
+  （ファイル成果物を保持）。
 - プロジェクトルートを作業ログで汚さない。`README.md` には最終結果だけ書く。
 - → `rules/artifacts.md`
 
 ## 4. リンク・出力
 
-- チャットでファイルに言及するときは、絶対パスの Markdown リンク `[名前](/Users/.../path)` にする（T3 Code は相対パスをワークスペース基準で解決するため、リポジトリをまたぐと開けない）。`file:///` は書かない。
+- チャットでファイルに言及するときは、絶対パスの Markdown リンク
+  `[名前](/Users/.../path)` にする（T3 Code は相対パスをワークスペース基準で
+  解決するため、リポジトリをまたぐと開けない）。`file:///` は書かない。
 - リポジトリ内のファイルには、絶対パスを書かない。相対パスまたは `[[WikiLink]]`。
-- ブラウザ成果物は外部閲覧時 `http://...`（tailnet）で示す。T3 Code 内提示は絶対パスリンクまたは必要時に実ツール（`html_preview` → `html_render`）。文書編集だけで無条件にブラウザを開かない。→ `rules/links.md`
-- 論文・投稿・教員説明に触れる応答は、到達レベルと不足を明示する。→ `rules/paper.md`
+- ブラウザ成果物は外部閲覧時 `http://...`（tailnet）で示す。T3 Code 内提示は
+  絶対パスリンクまたは必要時に実ツール（`html_preview` → `html_render`）。
+  文書編集だけで無条件にブラウザを開かない。→ `rules/links.md`
+- 論文・投稿・教員説明に触れる応答は、到達レベルと不足を明示する。
+  → `rules/paper.md`
 
 ## 5. スキル・用語
 
@@ -39,7 +59,7 @@
 ## 参照表
 
 | 状況 | 読むファイル |
-|---|---|
+| --- | --- |
 | モデル選択・クォータ・敵対レビュー | `rules/models.md` |
 | 委譲・サブエージェント・CLI フォールバック | `rules/delegation.md` |
 | HPC・クラスタ | `rules/hpc.md` |
