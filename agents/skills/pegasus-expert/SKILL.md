@@ -3,9 +3,6 @@ name: pegasus-expert
 description: Pegasusクラスタの仕様・運用ノウハウ・ルールを網羅した専門家スキル。ジョブスクリプト生成からデバッグ、実行手順・コマンド提示までPegasusに関する全般をサポートする。
 ---
 
-## 使用モデル（参考）
-Claude Sonnet 4.6 または Gemini 3.1 Pro または DeepSeek V4 Pro
-
 ## 指示テンプレート
 あなたはHPC（ハイパフォーマンスコンピューティング）クラスタ「Pegasus」の専門家（Expert）AIアシスタントです。
 

@@ -12,10 +12,11 @@ description: >-
 
 エージェント挙動の変更を、Agent Engineering 系譜（Prompt ⊂ Context ⊂ 狭義 Harness / Loop / Graph A、Graph B は直交）に沿って**層を誤認せず**行う。
 
-参照原本:
+参照正本と背景資料:
 
 - `~/brain/research-brain/wiki/ai-engineering/loop-and-harness-engineering.html`
-- `~/brain/research-brain/wiki/ai-engineering/cursor_model_routing.md`
+- モデル方針の正本: `../../rules/models.md`、タスク対応表: `../../docs/routing.md`
+- 背景資料（非規範）: `~/brain/research-brain/wiki/ai-engineering/cursor_model_routing.md`
 - `~/dotfiles/agents/GLOBAL_RULES.md`
 - スキル正本: `~/dotfiles/agents/skills/`（`~/.cursor/skills` は symlink）
 
@@ -41,17 +42,17 @@ description: >-
 | research-brain プロジェクト規則 | `~/brain/research-brain/.agents/AGENTS.md`（書き込み禁止ファイルに注意） |
 | life-brain プロジェクト規則 | `~/ghq/github.com/Vigener/life-brain/.agents/AGENTS.md` / `.cursor/rules/` |
 | life-brain リポスキル | `life-brain/.agents/skills/`（Cursor 用: `.cursor/skills/` から symlink） |
-| モデル方針の説明 | `~/brain/research-brain/wiki/ai-engineering/cursor_model_routing.md` 等 |
+| モデル方針・タスク対応 | `~/dotfiles/agents/rules/models.md` / `~/dotfiles/agents/docs/routing.md` |
 
 スキル新規作成後は `~/.cursor/skills` が symlink なら追加操作不要。
 
-## ステップ 3: モデルの使い分け（このスキル作業自体）
+## ステップ 3: 作業の分類とモデル選択
 
-| 作業 | 推奨 |
-|------|------|
-| スキル草案・ルール短文・差分整理 | `agy --model gemini-3.8-flash-high`（整形・要約。`rules/models.md` §2.3） |
-| 破壊的・インフラ・Git 危険操作の監査 | 敵対レビュー **ループ末 Opus**。T1/T2/T3 は当面なし（スキル `adversarial-review`） |
-| 単純ファイル配置・symlink 確認 | 現行エージェントで十分 |
+1. 草案・ルール修正・差分整理、監査、単純な配置確認のどれかを判定する。
+2. モデルを選択・委譲するときは `../../rules/models.md` と `../../docs/routing.md` を読み、
+   作業・環境・依頼の制約に照合する。判定手順はスキル `model-route` に従う。
+3. 監査を行う場合は、正本の暫定指示・申請要否を確認し、スキル `adversarial-review` の手順に従う。
+4. 単純ファイル配置・symlink 確認は現行エージェントで行う。
 
 ## ステップ 4: 検証
 
