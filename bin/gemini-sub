@@ -1,0 +1,301 @@
+#!/usr/bin/env node
+/**
+ * gemini-sub: Google GenAI API CLI wrapper for one-shot text requests.
+ *
+ * Designed to operate independently from T3 Code Antigravity (Google account subscription),
+ * preserving subscription quotas and activating only on weekly-limit spillover or explicit request.
+ *
+ * Sends only the supplied prompt. --repo validates a directory; it does not read
+ * repository files or provide file editing, shell tools, or an agent loop.
+ * Subscription limits, billing mode, and credit balance must be checked by the caller.
+ *
+ * Usage:
+ *   gemini-sub --repo <dir> --prompt <text|-> [options]
+ *
+ * Options:
+ *   --repo <dir>        workspace root (required)
+ *   --prompt <text|->   task prompt; '-' reads stdin (required)
+ *   --model <id>        model id (default: gemini-3.8-flash)
+ *   --effort <level>    off | low | medium | high (default: medium)
+ *   --timeout <sec>     wall-clock timeout in seconds (default: 900)
+ *   --key-file <path>   explicit path to .env containing GEMINI_API_KEY
+ *   --dry-run           validate auth, options, and payload without making API calls
+ *   -h, --help          show this help
+ *
+ * Key resolution:
+ *   1. GEMINI_SUB_API_KEY environment variable
+ *   2. GEMINI_API_KEY environment variable
+ *   3. File specified by --key-file
+ *   4. ~/.config/gemini-sub/.env
+ *   5. ~/.gemini-sub/.env
+ *
+ * Exit codes:
+ *   0 ok
+ *   2 usage / invalid arguments / missing API key
+ *   3 API error / auth failure / quota exceeded / run failed
+ *   4 timeout
+ */
+
+'use strict'
+
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+
+const EXIT = { ok: 0, usage: 2, failed: 3, timeout: 4 }
+
+function fail(message, code = EXIT.usage, extra = {}) {
+  process.stderr.write(`gemini-sub: ${message}\n`)
+  process.stdout.write(JSON.stringify({ ok: false, provider: 'gemini-sub', code: extra.code || 'USAGE', message, ...extra }) + '\n')
+  process.exit(code)
+}
+
+function parseArgs(argv) {
+  const out = {
+    model: 'gemini-3.8-flash',
+    effort: 'medium',
+    timeout: 900,
+    dryRun: false,
+  }
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]
+    const next = () => {
+      const value = argv[i + 1]
+      if (value === undefined) fail(`${arg} requires a value`, EXIT.usage)
+      i += 1
+      return value
+    }
+
+    switch (arg) {
+      case '--repo': out.repo = next(); break
+      case '--prompt': out.prompt = next(); break
+      case '--model': out.model = next(); break
+      case '--effort': out.effort = next().toLowerCase(); break
+      case '--timeout': out.timeout = Number(next()); break
+      case '--key-file': out.keyFile = next(); break
+      case '--dry-run': out.dryRun = true; break
+      case '-h':
+      case '--help':
+        out.help = true
+        break
+      default:
+        if (arg.startsWith('--')) fail(`unknown option: ${arg}`, EXIT.usage)
+        fail(`unexpected argument: ${arg}`, EXIT.usage)
+    }
+  }
+
+  return out
+}
+
+function readEnvFile(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return null
+    const content = fs.readFileSync(filePath, 'utf8')
+    for (const rawLine of content.split('\n')) {
+      const line = rawLine.trim()
+      if (!line || line.startsWith('#')) continue
+      const match = line.match(/^([A-Za-z_0-9]+)\s*=\s*(.*)$/)
+      if (match) {
+        const keyName = match[1]
+        let rawVal = match[2].trim()
+
+        // Extract quoted string if present
+        const quotedMatch = rawVal.match(/^"([^"]*)"/) || rawVal.match(/^'([^']*)'/)
+        let val = quotedMatch ? quotedMatch[1] : rawVal.split(/\s+#/)[0].trim()
+
+        if (keyName === 'GEMINI_SUB_API_KEY' || keyName === 'GEMINI_API_KEY') {
+          return val.trim()
+        }
+      }
+    }
+  } catch (err) {
+    // Ignore read errors, fall through
+  }
+  return null
+}
+
+function resolveApiKey(explicitKeyFile) {
+  if (process.env.GEMINI_SUB_API_KEY) return process.env.GEMINI_SUB_API_KEY
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY
+
+  const candidatePaths = []
+  if (explicitKeyFile) candidatePaths.push(explicitKeyFile)
+
+  const home = os.homedir()
+  candidatePaths.push(path.join(home, '.config', 'gemini-sub', '.env'))
+  candidatePaths.push(path.join(home, '.gemini-sub', '.env'))
+
+  for (const p of candidatePaths) {
+    const key = readEnvFile(p)
+    if (key) return key
+  }
+
+  return null
+}
+
+function buildThinkingConfig(model, effort) {
+  if (effort === 'off') {
+    return { thinkingBudget: 0 }
+  }
+
+  const isGemini3 = model.includes('gemini-3') || model.includes('gemini-4')
+  if (isGemini3) {
+    // Categorical reasoning level for 3.x / 4.x models
+    const levelMap = { low: 'low', medium: 'medium', high: 'high' }
+    return { thinkingLevel: levelMap[effort] || 'medium' }
+  }
+
+  // Numeric token budget for 2.5 models
+  const budgetMap = {
+    low: 1024,
+    medium: 8192,
+    high: 32768,
+  }
+  return { thinkingBudget: budgetMap[effort] || 8192 }
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2))
+
+  if (args.help) {
+    process.stdout.write(`Usage: gemini-sub --repo <dir> --prompt <text|-> [options]\n`)
+    process.exit(EXIT.ok)
+  }
+
+  if (!args.repo) fail('--repo is required', EXIT.usage)
+  if (!args.prompt) fail('--prompt is required', EXIT.usage)
+  if (!fs.existsSync(args.repo) || !fs.statSync(args.repo).isDirectory()) {
+    fail(`repo directory does not exist: ${args.repo}`, EXIT.usage)
+  }
+
+  const validEfforts = ['off', 'low', 'medium', 'high']
+  if (!validEfforts.includes(args.effort)) {
+    fail(`invalid effort: ${args.effort} (must be one of ${validEfforts.join(', ')})`, EXIT.usage)
+  }
+
+  if (Number.isNaN(args.timeout) || args.timeout <= 0) {
+    fail(`invalid timeout: ${args.timeout}`, EXIT.usage)
+  }
+
+  let promptText = args.prompt
+  if (promptText === '-') {
+    try {
+      promptText = fs.readFileSync(0, 'utf8')
+    } catch (err) {
+      fail(`failed to read prompt from stdin: ${err.message}`, EXIT.usage)
+    }
+  }
+
+  const apiKey = resolveApiKey(args.keyFile)
+  if (!apiKey) {
+    fail('GEMINI_API_KEY not found. Set GEMINI_SUB_API_KEY, GEMINI_API_KEY, or configure ~/.config/gemini-sub/.env', EXIT.usage, { code: 'AUTH_MISSING' })
+  }
+  if (!/^[\x20-\x7E]+$/.test(apiKey)) {
+    fail('GEMINI_API_KEY contains invalid non-ASCII characters. Check ~/.config/gemini-sub/.env', EXIT.usage, { code: 'AUTH_INVALID' })
+  }
+
+  const thinkingConfig = buildThinkingConfig(args.model, args.effort)
+  const payload = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: promptText }],
+      },
+    ],
+    generationConfig: {
+      thinkingConfig,
+    },
+  }
+
+  if (args.dryRun) {
+    const safeOutput = {
+      ok: true,
+      provider: 'gemini-sub',
+      dryRun: true,
+      model: args.model,
+      effort: args.effort,
+      repo: args.repo,
+      thinkingConfig,
+      promptLength: promptText.length,
+      hasKey: !!apiKey,
+    }
+    process.stdout.write(JSON.stringify(safeOutput) + '\n')
+    process.exit(EXIT.ok)
+  }
+
+  const baseEndpoint = process.env.GEMINI_API_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models'
+  const endpoint = `${baseEndpoint}/${encodeURIComponent(args.model)}:generateContent`
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => {
+    controller.abort()
+  }, args.timeout * 1000)
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timer)
+
+    if (!res.ok) {
+      let errBody = null
+      try {
+        errBody = await res.json()
+      } catch (e) {
+        // Not JSON
+      }
+
+      const status = res.status
+      const errMsg = errBody?.error?.message || `HTTP ${status} ${res.statusText}`
+      const errStatus = errBody?.error?.status || `HTTP_${status}`
+
+      if (status === 401 || status === 403) {
+        fail(`Authentication failed: ${errMsg}`, EXIT.failed, { code: 'AUTH_FAILED', status })
+      } else if (status === 429 || errStatus === 'RESOURCE_EXHAUSTED') {
+        fail(`Quota/Resource exhausted: ${errMsg}`, EXIT.failed, { code: 'USAGE_LIMIT', status })
+      } else {
+        fail(`API error: ${errMsg}`, EXIT.failed, { code: 'API_ERROR', status })
+      }
+    }
+
+    const data = await res.json()
+    const candidates = data.candidates || []
+    if (candidates.length === 0) {
+      fail('No response candidate returned by Gemini API', EXIT.failed, { code: 'EMPTY_RESPONSE' })
+    }
+
+    const parts = candidates[0].content?.parts || []
+    const responseText = parts
+      .filter((p) => p.text && !p.thought)
+      .map((p) => p.text)
+      .join('\n')
+
+    const outJson = {
+      ok: true,
+      provider: 'gemini-sub',
+      model: args.model,
+      effort: args.effort,
+      text: responseText,
+      usage: data.usageMetadata || null,
+    }
+
+    process.stdout.write(JSON.stringify(outJson) + '\n')
+    process.exit(EXIT.ok)
+  } catch (err) {
+    clearTimeout(timer)
+    if (controller.signal.aborted || err.name === 'AbortError') {
+      fail(`Command timed out after ${args.timeout}s`, EXIT.timeout, { code: 'TIMEOUT' })
+    }
+    fail(`Execution failed: ${err.message}`, EXIT.failed, { code: 'RUN_FAILED' })
+  }
+}
+
+main()

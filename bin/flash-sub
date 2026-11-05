@@ -1,0 +1,4 @@
+#!/bin/sh
+# flash-sub: call gemini-sub with gemini-3.8-flash (default medium effort)
+# Used as fallback when T3 Antigravity weekly subscription limit is reached.
+exec "$(dirname "$0")/gemini-sub" --model gemini-3.8-flash --effort medium "$@"
