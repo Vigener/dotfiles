@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * codex-sub: W1 wrapper — Codex CLI (ChatGPT login) with fallback to dsh-sub.
+ * codex-sub: W1 wrapper — Codex CLI only (ChatGPT login); no API fallback.
  *
  * Usage:
  *   codex-sub --repo <dir> --prompt <text|->
  *
- * Exit codes (aligned with dsh-sub): 0 ok / 2 usage / 3 run failed / 4 timeout
+ * Exit codes: 0 ok / 2 usage / 3 run failed / 4 timeout
  *
  * ChatGPT status phrase and Fast in ~/.codex/config.toml are conservative;
  * confirm on your machine after Plus contract.
@@ -68,8 +68,8 @@ const HELP = `Usage: codex-sub --repo <dir> --prompt <text|->
   --prompt <text|->   task text; '-' reads stdin
   --timeout <sec>     wall-clock limit for codex exec (default: 900)
 
-Prints one JSON line on stdout. Falls back to dsh-sub when codex is missing,
-not logged in, API-key auth, or usage limit hit.
+Prints one JSON line on stdout. Stops when Codex is unavailable.
+Never invokes dsh-sub or switches to an API.
 
 See skill codex-harness for flags and contract.
 `
@@ -82,19 +82,6 @@ function readStdin() {
     process.stdin.on('end', () => resolve(data))
     process.stdin.on('error', reject)
   })
-}
-
-function scriptDir() {
-  return path.dirname(process.argv[1])
-}
-
-function dshSubPath() {
-  try {
-    const self = fs.realpathSync(process.argv[1])
-    return path.join(path.dirname(self), 'dsh-sub')
-  } catch {
-    return path.join(scriptDir(), 'dsh-sub')
-  }
 }
 
 /** Strip API key vars so codex child cannot prefer pay-as-you-go auth. */
@@ -176,47 +163,9 @@ function promptWithFooter(prompt) {
   return prompt + FOOTER
 }
 
-function runDshSub(repo, prompt, fallbackReason, timeoutSec) {
-  const dsh = dshSubPath()
-  const args = ['--repo', repo, '--prompt', promptWithFooter(prompt), '--timeout', String(timeoutSec)]
-  let child
-  try {
-    child = spawnSync(dsh, args, {
-      encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
-      env: process.env,
-    })
-  } catch (err) {
-    const out = {
-      ok: false,
-      provider: 'dsh-sub',
-      fallback: 'dsh-sub',
-      reason: fallbackReason ?? 'dsh-sub spawn failed',
-      code: 'SPAWN_FAILED',
-      message: String(err?.message ?? err),
-    }
-    process.stdout.write(JSON.stringify(out) + '\n')
-    process.exit(EXIT.failed)
-  }
-
-  const line = (child.stdout || '').trim().split('\n').filter(Boolean).pop() || ''
-  let parsed
-  try {
-    parsed = line ? JSON.parse(line) : { ok: false, code: 'EMPTY', message: 'dsh-sub produced no JSON' }
-  } catch {
-    parsed = { ok: false, code: 'INVALID_JSON', message: line.slice(0, 500) }
-  }
-
-  parsed.provider = 'dsh-sub'
-  if (fallbackReason) {
-    parsed.fallback = 'dsh-sub'
-    parsed.reason = fallbackReason
-  }
-
-  process.stdout.write(JSON.stringify(parsed) + '\n')
-  const code = child.status
-  if (code === null || code === undefined) process.exit(EXIT.failed)
-  process.exit(code)
+function stopCodex(code, message, exitCode = EXIT.failed) {
+  process.stdout.write(JSON.stringify({ ok: false, provider: 'codex', code, message }) + '\n')
+  process.exit(exitCode)
 }
 
 function jsonlErrorBlob(jsonlRaw) {
@@ -362,17 +311,17 @@ async function main() {
 
   const ready = checkCodexReady()
   if (!ready.ready) {
-    runDshSub(repo, task, ready.reason, opts.timeout)
+    stopCodex('UNAVAILABLE', ready.reason)
   }
 
   const run = await runCodexExec(repo, task, opts.timeout)
 
   if (run.timedOut) {
-    runDshSub(repo, task, `codex exec timeout (${opts.timeout}s)`, opts.timeout)
+    stopCodex('TIMEOUT', `codex exec timeout (${opts.timeout}s)`, EXIT.timeout)
   }
 
   if (hitUsageLimit(run.stderr, run.jsonlRaw)) {
-    runDshSub(repo, task, 'Codex usage limit reached', opts.timeout)
+    stopCodex('USAGE_LIMIT', 'Codex usage limit reached')
   }
 
   const ok = run.exitCode === 0 && Boolean(run.text.trim())
