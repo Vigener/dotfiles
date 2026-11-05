@@ -13,6 +13,8 @@
 
 ; --- タスク切り替えモード管理 ---
 global IsAltTabActive := false
+; 英数+Tab のあいだ Alt を押し続ける。Tab を離した瞬間に Alt を上げると切替 UI が閉じる
+global EisuuAltHeld := false
 
 ; --- 1. 仮想デスクトップ操作 (Spaces 相当) ---
 vk1C & h::Send("#^{Left}")
@@ -37,9 +39,12 @@ vk1C & k::
     }
 }
 
-; --- 3. ウィンドウ配置・スナップ (Raycast Window Management 相当) ---
-vk1C & ,::Send("#{Left}")          ; 左半分
-vk1C & .::Send("#{Right}")         ; 右半分
+; --- 3. ウィンドウ配置・スナップ ---
+; かな+, /. と 英数+, /. の両方。Mac は Rectangle の Ctrl+Opt+←/→
+vk1C & ,::Send("#{Left}")
+vk1C & .::Send("#{Right}")
+vk1D & ,::Send("#{Left}")
+vk1D & .::Send("#{Right}")
 vk1C & vkBF::Send("#{Up}")         ; スラッシュで最大化
 vk1C & vkBB::Send("#{Tab}")        ; セミコロンでタスクビュー (Mission Control)
 vk1C & sc073::Send("#+{Right}")    ; ろキーで次のディスプレイへ移動
@@ -53,14 +58,29 @@ vk1C & Tab::
     IsAltTabActive := true
 }
 
-; 無変換 + Tab: 通常の Alt+Tab / Shift+Alt+Tab
+; 無変換 + Tab: Alt を無変換キーアップまで保持して Alt+Tab / Shift+Alt+Tab
+; Tab を離した瞬間に Alt も上げると切替 UI が閉じる。最初の打鍵が KeyWait で残り、
+; 追加の Tab は別スレッドで送る。SendInput は {Alt Down} を戻すことがあるので SendEvent。
+#MaxThreadsPerHotkey 5
 vk1D & Tab::
 {
+    global EisuuAltHeld
+    first := !EisuuAltHeld
+    if first {
+        SendEvent("{Alt Down}")
+        EisuuAltHeld := true
+    }
     if GetKeyState("Shift", "P")
-        Send("!+{Tab}")
+        SendEvent("+{Tab}")
     else
-        Send("!{Tab}")
+        SendEvent("{Tab}")
+    if first {
+        KeyWait("vk1D")
+        SendEvent("{Alt Up}")
+        EisuuAltHeld := false
+    }
 }
+#MaxThreadsPerHotkey 1
 
 ; --- 5. タスク切り替え中の Vim風キーバインド ---
 #HotIf IsAltTabActive

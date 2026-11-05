@@ -5,7 +5,7 @@
 Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操作感・キーバインド**を実現するための構成です。
 
 - **無変換キー (`vk1D`) ＝ Macの「英数キー」**
-  - **長押し/同時押し**: カーソル移動 (HJKL)、単語移動、行頭/行末、Cmdショートカット模倣 (Ctrl+Z/C/V/W/T等)、1行選択、スクショ
+  - **長押し/同時押し**: カーソル移動 (HJKL)、単語移動、行頭/行末、Cmdショートカット模倣 (Ctrl+Z/C/V/W/T等)、1行選択、スクショ、`Ctrl+1..9`
   - **単押し**: IME OFF (英語入力モード)
 - **変換キー (`vk1C`) ＝ Macの「かなキー」**
   - **長押し/同時押し**: アプリ起動 (トグル式)、ブラウザタブジャンプ、仮想デスクトップ、ウィンドウ分割、メディア操作
@@ -24,6 +24,7 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 | `lib/ime.ahk` | Windows IME 制御関数 (`IME_GET`, `IME_SET`, `IME_IsON`) | - |
 | `lib/window_utils.ahk` | アプリトグル起動・前面化・キー送信ヘルパー | `launcher.ts` ヘルパー |
 | `lib/bracket.ahk` | 選択文字列の括弧囲みヘルパー (`WrapBracket`) | - |
+| `lib/screenshot.ahk` | 英数+Shift+3/4 の全画面・範囲キャプチャ（保存 / クリップボード） | `edit.ts` のスクショ節 |
 | `rules/sys.ahk` | 無変換/変換キーのモディファイア化、単押しIME、JIS配列補正 | `sys.ts` |
 | `rules/edit.ahk` | 無変換レイヤー (HJKL移動、編集、Cmd模倣、行選択、スクショ) | `edit.ts` |
 | `rules/window.ahk` | 変換レイヤー (仮想デスクトップ、ウィンドウ配置、タスク切替Vimモード) | `window.ts` |
@@ -53,6 +54,23 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 
 ### 2. EDIT（無変換レイヤー: カーソル移動・編集・Cmd模倣）
 
+英数起点だけを Karabiner の `edit.ts` に合わせてある。かな側のアプリ起動は対象外（起動表は残しているが、今回の互換範囲ではない）。Ghostty / Vivaldi / herdr のアプリ限定ルールも入れていない。
+
+修飾の置き換えは次のとおり。
+
+| Mac が送るもの | Windows で送るもの |
+|---|---|
+| Cmd | Ctrl |
+| Cmd+Opt | Ctrl+Alt |
+| Cmd+Shift | Ctrl+Shift（Shift は押したまま残す） |
+| Cmd+← / →（行頭・行末） | Home / End |
+| Cmd+↑ / ↓（文頭・文末） | Ctrl+Home / Ctrl+End |
+| Opt+← / →（単語。英数+Ctrl+H/L） | Ctrl+← / → |
+| Opt+↑ / ↓（段落。英数+Alt+H/J/K/L） | Alt+↑ / ↓ |
+| Cmd+[ / ]（戻る・進む） | Alt+← / → |
+| スクショ（Shift+3/4、Ctrl なし） | ファイル（スクリーンショット フォルダ） |
+| スクショ（Ctrl+Shift+3/4） | クリップボード |
+
 #### 基本移動・スクロール
 | 入力 (無変換 + ) | 出力 | Mac対応 (英数 + ) | 用途 |
 |---|---|---|---|
@@ -73,11 +91,10 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 | **Q** | `Escape` | Escape | ESC |
 | **; (vkBB)** | `Enter` | Enter | Enter（ホームポジション維持） |
 | **Shift + Enter** | `Ctrl + Shift + Enter` | Cmd + Shift + Enter | 送信・確定（チャット等） |
-| **Enter (単体)** | `End` → `Enter` | - | 次の行へ改行挿入 |
-| **Ctrl + Enter** | `Up` → `End` → `Enter` | - | 前の行へ改行挿入 |
-| **Space** | `Alt + Space` / `Win + S` | Cmd + Space | ランチャー / 検索 |
+| **Enter（Shift なし）** | `Enter` | （マップなし。そのまま） | 改行 |
+| **Space** | `Alt + Space` | Cmd + Space | PowerToys Run |
 | **D** | `Home` → `Shift + End` | Cmd+Left -> Shift+Cmd+Right | **1行選択** |
-| **R** | `Shift + Ctrl + →` | Shift + Opt + Right | 単語選択 |
+| **, / .** | `Win + ←` / `Win + →` | Ctrl+Opt+← / → | ウィンドウ左半分 / 右半分 |
 
 #### Cmdショートカット模倣 (MacのCmdをWindowsのCtrlに翻訳)
 | 入力 (無変換 + ) | 出力 | 用途 |
@@ -86,21 +103,28 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 | **X / C / V** | `Ctrl + X` / `Ctrl + C` / `Ctrl + V` | 切り取り / コピー / 貼り付け |
 | **A / N** | `Ctrl + A` / `Ctrl + N` | 全て選択 / 新規作成 |
 | **W** | `Ctrl + W` | タブ / ウィンドウを閉じる |
-| **T** | `Ctrl + T` (Ctrl併用で `Ctrl + Shift + T`) | 新規タブ / 閉じたタブを復元 |
+| **T** | `Ctrl + T`（Ctrl 併用で `Ctrl + Alt + T`、Shift 併用で `Ctrl + Shift + T`） | 新規タブ / グループ内タブ / 閉じたタブ |
 | **P** | `Ctrl + P` | コマンドパレット / 印刷 |
-| **B** | `Ctrl + B` (Ctrl併用で `Ctrl + Alt + B`) | プライマリ / セカンダリ サイドバー開閉 |
+| **B** | `Ctrl + B`（Shift または Ctrl 併用で `Ctrl + Alt + B`） | 左サイドバー / 右パネル |
 | **U** | `Ctrl + U` | 下線 / アクション |
 | **G / R / E** | `Ctrl + G` / `Ctrl + R` / `Ctrl + E` | 次を検索 / リロード / Quick Open |
-| **[ / ]** | `Alt + ←` / `Alt + →` | 戻る (Back) / 進む (Forward) |
+| **[ / ]** | `Alt + ←` / `Alt + →` | 戻る / 進む（`Ctrl+[` はインデントなので使わない） |
 | **/** | `Ctrl + /` | コメントアウト切替 |
+| **1..9** | `Ctrl + 1..9` | タブ・スレッド切り替え |
+| **Tab** | Alt を無変換キーアップまで保持して `Tab` | 直前ウィンドウへ。OS の Alt+Tab は潰さない |
 
-#### スクリーンショット & herdr
-| 入力 (無変換 + ) | 出力 | 用途 |
+#### スクリーンショット
+
+Mac は「Ctrl なし = ファイル、Ctrl あり = クリップボード」。Windows の `Win+Shift+S` は範囲をクリップボードに置くだけで、この対になっていない。同じ指使いになるよう、こちらで撮って振り分ける。保存先はエクスプローラーの「スクリーンショット」フォルダ（`Win+PrintScreen` と同じ）。
+
+| 入力 (無変換 + ) | 出力 | Mac（英数 + ） |
 |---|---|---|
-| **Shift + 4** / **Ctrl + Shift + 4** | `Win + Shift + S` | 範囲切り取り (Snipping Tool) |
-| **Shift + 3** / **Ctrl + Shift + 3** | `PrintScreen` | 全画面キャプチャ |
-| **1 〜 8** | `Ctrl + Alt + 1..8` | herdr `focus_agent` |
-| **9 / 0** | AHK 管理 | **9**: スクリプト編集 / **0**: リロード（herdr 外） |
+| **Shift + 3** | 全画面を PNG 保存 | Shift+3 → ファイル |
+| **Ctrl + Shift + 3** | 全画面をクリップボード | Ctrl+Shift+3 → クリップボード |
+| **Shift + 4** | ドラッグした範囲を PNG 保存 | Shift+4 → ファイル |
+| **Ctrl + Shift + 4** | ドラッグした範囲をクリップボード | Ctrl+Shift+4 → クリップボード |
+
+Shift なしの **3 / 4** はスクショにしない。`Ctrl+3` / `Ctrl+4`（タブ切り替え）になる。範囲選択中の Esc と右クリックはキャンセル。スペースキーでウィンドウ単位に切り替える Mac の操作は入れていない。
 
 ---
 
@@ -169,8 +193,8 @@ Mac (Karabiner-Elements) と Windows (AutoHotkey v2) で**まったく同じ操�
 ## 🛠 スクリプト管理ショートカット
 
 - **無変換 + 0**: スクリプトを即座にリロード（設定変更を即時反映）
-- **無変換 + 9**: スクリプトをエディタで開く
-- **無変換 + 1〜8**: herdr `Ctrl+Alt+1..8`（9/0 は herdr 対象外）
+- **無変換 + Shift + 0**: スクリプトをエディタで開く
+- **無変換 + 1〜9**: `Ctrl+1..9`（タブ・スレッド）。herdr の `Ctrl+Alt+1..9` は Ghostty 限定なので、Windows 側にはまだ無い
 
 > **重要**: 起動するのは `autohotkey/main.ahk` のみ。`win-env/` 配下の旧 `main*.ahk` はアーカイブです。スタートアップやタスクトレイに複数登録すると `Duplicate hotkey` で落ちます。
 

@@ -1,18 +1,24 @@
 #Requires AutoHotkey v2.0
 
 ; ==============================================================================
-; [EDIT] 無変換レイヤー (Macの英数レイヤーに完全対応)
-; - 基本移動: HJKL (左下上右), S/F (行頭/行末)
-; - 高速移動: Ctrl+H/L (単語移動), Ctrl+J/K (5行スクロール), Ctrl+S/F (文頭/文末)
-; - 削除系:   O (BackSpace), Ctrl+O (単語削除), @ (Delete), Ctrl+@ (次単語削除)
-; - 確定・Esc: ; (Enter), Q (Esc), Shift+Enter (Ctrl+Shift+Enter)
-; - 行選択:   D (行頭移動 -> 行末まで選択)
-; - Cmd模倣:  Z, Y, X, C, V, A, N, W, T, P, B, U, R, G, E, [, ], /
-; - スクショ: Shift+4 (範囲切取 Win+Shift+S), Shift+3 (全画面 PrintScreen)
-; - herdr:    1..8 (Ctrl+Alt+1..8)。9/0 は main.ahk の AHK 管理用
+; [EDIT] 無変換レイヤー = Karabiner 英数レイヤー（edit.ts）
+;
+; 翻訳:
+;   Cmd            → Ctrl
+;   Cmd+Opt        → Ctrl+Alt
+;   Cmd+Shift      → Ctrl+Shift（{Blind} で物理 Shift を残す）
+;   Cmd+← / →      → Home / End          （行頭 / 行末）
+;   Cmd+↑ / ↓      → Ctrl+Home / Ctrl+End （文頭 / 文末）
+;   Opt+← / →      → Ctrl+← / Ctrl+→     （単語。Mac では Opt と Ctrl が同じ送出に潰れる）
+;   Opt+↑ / ↓      → Alt+↑ / Alt+↓       （段落・行移動）
+;   Cmd+[ / ]      → Alt+← / Alt+→       （戻る / 進む。Ctrl+[ はインデントなので使わない）
+;   英数+1..9      → Ctrl+1..9           （タブ / スレッド。Ghostty の herdr はアプリ枠が空なので未収録）
+;   英数+Shift+3/4 → ファイル保存、Ctrl を足すとクリップボード
+;
+; 入れないもの: Vivaldi / Ghostty / herdr / 両親指（英数+かな）
 ; ==============================================================================
 
-; --- 1. カーソル移動系 (H, J, K, L) ---
+; --- 1. カーソル移動 (H J K L) ---
 vk1D & h::
 {
     if GetKeyState("Ctrl", "P")
@@ -70,7 +76,7 @@ vk1D & f::
         Send("{Blind}{End}")
 }
 
-; --- 3. 削除系 (O, @) ---
+; --- 3. 削除 (O, @) ---
 vk1D & o::
 {
     if GetKeyState("Ctrl", "P")
@@ -79,7 +85,7 @@ vk1D & o::
         Send("{Blind}{BackSpace}")
 }
 
-; JIS配列の「@」キー (vkC0 / sc01A)
+; JIS「@」(vkC0)。Mac の open_bracket = Forward Delete
 vk1D & vkC0::
 {
     if GetKeyState("Ctrl", "P")
@@ -88,120 +94,96 @@ vk1D & vkC0::
         Send("{Blind}{Delete}")
 }
 
-; --- 4. 確定・キャンセル・特殊キー (Q, ;, Enter, Space) ---
+; --- 4. Esc / Enter / Space ---
 vk1D & q::Send("{Blind}{Escape}")
 
-; セミコロン (vkBB) で Enter
+; JIS「;」(vkBB) → Enter。Shift は残るので Shift+Enter も通る
 vk1D & vkBB::Send("{Blind}{Enter}")
 
-; 無変換 + Enter (Shift押下で Ctrl+Shift+Enter, Ctrl押下で行挿入)
+; 英数+Shift+Enter → Ctrl+Shift+Enter。修飾なしの Enter はそのまま
 vk1D & Enter::
 {
     if GetKeyState("Shift", "P")
         Send("^+{Enter}")
-    else if GetKeyState("Ctrl", "P")
-        Send("{Up}{End}{Enter}")
     else
-        Send("{End}{Enter}")
+        Send("{Enter}")
 }
 
-; Space でランチャー（PowerToys Run または Windows Search）
-vk1D & Space::
-{
-    ; PowerToys Run (!Space) または Windows 検索 (#s)
-    Send("!{Space}")
-}
+; 英数+Space → Cmd+Space。Windows 側は PowerToys Run（Alt+Space）
+vk1D & Space::Send("!{Space}")
 
-; --- 5. 選択・vim風操作 (D, R) ---
-; D: 1行選択 (行頭へ移動して行末まで選択)
-vk1D & d::
-{
-    Send("{Home}+{End}")
-}
+; --- 5. 一行選択 (D) ---
+; Mac: Cmd+Left → Shift+Cmd+Right。Windows: Home → Shift+End
+vk1D & d::Send("{Home}+{End}")
 
-; R: 単語選択 (Shift+Ctrl+Right)
-vk1D & r::
-{
-    if GetKeyState("Ctrl", "P")
-        Send("{Blind}^r")
-    else
-        Send("{Blind}+^{Right}")
-}
+; --- 6. Cmd 模倣。S/D/F/Q/;/@ は上で別機能 ---
+vk1D & z::Send("{Blind}^z")
+vk1D & y::Send("{Blind}^y")
+vk1D & x::Send("{Blind}^x")
+vk1D & c::Send("{Blind}^c")
+vk1D & v::Send("{Blind}^v")
+vk1D & a::Send("{Blind}^a")
+vk1D & n::Send("{Blind}^n")
+vk1D & w::Send("{Blind}^w")
+vk1D & p::Send("{Blind}^p")
+vk1D & u::Send("{Blind}^u")
+vk1D & g::Send("{Blind}^g")
+vk1D & e::Send("{Blind}^e")
+vk1D & r::Send("{Blind}^r")
 
-; --- 6. Cmdショートカット模倣 (MacのCmdをWindowsのCtrlに翻訳) ---
-vk1D & z::Send("{Blind}^z")           ; Undo
-vk1D & y::Send("{Blind}^y")           ; Redo
-vk1D & x::Send("{Blind}^x")           ; Cut
-vk1D & c::Send("{Blind}^c")           ; Copy
-vk1D & v::Send("{Blind}^v")           ; Paste
-vk1D & a::Send("{Blind}^a")           ; Select All
-vk1D & n::Send("{Blind}^n")           ; New
-vk1D & w::Send("{Blind}^w")           ; Close Tab / Window
-
+; 英数+Ctrl+T → Ctrl+Alt+T（Mac の Cmd+Opt+T）。Shift は {Blind} で Ctrl+Shift+T
 vk1D & t::
 {
     if GetKeyState("Ctrl", "P")
-        Send("^+t")                   ; 閉じたタブを開く (Ctrl+Shift+T)
+        Send("^!t")
     else
-        Send("{Blind}^t")             ; New Tab
+        Send("{Blind}^t")
 }
 
-vk1D & p::Send("{Blind}^p")           ; Palette / Print
-
+; 英数+Shift+B / 英数+Ctrl+B → Ctrl+Alt+B（右パネル）。素の B は Ctrl+B
 vk1D & b::
 {
-    if GetKeyState("Ctrl", "P")
-        Send("!^b")                   ; セカンダリサイドバー (Ctrl+Alt+B)
+    if GetKeyState("Ctrl", "P") || GetKeyState("Shift", "P")
+        Send("^!b")
     else
-        Send("{Blind}^b")             ; サイドバー開閉 (Ctrl+B)
+        Send("{Blind}^b")
 }
 
-vk1D & u::Send("{Blind}^u")           ; Underline / Action
-vk1D & g::Send("{Blind}^g")           ; Find Next
-vk1D & e::Send("{Blind}^e")           ; Quick Open / Search
-
-; JIS [ (vkDB) -> 戻る (Alt+Left)
+; JIS [ ]。戻る / 進むはブラウザもエディタも Alt+矢印
 vk1D & vkDB::Send("!{Left}")
-; JIS ] (vkDD) -> 進む (Alt+Right)
 vk1D & vkDD::Send("!{Right}")
 
-; スラッシュ (vkBF) -> コメント切替 (Ctrl+/)
-vk1D & vkBF::Send("^/")
+vk1D & vkBF::Send("{Blind}^/")
 
-; --- 7. スクリーンショット (Mac: Cmd+Shift+3/4) ---
-; 無変換 + 4 (ShiftまたはCtrl付き) -> Snipping Tool (Win+Shift+S)
-vk1D & 4::
-{
-    if GetKeyState("Shift", "P") || GetKeyState("Ctrl", "P")
-        Send("#+s")
-    else
-        Send("^!4")
-}
+; --- 7. スクリーンショットとタブ番号 ---
+; Shift+3/4 はスクショ（3/4 の Ctrl+数字より先）。Ctrl 追加でクリップボード
+vk1D & 1::EisuuNumber(1)
+vk1D & 2::EisuuNumber(2)
+vk1D & 3::EisuuNumber(3)
+vk1D & 4::EisuuNumber(4)
+vk1D & 5::EisuuNumber(5)
+vk1D & 6::EisuuNumber(6)
+vk1D & 7::EisuuNumber(7)
+vk1D & 8::EisuuNumber(8)
+vk1D & 9::EisuuNumber(9)
 
-; 無変換 + 3 (ShiftまたはCtrl付き) -> 全画面キャプチャ (PrintScreen)
-vk1D & 3::
-{
-    if GetKeyState("Shift", "P") || GetKeyState("Ctrl", "P")
-        Send("{PrintScreen}")
-    else
-        Send("^!3")
-}
-
-; --- 8. herdr focus_agent (無変換 + 1..8 -> Ctrl+Alt+1..8) ---
-vk1D & 1::Send("^!1")
-vk1D & 2::Send("^!2")
-vk1D & 5::Send("^!5")
-vk1D & 6::Send("^!6")
-vk1D & 7::Send("^!7")
-vk1D & 8::Send("^!8")
-; 3/4 は上のスクショ節で Shift/Ctrl なし時 ^!3 / ^!4 を送信
-
-; --- 9. 括弧囲み (Shift+コロン で ** 囲み。コロン単体は改行) ---
-
-vk1D & vkBA::  ; コロン
-{
-    if GetKeyState("Shift", "P")
-        WrapBracket("*", "*")
-    else
-        Send("{Blind}{End}{Enter}")
+EisuuNumber(n) {
+    try {
+        shift := GetKeyState("Shift", "P")
+        ctrl := GetKeyState("Ctrl", "P")
+        if shift && (n = 3 || n = 4) {
+            dest := ctrl ? "clip" : "file"
+            if (n = 3)
+                EisuuShotFull(dest)
+            else
+                EisuuShotRegion(dest)
+        } else {
+            Send("{Blind}^" n)
+        }
+    } catch as err {
+        ToolTip("スクショ失敗: " err.Message)
+        SetTimer(() => ToolTip(), -2000)
+    } finally {
+        KeyWait(String(n))
+    }
 }

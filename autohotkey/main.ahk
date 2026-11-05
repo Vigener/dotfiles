@@ -15,6 +15,7 @@ SetWorkingDir(A_ScriptDir)
 #Include "lib/ime.ahk"
 #Include "lib/window_utils.ahk"
 #Include "lib/bracket.ahk"
+#Include "lib/screenshot.ahk"
 
 ; --- ルール読み込み ---
 ; 1. システム・モディファイア (無変換/変換キー、IME連携、JIS補正)
@@ -35,18 +36,22 @@ SetWorkingDir(A_ScriptDir)
 ; 6. 短縮入力 (Hotstrings)
 #Include "rules/hotstrings.ahk"
 
-; --- スクリプト管理ショートカット (herdr は 1..8 のみ。9/0 は AHK 専用) ---
-; 無変換 + 0: リロード / 無変換 + 9: スクリプトをエディタで開く
-~vk1D & 0::
+; --- スクリプト管理（英数+1..9 はタブ切り替えに使ったので、ここは 0 だけ） ---
+; 無変換+0: リロード / 無変換+Shift+0: スクリプトをエディタで開く
+vk1D & 0::
 {
+    global EisuuAltHeld
+    if EisuuAltHeld {
+        SendEvent("{Alt Up}")
+        EisuuAltHeld := false
+    }
+    if GetKeyState("Shift", "P") {
+        Edit()
+        return
+    }
     ToolTip("Reloading AutoHotkey...")
-    Sleep(500)
+    Sleep(300)
     Reload()
-}
-
-~vk1D & 9::
-{
-    Edit()
 }
 
 ; --- アイドル時タイマー (無操作時にIMEを自動OFF) ---
