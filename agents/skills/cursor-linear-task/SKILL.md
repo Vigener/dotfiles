@@ -1,132 +1,84 @@
 ---
 name: cursor-linear-task
 description: >-
-  Linear にタスク・チケット・Issue を【追加・登録・起票】する（書き込み専用）。
-  agy (Gemini等) からローカルの cursor-agent CLI を経由して Linear にタスクを登録し、now/TODO.md へ反映する。
-  【重要・ハイブリッド規律】
-  - 追加・起票（Write）: 本スキルを発動する。経路は実行環境で分岐（OpenCode / Claude は Linear MCP を直接、agy は cursor-agent に委譲）。
-  - 参照・確認（Read）: 「Linearのタスク確認」「未完了一覧」「期日確認」等の読み取りは本スキルを使わず、agy 内蔵の Linear MCP を直接叩いて即時回答する。
-  「Linearにタスク追加」「Linearのチケット作成」「Linearに起票」「Linear add task」「Linear issue作成」「add task in Linear」などで発動。
-  ※注意: 数学・物理・機械学習等の文脈（線形代数・線形回帰・linear regression 等）における "linear" は対象外。
+  Linear にタスク・チケット・Issue を起票し、now/TODO.md へ反映する（書き込み専用）。
+  参照（Read）は内蔵 Linear MCP を直接叩き本スキルは使わない。
+  書き込みはユーザーの明示指示があるときだけ、1操作ずつ実行する。
+  「Linearにタスク追加」「Linearのチケット作成」「Linearに起票」「Linear add task」「Linear issue作成」等で発動。
 ---
 
 # cursor-linear-task
 
-Linear へのタスク（Issue）作成と `now/TODO.md` へのリンク反映を、Cursor のローカル CLI (`cursor-agent --model auto`) に丸投げ委譲するパイプライン。
+Linear へのタスク（Issue）起票と `now/TODO.md` への反映パイプライン。
 
----
+## 規律と安全条件
 
-## 運用方針（ハイブリッド構成: Read agy / Write Cursor）
+- **参照 (Read)**: 「Linear のタスク確認」「期日確認」等の読み取りは本スキルを使わず、内蔵 Linear MCP ツールを直接呼び出して回答する。
+- **書き込み (Write)**: `rules/delegation.md` §11 に従い、**ユーザーの明示指示があるときだけ・1操作ずつ**実行する。サービス操作や認証設定の無断変更は行わない。
 
-agy（Gemini / Claude）と Cursor の長所を組み合わせ、安定性とコンテキスト効率を両立したハイブリッド運用をとる。
+## 1. 経路判定
 
-| 操作種別 | 担当エージェント | 実行手段 | 理由・メリット |
-|---|---|---|---|
-| **参照 (Read)**<br>一覧・ステータス・期日確認 | **agy (直接)** | 内蔵 Linear MCP<br>(`list_issues`, `get_issue` 等) | **最速（0.5秒で即答）**。別プロセスを起動するオーバーヘッドをゼロにし、会話のリズムを崩さない。 |
-| **起票 (Write)**<br>新規追加・チケット作成 | **実行環境で分岐**（下記）<br>※本スキル | `cursor-agent`<br>(`--model auto`) または Linear MCP 直接 | **コンテキスト隔離 ＆ 安定性**。<br>1. 「起票 → ID/URL取得 → `now/TODO.md` 更新」の泥臭い往復を隔離し、メインチャットのトークンを汚さない。<br>2. 環境ごとに安定する経路が違う（下表）。 |
+実行環境に応じて起票経路を判定する。
 
-**環境別の起票経路（2026-10-21 改定）**
-
-| 実行環境 | 起票 | 理由 |
+| 実行環境 | 起票経路 | 備考 |
 |---|---|---|
-| **OpenCode / Claude** | **Linear MCP を直接**使う | MCP 接続済み。プロセス起動のオーバーヘッドが無く、ID/URL もその場で取れる |
-| **agy** | `cursor-agent --model auto` に委譲 | agy の MCP は書き込み時の挙動が不安定という前提を維持する |
-| それ以外（Cursor 等） | `cursor-agent --model auto` | 同じ経路で足りる |
+| **OpenCode / Claude** | **Linear MCP を直接使用** | 接続済み MCP で起票し、ID / URL を取得 |
+| **agy / Cursor 等** | **`cursor-agent` CLI への委譲** | 非対話 CLI 経由で起票し、TODO へ反映 |
 
-どの経路でも、書き込みは `rules/delegation.md` §11 に従う（**明示指示があるときだけ・1操作ずつ**）。
+## 2. 設定確認（既存設定を保持）
 
-> [!NOTE]
-> ユーザーから「Linearのタスク一覧見せて」「LIFE-12 の期日っていつだっけ？」などの **参照（Read）** を求められた場合は、本スキルを起動せず agy 自身の内蔵 MCP ツールで直接回答すること。
+`cursor-agent` 経由で実行する場合、`~/.cursor/mcp.json` に Linear MCP が定義されているか確認する。
 
----
+```bash
+# 設定の存在確認
+jq '.mcpServers["plugin-linear-linear"]' ~/.cursor/mcp.json 2>/dev/null
+```
 
-## 仕組みと前提
-
-- **認証構造**: Cursor Desktop 側で認証済みの OAuth トークン（`mcp-auth.json`）を流用する。
-- **設定ファイル**: `~/.cursor/mcp.json` に Linear MCP サーバーが定義されている必要がある（未設定の場合は下記を追記）。
+未設定なら、必要なサーバー定義は次のとおり。設定追加が許可されている場合のみ、
+既存 JSON を正常に解析できることを確認し、他の項目を保持して `mcpServers` に追加する。
+ファイルの読み取り・解析に失敗した場合は停止し、空の設定で上書きしない。
 
 ```json
-{
-  "mcpServers": {
-    "plugin-linear-linear": {
-      "url": "https://mcp.linear.app/mcp"
-    }
-  }
-}
+"plugin-linear-linear": { "url": "https://mcp.linear.app/mcp" }
 ```
 
----
+## 3. 起票プロンプトと実行
 
-## 基本実行コマンド
+### プロンプト指定項目
 
-agy などの呼び出し元エージェントは、Bash コマンドを用いて非対話モードで `cursor-agent` を実行する。
-
-```bash
-cursor-agent -p --force --approve-mcps --trust --model auto "プロンプト..."
-```
-
-### オプション解説
-
-| オプション | 意味・必要理由 |
-|---|---|
-| `-p` / `--print` | **非対話出力モード**。対話TUIを起動せず、結果を標準出力に出力する。スクリプトやエージェントからの呼び出しに必須。 |
-| `-f` / `--force` | **ツール強制実行（自動承認）**。ファイル書き込みやシェル実行のたびに対話確認プロンプト（Y/n）を要求せず、自動承認する。ヘッドレス実行時の入力待ちハングを防止する。 |
-| `--approve-mcps` | **MCPツール自動承認**。Linear MCP の各ツール呼び出しを自動で許可する。これがないとMCP実行確認待ちで停止する。 |
-| `--trust` | **ワークスペース信頼**。現在の作業ディレクトリを信頼されたワークスペースとして扱い、セキュリティ警告プロンプトをスキップする。 |
-| `--model auto` | **自動モデル選択（推奨）**。タスク起票のような定型処理を高コストなフロンティアモデルに過剰割り当てせず、最適な中軽量モデルへルーティングする。モデルナンバリングの陳腐化も防ぐ。 |
-
-※ モデルは `auto` で足りる。明示指定はしない（Grok を明示する必要が出たら `docs/routing.md` §3・§4 の ID 表記に従う）。
-
----
-
-## 標準ワークフロー（起票時）
-
-### 1. 前提設定の確認（初回または未設定時）
-
-`~/.cursor/mcp.json` に `plugin-linear-linear` が存在するか確認する。
-
-```bash
-grep -q "plugin-linear-linear" ~/.cursor/mcp.json 2>/dev/null || cat << "JSON_EOF" > ~/.cursor/mcp.json
-{
-  "mcpServers": {
-    "plugin-linear-linear": {
-      "url": "https://mcp.linear.app/mcp"
-    }
-  }
-}
-JSON_EOF
-```
-
-### 2. プロンプトの組み立て
-
-プロンプトには以下の必須メタデータを明記する：
-
-- **Team**: 既定は `LIFE`（タスクの対象に応じて適切なチームを指定）
-- **Title**: タスクの概要
+- **Team**: 既定 `LIFE`（対象リポジトリ・内容に応じた適切なチーム）
+- **Title**: タスク名
 - **Priority**: 1 (Urgent), 2 (High), 3 (Medium), 4 (Low)
-- **Due Date**: 期日（`YYYY-MM-DD` 形式）
+- **Due Date**: 期日（`YYYY-MM-DD`）
 - **Assignee**: `me`（本人）
-- **Description**: 背景、参照ドキュメント、アクション項目、完了条件
-- **事後処理の指示**: 発行された Issue ID（例: `LIFE-xx`）と URL を `now/TODO.md` の該当項目へ反映させる
+- **Description**: 背景、参照ドキュメント、完了条件
+- **事後指示**: 発行された Issue ID（例: `LIFE-xx`）と URL を `now/TODO.md` へ反映させる
 
-### 3. 実行（ファイル経由またはヒアドキュメント）
+### コマンド実行
 
-長文プロンプトの場合は `inbox/prompt_cursor_linear_xxx.txt` などに保存するか、コマンドラインに直接渡す。
+CLI 委譲時の既定は `--model auto`。Linear 起票では従来どおり自動モデル選択を使う。
+ユーザーがモデルを明示指定した場合は、その指定と `model-route` の手順に従う。
+MCP 直接起票では CLI のモデル選択は不要。
 
 ```bash
-cursor-agent -p --force --approve-mcps --trust --model auto "$(cat prompt.txt)"
+cursor-agent -p --force --approve-mcps --trust --model auto "起票内容と TODO 反映の指示"
 ```
 
-### 4. 実行結果の検証
+| オプション | 役割 |
+|---|---|
+| `-p` / `--print` | 非対話出力モード（標準出力に出力） |
+| `-f` / `--force` | ツール自動承認（入力待ちハングを防止） |
+| `--approve-mcps` | MCP ツールの実行自動承認 |
+| `--trust` | ワークスペース警告のスキップ |
 
-- `cursor-agent` の出力から Issue ID（`LIFE-xx`）と URL を確認する。
-- `git diff now/TODO.md` を実行し、正本ファイルにチケットリンクが反映されたか確認する。
+## 4. Issue ID / URL の確認と TODO 反映
 
----
+1. 選択した経路の応答から Issue ID（例: `LIFE-xx`）と URL を取得・確認する。
+2. `now/TODO.md` の該当箇所にチケットリンクを反映する。
+3. `git diff now/TODO.md` で反映結果を確認する。
 
-## 関連・参照
+## 関連
 
-- `add-to-todo`: `now/TODO.md` への直接追記スキル（Linear を使わない場合）
-- 設定正本: `~/.cursor/mcp.json`
-- 認証トークン: `~/.cursor/projects/.../mcp-auth.json`
-- agy 内蔵 MCP 設定: `~/.gemini/config/mcp_config.json`（Read 用）
+- `add-to-todo`: Linear を使わず `now/TODO.md` へ直接追記するスキル
+- モデル選定正本: `rules/models.md` / `model-route`
+- 設定ファイル: `~/.cursor/mcp.json`

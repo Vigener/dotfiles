@@ -50,10 +50,11 @@ md-to-html input.md --open
 1. **正本は絶対にMarkdownのまま維持する**:
    - 内容の加筆・修正・削除は必ず `.md` ファイルに対して行う。
    - `.html` はビルド成果物（使い捨て・自動再生成可能）として扱う。
-2. **生成後のブラウザ確認（open-artifact連携）**:
-   - 作業ホストは Mac mini（`:8766` 配信）、ユーザーの手元マシンは **MacBook Air (MBA)** である。
-   - 生成したHTMLを開く・確認する際は、スキル `open-artifact` のフローに完全委譲する（URL組み立て → `ssh mac "~/dotfiles/bin/chrome-open-or-reload '$URL'"`）。
-   - 古い `:8770` ポートや直接の `ssh mba "open ..."` は使用せず、`open-artifact` を唯一の正本経路とする。
+2. **生成後の確認（open-artifact連携・環境分岐）**:
+   - 文書編集しただけで無条件にブラウザを開かない。
+   - **T3 Code 環境**: 画面確認を求められた場合は実ツール（`html_preview` → `html_render`）または絶対パスリンクで提示する。投稿・配布用 PNG や論文図は元のファイル成果物を保持し、`html_render` で代替しない。
+   - **外部ブラウザ閲覧**: ユーザーから外部 MBA Chrome での確認を明示された場合、または T3 外環境でのみスキル `open-artifact` の外部配信フローに委譲する。
+   - 古い `:8770` ポートや直接の `ssh mba "open ..."` は使用しない。
 3. **印刷対応**:
    - `tactical` テーマ等は `@media print` に対応しているため、ブラウザ印刷（Cmd+P）で即座にA4用紙やクリップボード用の白黒レイアウトになる。
 

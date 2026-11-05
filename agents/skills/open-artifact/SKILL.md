@@ -1,103 +1,95 @@
 ---
 name: open-artifact
 description: >-
-  人間レビュー向け HTML を http-brain 等経由で MBA Chrome に開く。
-  Plan 締め・/goal 完了・「開いて」で発動。流れは [HTML保存 → URL決定 → ssh mac chrome-open-or-reload]。
-  open 失敗時も URL は必ずチャットに出す。素の python -m http.server は使わない。
+  成果物HTMLの確認・提示を行うスキル。
+  T3 Code環境内では外部配信は不要（html_preview → html_render、または絶対パスリンク）。
+  外部MBA Chromeを明示して開く場合やT3外環境でのみ従来の外部配信（http-brain / ssh mac）を使う。
+  Plan/goal締めの自動発動は行わない。「ブラウザで開いて」「MBAで開いて」「open-artifact」等で発動。
 ---
 
 # open-artifact
 
-## 標準フロー（Plan /goal の締めでも同じ）
+成果物 HTML の確認・提示手順。
+
+> [!IMPORTANT]
+>
+> - **T3 Code 環境**: 外部配信（HTTP / SSH）は不要。HTML 表示はツールがあるとき `html_preview` → `html_render`、ファイル参照は絶対パスリンク `[名前](/Users/.../path)` で提示する。差分や Markdown で足りる場合は HTML 自体の生成も不要。文書編集だけで無条件にブラウザを開かない。
+> - **外部表示（MBA Chrome）**: ユーザーが外部ブラウザ閲覧を明示指定した場合、または T3 外環境のときだけ使用する。
+
+## 1. T3 Code 環境での提示
+
+T3 Code 内で完結する場合、Web サーバ起動や SSH 転送は行わない。
+
+- **HTML プレビュー**: ユーザーが画面確認を求めた場合、利用可能な T3 ツール（`html_preview` → `html_render`）に HTML の内容を渡して表示する。
+- **ファイル共有**: チャット内では絶対パスの Markdown リンク（例: `[成果物](/Users/mikoto/.../topic.html)`）を示す。
+- **実ツールの確認**: 実際に利用可能なツールのみを呼び出し、存在しないオプションや能力を捏造しない（表示要求がない文書編集ではプレビュー呼び出し自体不要）。
+
+## 2. 外部 MBA Chrome での閲覧手順（明示指示時・T3 外）
+
+ユーザーが「MBA で開いて」など外部端末での閲覧を明示した場合、または T3 外で閲覧を求められた場合のみ実行する。
+T3 内で単に「ブラウザで確認したい」と言われた場合は、外部 MBA 起動の指定とは扱わず、実行環境のブラウザ操作契約に従う。
 
 ```text
-1. 人間向け成果を HTML として保存
-   （トーン選択: スキル human-review-html → wiki/templates/human-review/ をコピー）
-   ※ 研究用記号・非一般用語は sticky サイドバー／スマホドロワー必須
-     （human-review-html「用語サイドバー」節）。本文だけで記号暗記を要求しない。
+1. 人間向け成果を HTML として保存（wiki/ 配下など）
 2. Tailscale IP で URL を組み立てる
-3a. 今すぐ開く: ssh mac "~/dotfiles/bin/chrome-open-or-reload 'URL'"
-3b. セッション末に開く: URL を ~/.cursor/open-on-stop.url に書いて stop hook に任せる
+3. ssh mac 経由で Chrome を開く（または停止フックに委譲）
 ```
 
-3a と 3b はどちらか1つだけ実行する。ユーザー指定がなければ 3a。
-ntfy はユーザーが通知を求めたときだけ送る。3a/3b に常時併送しない。
-
-Cursor `stop` hook（`on-stop-open-artifact.sh`）は **3b のマーカーがあるときだけ**発火する。スキルとフックはセット。
-
-テンプレ案内: `http://<TS_IP>:8766/wiki/templates/human-review/INDEX.html`
-
-## 前提
-
-- 母艦（Mac mini）: `http-brain`（`:8766` → ghq `research-brain`）tmux 常駐
-- 画面（MBA）: Google Chrome で成果物確認（`ssh mac` 経由で開く・既存タブは自動リロード）
-- 人間レビュー=HTML / エージェント間=Markdown
-- best-effort の範囲は 3a/3b の open コマンドだけ。手順1の HTML 保存と URL のチャット出力は省略しない
-- MBA オフラインで open が失敗しても、エラーは無視して URL をチャットに出す
-
-## スマホ通知（ntfy）と Click URL
-
-ユーザーが「ntfy」「通知」と言ったときだけ `~/bin/ntfy-notify "題" "本文" "$URL"` を送る。言っていなければ送らない。
-
-**必須ルール: Click / スマホで開く URL は必ず `.html`。**  
-`.md` を http-brain で直開きすると `text/markdown`（charset なし）になり、Android で文字化け・極小表示になる。  
-`ntfy-notify` は `.md` の Click を拒否する。詳細: `wiki/ai-engineering/ntfy-phone-notify.md`
-
-## 手順
-
-### 1. パス → URL
+### URL 組み立てと配信確認
 
 | ローカルパス | サイト | URL |
 |---|---|---|
 | `~/brain/research-brain/wiki/...` | http-brain :8766 | `http://<TS_IP>:8766/wiki/...` |
-| sandbox 配下 | http-sandbox :8765 | `http://<TS_IP>:8765/<sandbox からの相対パス>` |
-| 上記以外 | `thinkpad-resident status` で確認 | status 出力にないポートは使わない |
+| sandbox 配下 | http-sandbox :8765 | `http://<TS_IP>:8765/<相対パス>` |
+| 上記以外 | `thinkpad-resident status` | status 出力にあるポートを使用 |
 
 ```bash
 TS_IP="$(tailscale ip -4 | head -n1)"
-REL="wiki/ai-engineering/example.html"   # research-brain からの相対
+REL="wiki/ai-engineering/example.html"
 URL="http://${TS_IP}:8766/${REL}"
+
+# 配信サイトが未起動の場合のみ起動
+thinkpad-resident status
+# 対象サイトが未起動と確認できた場合のみ（sandbox は http-sandbox）
+thinkpad-resident start http-brain
 ```
 
-### 2. 配信サイトの起動
+### ブラウザ起動（3a または 3b のいずれか）
 
-HTML の置き場が research-brain なら `http-brain`、sandbox なら `http-sandbox`。
-`status` にその名前が running でなければ start する。
+- **今すぐ開く（3a・既定）**:
+
+  ```bash
+  ssh -o BatchMode=yes -o ConnectTimeout=5 mac "~/dotfiles/bin/chrome-open-or-reload '$URL'" || true
+  echo "$URL"
+  ```
+
+  ※ MBA オフライン等で接続失敗してもエラーで中断せず、URL をチャットに提示する。
+
+- **セッション末に開く（3b・opt-in）**:
+
+  ```bash
+  printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
+  ```
+
+## 3. スマホ通知（ntfy）
+
+ユーザーが「ntfy」「通知して」と明示した場合のみ送信する（常時併送しない）。
 
 ```bash
-thinkpad-resident status 2>/dev/null | head -40
-thinkpad-resident start http-brain   # research-brain の HTML のとき
+~/bin/ntfy-notify "タイトル" "本文" "$URL"
 ```
 
-### 3a. 今すぐ開く（推奨・締め）
+- **制約**: スマホで開く URL は必ず `.html`（`.md` は文字化け・極小表示となるため `ntfy-notify` が拒否する）。
 
-```bash
-ssh -o BatchMode=yes -o ConnectTimeout=5 mac "~/dotfiles/bin/chrome-open-or-reload '$URL'" || true
-echo "$URL"
-```
+## 4. やらないこと
 
-### 3b. セッション末に開く（opt-in）
-
-```bash
-printf '%s\n' "$URL" > ~/.cursor/open-on-stop.url
-# stop hook が1回 open してマーカーを消す
-```
-
-### 4. やらないこと
-
-- セッション失敗扱い / IP のドキュメント焼き付け / 素の `python -m http.server`
-- stop hook に重い agy/pi レビューを載せない（`adversarial-review` スキルを明示呼び出し）
-- **スマホ／ntfy の Click に `.md` を渡す**（必ず HTML 成果物の URL）
+- Plan / goal 締めでの無条件自動オープン（明示指示がない限り開かない）
+- T3 Code 環境内での不要な HTTP サーバ起動や `ssh mac` 実行
+- 素の `python -m http.server` の起動
+- URL のドキュメントへのハードコード（Tailscale IP を固定しない）
 
 ## 関連スキル
 
-| スキル | 関係 |
-|---|---|
-| `human-review-html` | トーン別テンプレ選択・複製（`wiki/templates/human-review/`） |
-| `update-agent-config` | 挙動設定変更時の層判定 |
-| `adversarial-review` | HTML 化する前の品質ゲート（任意） |
-
-## 体制（Mac mini 母艦・MBA 画面）
-
-母艦は Mac mini（`:8766` 配信）、閲覧画面は MBA（SSH 経由で Chrome リロード）。
-ThinkPad はバックアップ・クラスタ作業用。詳細: `wiki/compute-environments/mac-mini-migration-playbook.md`。
+- `human-review-html`: 人間レビュー用 HTML テンプレートのトーン選択
+- `md-to-html`: Markdown からスタンドアロン HTML への変換
+- `update-agent-config`: 挙動設定変更時の層判定

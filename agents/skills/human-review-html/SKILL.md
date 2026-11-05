@@ -3,7 +3,6 @@ name: human-review-html
 description: >-
   人間レビュー用 HTML のトーン／テンプレを選んで複製する。
   「HTML作って」「open-artifact用」「MTG用ページ」「自分用の読みもの」「主張境界HTML」で発動。
-  open-artifact の直前に使う。
 ---
 
 # human-review-html
@@ -42,7 +41,7 @@ description: >-
 2. デモ HTML を **コピー**して配置先へ（例: `wiki/.../YYYY-MM-DD-topic.html` または sandbox `docs/logs/`）。
 3. 見出し・表・コマンド・主張だけ差し替える。**CSS は原則触らない**（トーン崩壊を防ぐ）。
 4. HTML コメントの `TEMPLATE:` 行は残す。
-5. 締めはスキル `open-artifact`（Mac オフラインなら URL のみ）。
+5. **確認・提示**: T3 Code 内では必要に応じて実ツール（`html_preview` → `html_render`）または絶対パスリンクで提示する。外部 MBA Chrome での閲覧を明示された場合のみスキル `open-artifact`。文書編集しただけで無条件にブラウザを開かない。
 
 ## 制約
 
@@ -52,6 +51,7 @@ description: >-
 - solo では語りかけ可。Zoom 前提の過密レイアウトは避ける。
 - 紫グラデ単色・汎用ダッシュボード見た目に逃げない（既存デモの方向を踏襲）。
 - runbook の `ul.check > li` はテンプレ JS が本物の checkbox にする（**永続化しない**。リロードで未チェックに戻るでよい）。
+- 投稿・配布用 PNG や論文図は元のファイル成果物を保持し、`html_render` で代替しない。
 - スマホ／ntfy で開く成果物は **HTML のみ**（`.md` 直リンク禁止。`open-artifact` / `ntfy-notify` 参照）。
 
 ### 用語サイドバー（2026-08-07・全テーマ必須）

@@ -11,33 +11,23 @@ description: "DeepSeek Harness (dsh) を CLI サブエージェントとして�
 オーケストレータから DeepSeek Harness を**ワンショットのサブエージェント**として呼ぶための契約。
 対話 UI は前提にしない。1タスク1プロセスで完結させる。
 
-## 前提（2026-10-21 実測）
+## 前提
 
-| 項目 | 値 |
-|---|---|
-| バージョン | `@deepseek-ai/dsh@0.2.1-rc.2`（global npm、mise Node 24.20.0 配下） |
-| 実体 | `~/.local/share/mise/installs/node/lts/bin/dsh` |
-| プロファイル | `~/.dsh/profiles/headless/`（初回起動で自動生成） |
-| APIキー | `~/.dsh/.env` の `DEEPSEEK_API_KEY`（`600`）。環境変数 → `./.env` → `~/.dsh/.env` の順 |
-| 起動コスト | 約1.1秒 + 1ターン 2〜3秒 |
+- **実体**: `~/.local/share/mise/installs/node/lts/bin/dsh`（`@deepseek-ai/dsh@0.2.1-rc.2`）
+- **認証**: `~/.dsh/.env` の `DEEPSEEK_API_KEY`（パーミッション `600`。環境変数 → `./.env` → `~/.dsh/.env` の順で解決）
+- **プロファイル**: `~/.dsh/profiles/headless/`
 
-**Node を mise で更新すると global パッケージが消える。** その場合は再インストール:
+## モデルと effort（CLI 受理値と既定）
 
-```sh
-npm i -g @deepseek-ai/dsh@0.2.1-rc.2
-```
+用途別割当や利用条件は `../../rules/models.md` §2.5 および `../../docs/routing.md` を正本とする。
 
-## モデルと effort
-
-| 用途 | 指定 | 備考 |
+| パラメータ | CLI 受理値 | 既定 / 扱い |
 |---|---|---|
-| 既定 | `deepseek-flash` | **DeepSeek-V4.1-Flash-1017 そのもの**（日付付きIDは不要） |
-| 難所 | `deepseek-v4-pro` | エージェント的コーディング・知識・難推論向け |
-| effort 既定 | `high` | DeepSeek 公式の "default balance for most tasks" |
-| effort 最大 | `max` | "Reserve for the hardest quality-first tasks"。常用禁止 |
+| `--model` | モデル ID（用途別選択は正本参照） | overlay 未生成時はプロファイル継承。生成時の省略値は `deepseek-flash` |
+| `--effort` | `off`, `low`, `high`, `max` | overlay 未生成時はプロファイル継承。生成時の省略値は `high` |
+| `--provider` | プロバイダ ID | overlay の既定は `deepseek-official`。単独指定では overlay を生成しない |
 
-`off` は thinking 無効。`low` は低レイテンシ用途。**既定を `max` にしない**（思考トークン＝出力課金とレイテンシが増える）。
-プロファイル側は `high` 固定で、難所だけ呼び出し時に `--effort max` を渡す。
+- `--model` または `--effort` を指定した場合に overlay を生成する。利用するモデル・effort の判断は正本に従う。
 
 ## 呼び出し
 
@@ -51,6 +41,7 @@ dsh-sub --repo /path/to/repo --prompt "タスク本文"
 | `--prompt <text\|->` | タスク本文。`-` で stdin から読む（長文・引用はこちら） |
 | `--session <id>` | 既存セッションを再開。未知IDは実行前エラー |
 | `--model <id>` | `deepseek-flash` / `deepseek-v4-pro` |
+| `--provider <id>` | プロバイダ指定。省略時 `deepseek-official` |
 | `--effort <level>` | `off` / `low` / `high` / `max`（`--model`/`--effort` 指定時のみ overlay 生成、省略時 `high`） |
 | `--timeout <sec>` | 既定 900。超過時はプロセスグループごと kill |
 | `--danger` | `DSH_PERMISSION_MODE=danger-full-access`（原則使わない） |
@@ -117,7 +108,7 @@ ok=$(printf '%s' "$out" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on(
 | `session-telemetry-otel` | `FEEDBACK_ONLY`（フィードバック時のみ送信） | 無効化 |
 | `session-log-deepseek` | **ON**（次回リクエストにセッションログ差分を同梱） | 無効化 |
 
-モデル入力・応答品質は変わらない。機密リポジトリでは `--no-telemetry` を付ける。
+モデル入力・応答品質は変わらない。機密リポジトリでは `--no-telemetry` を付ける（Private の扱い・担当モデルは `../../rules/models.md` §2.1 参照）。
 
 ## トラブルシュート
 
