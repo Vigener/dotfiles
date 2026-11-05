@@ -133,7 +133,7 @@ Shift なしの **3 / 4** はスクショにしない。`Ctrl+3` / `Ctrl+4`（�
 | 入力 (変換 + ) | 出力 | Mac対応 (かな + ) | 用途 |
 |---|---|---|---|
 | **H / L** | `Win + Ctrl + ←` / `→` | Ctrl + Left / Right | 仮想デスクトップ移動 (Spaces) |
-| **J** | `Win + ↓` / `WinMinimize` | Cmd + H | 最小化 / 隠す |
+| **J** | **T3 Code** トグル | Open: T3 Code | 最頻出作業環境（最前面時は最小化 / Mac Karabiner互換） |
 | **K** | `Win + ↑` / `WinMaximize` | Ctrl + Cmd + F | 最大化 / フルスクリーン |
 | **, (comma)** | `Win + ←` | Cmd+Opt+Ctrl+Left | ウィンドウ左半分スナップ |
 | **. (period)** | `Win + →` | Cmd+Opt+Ctrl+Right | ウィンドウ右半分スナップ |
@@ -157,20 +157,22 @@ Shift なしの **3 / 4** はスクショにしない。`Ctrl+3` / `Ctrl+4`（�
 |---|---|---|
 | **Space** | メディア | 再生 / 一時停止 (`Media_Play_Pause`) |
 | **U / I / Y** | 音量 | 音量アップ / 音量ダウン / ミュート |
+| **J** | **T3 Code** | メイン作業環境 トグル（Mac Karabiner互換） |
+| **T** | **T3 Code** | AIエディタ トグル（Mac Karabiner移行用と互換） |
+| **G** | **Grok Bot** | トグル起動（Mac Karabiner互換） |
+| **B** | **Google Chrome** | トグル起動 |
 | **O** | **Obsidian** | トグル起動 |
 | **A** | **Antigravity** | AIエディタ / ターミナル トグル |
 | **M** | **Cursor** | メインエディタ トグル |
 | **V** | **Visual Studio Code** | トグル起動 |
 | **Z** | **Zed** | トグル起動 |
-| **W / T** | **Warp** / Windows Terminal | ターミナル トグル |
+| **W** | **Warp** / Windows Terminal | ターミナル トグル |
 | **E** | **Edge** / Mail | ブラウザ / メール トグル |
-| **B** | **Google Chrome** | トグル起動 |
 | **N** | **Google Chrome** (メインブラウザ) | 最前面時は **思考ハブ (タブ2: Ctrl+2)** へジャンプ |
 | **S** | **Slack** | メインブラウザ起動 → **Slack (タブ3: Ctrl+3)** へジャンプ |
 | **C** | **Calendar** | メインブラウザ起動 → **カレンダー (タブ4: Ctrl+4)** へジャンプ |
 | **8** | **YouTube Music** | メインブラウザ起動 → **Music (タブ5: Ctrl+5)** へジャンプ |
 | **F** | **エクスプローラー** (Finder) | トグル起動 (`Win + E`) |
-| **G** | **Alacritty** | トグル起動（ThinkPad 外側端末） |
 | **P** | **Microsoft PowerPoint** | トグル起動 |
 | **L** | （window.ahk）右の仮想デスクトップ | LINE はかな+L と衝突するため未割り当て |
 

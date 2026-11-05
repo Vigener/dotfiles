@@ -6,13 +6,42 @@
 ; ==============================================================================
 
 /**
+ * exe名・起動パスからウィンドウターゲット (ahk_exe ...) を解決
+ * パイプ区切り（例: "T3 Code.exe|t3code.exe"）や実在パスのexe名に対応
+ */
+ResolveAppTarget(exeName, runPath := "") {
+    candidateList := []
+    if (runPath != "" && FileExist(runPath)) {
+        SplitPath(runPath, &actualExe)
+        if (actualExe != "")
+            candidateList.Push(actualExe)
+    }
+
+    for name in StrSplit(exeName, "|") {
+        trimmed := Trim(name)
+        if (trimmed != "")
+            candidateList.Push(trimmed)
+    }
+
+    for name in candidateList {
+        t := "ahk_exe " . name
+        if WinExist(t)
+            return t
+    }
+
+    if (candidateList.Length > 0)
+        return "ahk_exe " . candidateList[1]
+    return "ahk_exe " . exeName
+}
+
+/**
  * 通常アプリのトグル起動/最小化
  * - 既に最前面（アクティブ）なら最小化
  * - 起動中だがバックグラウンドなら最前面化
  * - 起動していなければ新規起動
  */
 ToggleApp(exeName, runPath := "") {
-    target := "ahk_exe " . exeName
+    target := ResolveAppTarget(exeName, runPath)
     if (runPath == "")
         runPath := exeName
 
@@ -38,7 +67,7 @@ ToggleApp(exeName, runPath := "") {
  * - 起動していなければ起動後にショートカットキーを送信
  */
 ToggleAppWithKey(exeName, runPath, keyToSend) {
-    target := "ahk_exe " . exeName
+    target := ResolveAppTarget(exeName, runPath)
     if (runPath == "")
         runPath := exeName
 
@@ -72,7 +101,7 @@ ToggleAppWithKey(exeName, runPath, keyToSend) {
  * 最前面ならキー送信、そうでなければ前面化/起動のみ行う (Macの toggleAppOrSendKey 相当)
  */
 ToggleAppOrSendKey(exeName, runPath, keyToSend) {
-    target := "ahk_exe " . exeName
+    target := ResolveAppTarget(exeName, runPath)
     if (runPath == "")
         runPath := exeName
 

@@ -9,13 +9,15 @@
 ;   M: Cursor (メインエディタ)
 ;   Z: Zed
 ;   S: メインブラウザ -> Slackタブ (Ctrl+3)
-;   W / T: Warp / Windows Terminal
+;   W: Warp / Windows Terminal
 ;   E: Edge / Mail
 ;   B: Google Chrome
+;   J: T3 Code (メイン作業環境)
+;   T: T3 Code (移行用)
+;   G: Grok Bot
 ;   N: Zen / メインブラウザ (アクティブ時は思考ハブ Ctrl+2 へ)
 ;   V: Visual Studio Code
 ;   F: エクスプローラー
-;   G: Alacritty
 ;   C: メインブラウザ -> Calendarタブ (Ctrl+4)
 ;   8: メインブラウザ -> YouTube Musicタブ (Ctrl+5)
 ;   P: Microsoft PowerPoint
@@ -29,6 +31,18 @@ vk1C & i::Send("{Volume_Down}")
 vk1C & y::Send("{Volume_Mute}")
 
 ; --- 2. アプリ起動 (トグル式) ---
+
+; J: T3 Code (メイン作業環境・最頻出)
+vk1C & j::LaunchRegisteredApp("T3Code")
+
+; T: T3 Code (Mac Karabiner互換の移行用)
+vk1C & t::LaunchRegisteredApp("T3Code")
+
+; G: Grok Bot (Mac Karabiner互換)
+vk1C & g::LaunchRegisteredApp("GrokBot")
+
+; B: Google Chrome
+vk1C & b::LaunchRegisteredApp("Chrome")
 
 ; O: Obsidian
 vk1C & o::LaunchRegisteredApp("Obsidian")
@@ -45,18 +59,11 @@ vk1C & z::LaunchRegisteredApp("Zed")
 ; V: Visual Studio Code
 vk1C & v::LaunchRegisteredApp("VSCode")
 
-; W / T: Warp (または Windows Terminal)
+; W: Warp (または Windows Terminal)
 vk1C & w::LaunchRegisteredApp("Warp")
-vk1C & t::LaunchRegisteredApp("Warp")
 
 ; E: Edge / Mail
 vk1C & e::LaunchRegisteredApp("Edge")
-
-; B: Google Chrome
-vk1C & b::LaunchRegisteredApp("Chrome")
-
-; G: Alacritty (ThinkPad outer terminal; Ghostty is Mac/herdr only)
-vk1C & g::LaunchRegisteredApp("Alacritty")
 
 ; F: エクスプローラー (Finder 相当)
 vk1C & f::

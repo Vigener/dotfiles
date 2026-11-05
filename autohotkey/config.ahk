@@ -28,16 +28,48 @@ global BROWSER_SLACK_TAB := "3"     ; 変換 + S: Slackタブ
 global BROWSER_CALENDAR_TAB := "4"  ; 変換 + C: カレンダータブ
 global BROWSER_MUSIC_TAB := "5"     ; 変換 + 8: YouTube Musicタブ
 
+; --- アプリパス探索ヘルパー ---
+FindAppPath(candidates, defaultPath) {
+    for path in candidates {
+        if (path != "" && FileExist(path))
+            return path
+    }
+    return defaultPath
+}
+
+; T3 Code パス解決
+global T3_CODE_PATH := FindAppPath([
+    EnvGet("LocalAppData") . "\Programs\t3-code\T3 Code.exe",
+    EnvGet("LocalAppData") . "\Programs\T3 Code\T3 Code.exe",
+    EnvGet("LocalAppData") . "\t3-code\T3 Code.exe",
+    EnvGet("ProgramFiles") . "\T3 Code\T3 Code.exe",
+    EnvGet("ProgramFiles(x86)") . "\T3 Code\T3 Code.exe"
+], EnvGet("LocalAppData") . "\Programs\t3-code\T3 Code.exe")
+global T3_CODE_EXE := "T3 Code.exe|t3code.exe"
+
+; Grok Bot パス解決
+global GROK_BOT_PATH := FindAppPath([
+    EnvGet("LocalAppData") . "\Programs\Grok\Grok.exe",
+    EnvGet("LocalAppData") . "\Programs\Grok Bot\Grok Bot.exe",
+    EnvGet("LocalAppData") . "\Programs\grok-bot\Grok Bot.exe",
+    EnvGet("LocalAppData") . "\Programs\Sand\Sand.exe",
+    EnvGet("ProgramFiles") . "\Grok\Grok.exe",
+    EnvGet("ProgramFiles") . "\Grok Bot\Grok Bot.exe"
+], EnvGet("LocalAppData") . "\Programs\Grok\Grok.exe")
+global GROK_BOT_EXE := "Grok.exe|Grok Bot.exe|Sand.exe"
+
 ; --- アプリケーション パス・実行ファイル一覧 ---
 ; ※ APP_REGISTRY にアプリ名 -> [exeName, defaultPath] を登録
 global APP_REGISTRY := Map(
     ; ブラウザ
     "Zen", ["zen.exe", EnvGet("LocalAppData") . "\zen\zen.exe"],
-    "Chrome", ["chrome.exe", "C:\Program Files\Google\Chrome\Application\chrome.exe"],
+    "Chrome", [MAIN_BROWSER_EXE, MAIN_BROWSER_PATH],
     "Edge", ["msedge.exe", "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"],
     "Vivaldi", ["vivaldi.exe", EnvGet("LocalAppData") . "\Vivaldi\Application\vivaldi.exe"],
 
     ; 開発ツール・エディタ
+    "T3Code", [T3_CODE_EXE, T3_CODE_PATH],
+    "GrokBot", [GROK_BOT_EXE, GROK_BOT_PATH],
     "Cursor", ["Cursor.exe", EnvGet("LocalAppData") . "\Programs\Cursor\Cursor.exe"],
     "VSCode", ["Code.exe", EnvGet("LocalAppData") . "\Programs\Microsoft VS Code\Code.exe"],
     "Zed", ["zed.exe", EnvGet("LocalAppData") . "\Programs\Zed\zed.exe"],

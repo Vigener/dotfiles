@@ -21,14 +21,9 @@ vk1C & h::Send("#^{Left}")
 vk1C & l::Send("#^{Right}")
 
 ; --- 2. ウィンドウ状態 (最小化・最大化) ---
-vk1C & j::
-{
-    try {
-        WinMinimize("A")
-    } catch {
-        Send("#{Down}")
-    }
-}
+; ※ 変換+J は Mac Karabiner と同様に最頻出作業環境 T3 Code のトグル（rules/launcher.ahk）へ移行。
+; （ToggleApp により T3 Code が最前面の場合は WinMinimize される）
+; vk1C & j::WinMinimize("A")
 
 vk1C & k::
 {
