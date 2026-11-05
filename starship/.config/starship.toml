@@ -1,0 +1,10 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+# $all の末尾（改行の前）に $time を挿入
+format = "$all$time$line_break$character"
+
+[time]
+disabled = false
+time_format = "%T"
+style = "bold dimmed white"
+format = 'at [$time]($style) '

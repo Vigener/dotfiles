@@ -11,7 +11,7 @@
 
 | 役割 | 手段 |
 |---|---|
-| プロンプト（現在地） | **Starship**（初回はデフォルト。`starship.toml` なし） |
+| プロンプト（現在地） | **Starship**（`starship/.config/starship.toml` を `~/.config/starship.toml` へリンク） |
 | サジェスト | `zsh-autosuggestions`（ghq） |
 | 色付け | `zsh-syntax-highlighting`（ghq） |
 | 補完 | zsh 本体 `compinit` |

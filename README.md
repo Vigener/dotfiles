@@ -22,6 +22,7 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
     - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
 - `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。
 - `ghostty/.config/ghostty/config`: Ghostty（MBA・herdr 専用外側端末）の共有キーバインド。`~/.config/ghostty/config` へ symlink。`initial-command` は `~/.config/ghostty/config.local`（MBA のみ、symlink しない）。
+- `starship/.config/starship.toml`: Starship（プロンプト）の共有設定。`~/.config/starship.toml` へ symlink。
 - `rtk/config.toml`: RTK（トークン圧縮）の共有設定。Linux は `~/.config/rtk/`、macOS は `~/Library/Application Support/rtk/` へ symlink。
 - `google-ime/azik_romantable.txt`: Google 日本語入力の AZIK ローマ字表。symlink しない。IME 設定からインポート。
 - `autohotkey/main.ahk`: Windows 専用の AutoHotkey v2 キーバインド設定。Mac の Karabiner-Elements と同一の操作感を Windows 上に完全再現。（Windows のみ）
