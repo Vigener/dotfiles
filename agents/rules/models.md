@@ -28,39 +28,52 @@ HPC 境界は `rules/hpc.md` を参照。
   **Anthropic API 従量課金**または **Claude Pro 契約**を足すか本人が決める
   （§2.5 敵対レビュー・§3 と同趣旨）。
 
-## 0.5 Google サブスクと API（2026-11-04 人間の指示）
+## 0.5 Google サブスクと API（2026-11-04 決定、2026-11-13 改定）
 
-- Google AI Pro のサブスクを優先する。該当モデルの weekly limit 到達が
-  確認できた場合、設定済みの Google API 経路で同じモデルを使うことを
-  事前許可する（都度申請不要）。未確認のエラー・残量予測だけで API へ
-  切り替えない。サブスクが回復したらサブスクへ戻す。
-- API も既定 medium。適した軽作業には low を使ってよい。high 以上への
-  格上げは §3.6–§3.7 の事前申請・承認を維持する。この許可はモデルの
-  用途禁止・Private 等の境界を解除しない。
-- API の利用許可と課金設定の変更は別。まだ未設定の経路の開通・チャージ・
-  オートチャージ有効化は行わない。Prepay/オートチャージ OFF と、
-  適用クレジット・利用可能残高を確認できる経路を使用し、残高不足では
-  停止する。Postpay はこの事前許可の対象外。支出・トークン使用量・
-  切替理由を記録する。残高や価格は正本文に固定しない。
-- Argon の通常経路は引き続き antigravity。weekly limit 到達時のみ、
-  上記の Google API 経路を例外として許可する。呼べるモデル・設定を
-  確認できない経路を推測で呼ばない。
-- **実行チャネルと認証隔離（サブスク保護）**: T3 Code の Antigravity
-  （Google account サブスク認証）を維持するため、T3 Code 設定や
-  シェル全体（`.zshrc` 等）に `GEMINI_API_KEY` を登録しない
-  （サブスク枠の誤消費・API引きずり込みを防止）。API 実行は独立 CLI
-  `bin/gemini-sub`、および既定モデルを指定するラッパー `bin/argon-sub`
-  （`gemini-4-argon` / medium）・`bin/flash-sub`（`gemini-3.8-flash` / medium）
-  を使用し、キーは専用ファイル `~/.config/gemini-sub/.env`
-  （パーミッション `600`）または一時環境変数からのみ読み込む。
-  Prepay 枯渇（429 / RESOURCE_EXHAUSTED）時は即時停止（exit 3）し、
-  課金設定の変更は行わない。
-- **ラッパーの動作特性と確認責務**: `gemini-sub` / `argon-sub` /
-  `flash-sub` は単発テキスト API 要求であり、ファイル探索・編集や
-  ツールループの自走機能は持たない（`--repo` はディレクトリの実在検証のみ）。
-  weekly limit 到達の確認、Prepay／利用可能残高の確認、
-  支出・トークン使用量の記録は呼出側の確認事項であり、
-  ラッパーがこれらを自動保証するものではない。
+- Google AI Pro のサブスク（`antigravity`）を優先する。ただし専用経路
+  `~/.config/gemini-sub/.env` は **Prepay / オートチャージ OFF が確認済み**
+  （2026-11-13）であり、該当モデルの weekly limit 到達時や、API 専用モデル
+  （例: Antigravity 未掲載間の `carbon-sub`）の適合タスクでは、都度確認なしで
+  設定済みの Google API 経路（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
+  `carbon-sub`）を呼び出してよい。サブスクが回復したらサブスクへ戻す。
+- API も既定 `medium`（機械的処理は `low`）。**無意味に `high` / `xhigh` へ
+  引き上げることは禁止**する。難所・開かれた問題等で `high`（`gemini-4-hydrogen`
+  のみ `xhigh` 可）が必要なときは、Google API に限り **理由を 1 行記録すれば
+  事後報告可**とする（§3.6–§3.7 の事前承認待ちを要しない。Codex / Opus /
+  Fable の事前承認規則や、用途禁止・Private 境界は解除しない）。
+- API の利用許可と課金設定の変更は別。未設定経路の開通・チャージ・オートチャージ
+  有効化は禁止。Prepay 枯渇（`429` / `RESOURCE_EXHAUSTED`）時は即時停止
+  （`exit 3`）し、課金設定を変えない。支出・トークン使用量・理由を記録し、
+  残高や単価の金額は正本文に固定しない。
+- **Google AI Pro 枠切れ後のフォールバック順**:
+  - **Argon 独立週枠を消化したとき**: 低ハルシネーション（`AA-Omniscience`）や
+    図表読解が必須でない作業は、別枠の **`agy` `gemini-4-hydrogen`** または
+    **Web 版 Argon** を優先する。Argon 自体（低ハルシネーション監査等）が必要な
+    場合は、同一モデルの **`bin/argon-sub`** を使う。
+  - **Gemini 枠（Hydrogen / 3.8 Flash）を消化したとき**: **`bin/hydrogen-sub`**
+    を使う。
+  - **有料 API 呼び出し時のモデル優先**: API では `argon-sub` の利用を最小化し、
+    速度・単価・コーディング効率で優れる **`hydrogen-sub`**、または最深推論の
+    **`carbon-sub`** を主軸にする（`argon-sub` は低ハルシネーション検証、
+    Argon 同一モデルフォールバック、Carbon タイムアウト退避に絞る）。
+- **実行チャネルと認証隔離（サブスク保護）**: T3 Code 設定やシェル全体
+  （`.zshrc` 等）に `GEMINI_API_KEY` を登録しない（サブスク枠の誤消費・API
+  引きずり込み防止）。API 実行は独立 CLI `bin/gemini-sub`（既定
+  `gemini-4-hydrogen` / `medium`、SSE ストリーミング `:streamGenerateContent?alt=sse`・
+  `xhigh` 対応）および既定モデル固定ラッパー `bin/hydrogen-sub`
+  （`gemini-4-hydrogen` / `medium`）・`bin/carbon-sub`（`gemini-4-carbon` /
+  `medium`）・`bin/argon-sub`（`gemini-4-argon` / `medium`）・`bin/flash-sub`
+  （`gemini-3.8-flash` / `medium`、レガシー控え）を使い、キーは専用ファイル
+  `~/.config/gemini-sub/.env`（パーミッション `600`）または一時環境変数からのみ
+  読み込む。
+- **ラッパーの動作特性と Carbon 運用ガードレール（2026-11-10 実測教訓）**:
+  `gemini-sub` 系は単発テキスト API 要求であり、ファイル探索・編集やツールループは
+  持たない（`--repo` は実在検証のみ）。`gemini-4-carbon` は長い思考を伴うため、
+  `--timeout 900`（既定）を維持し、巨大な生プロンプト（数十 KB の無選別ログ等）を
+  避けて要点・対象差分に絞る。`gemini-sub` は SSE ストリーミングで接続するため
+  HTTP ヘッダ待機（300s）では落ちないが、壁時計タイムアウト（`exit 4`）時は
+  プロンプトを圧縮して再試行するか、制約に反しない範囲で `argon-sub` /
+  `hydrogen-sub` へ切り替える（モデル固定指定時は停止して報告）。
 
 ## 1. Gemini 4 Argon（agy 独立週枠）— 発想（監査の暫定例外は §2.5）
 
@@ -70,9 +83,13 @@ HPC 境界は `rules/hpc.md` を参照。
   発想セッションに計画的に使う。
 - 監査への暫定利用は §2.5「暫定監査」に従う。設計・仕様・実装前仕様化の
   禁止は維持する。
-- 消化後は Web 版 Argon へフォールバックしてよい（従来どおり）。
+- 公式ベンチマーク上の優位点（§1.2 比較）として、Hydrogen より
+  **低ハルシネーション率（AA-Omniscience）**・図表読解（Chartography）・
+  Terminal-Bench-Science 0.1 に強みを持つ。
+- 消化後のフォールバックは §0.5（`agy` Hydrogen / Web Argon → 必要時 `argon-sub`）に
+  従う。
 
-## 1.1 Gemini 4 Carbon（Argon の置換ではない。2026-11-11）
+## 1.1 Gemini 4 Carbon（Argon の置換ではない。2026-11-11、2026-11-13 更新）
 
 - 公開は 2026-11-10。モデルカードは Carbon を Argon ベースと書く。公式の使い分けは、
   Argon をソフトウェア工学と知識労働の多数向け、Carbon を知能の限界を試す作業
@@ -80,29 +97,56 @@ HPC 境界は `rules/hpc.md` を参照。
   Carbon は Argon より多くのトークンを使って探索・推論・検証する。料金表は
   Argon を、Carbon より応答が速くターンあたりのトークンが少ない側と書く。
 - Developer API の有料枠に `gemini-4-carbon` と `gemini-4-argon` が並ぶ
-  （Free は両方なし）。2026-11-11 に設定済みキーの models.list でも両方を
-  確認した。`gemini-sub --model` で指定できる形ではある。`carbon-sub` は置かない。
-- 2026-11-11 の料金表では、両者の導入期間は 2026-11-30 まで、標準単価は
-  2026-12-01 から。入出力単価のスケジュールは両者で同じ。Argon の導入期間
-  だけが先に終わる、という公式記載は無い。金額は写さない（§0.5）。
-  期間後に料金表とこの節が食い違っても、Carbon を安い代替として自動優先しない。
-  人間がこの節を直すまで、下の役割のままにする。
-- 掲載単価が同じでも Carbon はトークンが多い。タスク費用が Argon 以下になる
-  前提で、割引終了後に Carbon へ切り替えない。
+  （Free は両方なし）。API 経路では `bin/carbon-sub`（`gemini-4-carbon` /
+  `medium`）を用意し、§0.5 の事前許可の範囲（限界を試す難所・科学的探求）で
+  呼べる形にした。トークン消費が多いため、通常作業を安易に `carbon-sub` へ
+  逃がさない。
+- 導入期間は 2026-11-30 まで、標準単価は 2026-12-01 から。Argon と Carbon の
+  単価スケジュールは同じで、金額は写さない（§0.5）。期間後に料金表とこの節が
+  食い違っても、Carbon を安い代替として自動優先しない。掲載単価が同じでも
+  Carbon はトークンが多いため、割引終了後に Argon の安い代替へ切り替えない。
 - 人間の前提（2026-11-11）: Carbon は Google AI Pro の Antigravity にも来る。
-  同日のプラン説明では Pro は Argon、Carbon は Ultra と API 有料枠。
-  この環境の T3 カタログも `antigravity` は Argon と Flash のみ。未掲載を
-  「来ない」方針にはしない。判定手順はスキル `model-route` の「Argon と Carbon」。
-  呼ぶ直前にライブカタログを見て、`antigravity` に出たときだけサブスクで呼ぶ。
-  `cursor` に出ても選ばない（Other Models は Fable 専用）。
+  2026-11-13 時点の T3 ライブカタログ `antigravity` は `gemini-4-argon`、
+  `gemini-4-hydrogen`、`gemini-3.8-flash` で、Carbon は未掲載（`cursor` に
+  出ても選ばない）。サブスク枠での判定手順はスキル `model-route` に従い、
+  呼ぶ直前に `orchestrator_capabilities` で `antigravity` を確認し、出たときだけ
+  サブスクで呼ぶ。
 - 掲載後も、発想と暫定監査は Argon（§1、§2.5）。設計・仕様・W1 は Opus / Codex
   のまま。Carbon は複雑な多段デバッグと開かれた科学的探求に限る。
-  weekly limit 時の API は同一モデルだけ（§0.5）。Argon の枠切れを Carbon の
-  API で埋めない。
+  Argon の weekly limit を Carbon（`carbon-sub`）で埋めない（§0.5）。
 
 出典: [Gemini 4 Carbon is now available](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/)、
 [Gemini Developer API pricing](https://aistudio.google.com/docs/pricing)、
 [Google AI plans](https://one.google.com/about/google-ai-plans/)。
+
+## 1.2 Gemini 4 Hydrogen（3.8 Flash からの移行先。2026-11-13）
+
+- 公開は 2026-11-12。公式は `gemini-3.8-flash` および旧世代からの推奨アップグレード
+  先かつ Antigravity Agent の既定モデルと位置づける。Gemini 4 共通の統合 1M
+  コンテキスト、同期 64K 出力（長文デコード最大 1M）、4 段階の `thinking_level`
+  （`low` / `medium` / `high` / `xhigh`。`minimal` は非対応でエラー）を持つ。
+- **既定 `thinking_level` の注意**: Argon / Carbon / 3.8 Flash（既定 `medium`）と
+  異なり、**Hydrogen は既定が `high`**。`agy`（T3 `delegate_task`）で呼ぶときは
+  **必ず `options` に `{"thinking_level": "medium"}`（機械的抽出は `"low"`）を明示**
+  する。`high` / `xhigh` の利用条件は §0.5・§3.5–§3.7 に従う。
+- **Argon・Carbon との公式比較（全領域で Hydrogen > Argon ではない）**:
+  - **Hydrogen が上回る領域**: 応答速度（3.8 Flash 比約 2.5 倍、Argon より高速）、
+    API 単価の低さ（金額は写さず料金表を参照）、3.8 Flash 比 5 倍以上の捏造削減、
+    SWE-sweep / FrontierCode 2.0 / CursorBench 4.0 / AA Intelligence Index /
+    HLE-Diamond。Carbon や Argon（計画・難所・最終検証）と Hydrogen（並列ワーカー・
+    実行・テスト検証）を組み合わせるオーケストレーションが公式推奨。
+  - **Argon が上回る領域**: **AA-Omniscience 低ハルシネーション率**、Chartography、
+    Terminal-Bench-Science 0.1。加えて `agy` Pro では Argon は非繰越の独立週枠、
+    Hydrogen は `Gemini Models` 枠共有。
+- **運用方針**: `agy` サブスクでは旧 Gemini 3.8 Flash の役割（§2.3・§2.8）を
+  **すべて Gemini 4 Hydrogen へ移行**し、Argon の独立週枠は発想と暫定監査（§1・§2.5）に
+  温存する。有料 API（`gemini-sub` 系）では `hydrogen-sub` / `carbon-sub` を主軸にし、
+  `argon-sub` 呼び出しを最小化する（§0.5）。
+
+出典: [Gemini 4 Hydrogen docs](https://aistudio.google.com/docs/models/gemini-4-hydrogen)、
+[What's new in Gemini 4 Hydrogen](https://aistudio.google.com/docs/whats-new-gemini-4-hydrogen)、
+[Gemini 4 Hydrogen model card](https://deepmind.google/models/model-cards/gemini-4-hydrogen/)、
+[Gemini Developer API pricing](https://aistudio.google.com/docs/pricing)。
 
 ## 2. Cursor Pro（ローカルと Cloud Agent）
 
@@ -114,8 +158,8 @@ HPC 境界は `rules/hpc.md` を参照。
   （本ファイル §2.1 の Fast 手順、`docs/routing.md` §8）:
   - **機密（Flag: Private）**: **Composer 2.5**
     （`fastMode: false` を明示した T3 / 非 Fast CLI）。
-  - **Visual QA フォールバック**: Gemini 3.8 Flash のあと、目視 QA に
-    **Grok 4.7**（`docs/routing.md` §3 Visual QA）。
+  - **Visual QA フォールバック**: Gemini 4 Hydrogen（旧 3.8 Flash）のあと、
+    目視 QA に **Grok 4.7**（`docs/routing.md` §3 Visual QA）。
   - **Opus 5.5 が使えないときのオーケストレーター代行**: **Grok 4.7**
     （Team / `claude` が使えない局面のみ。代行できるのが Grok だけだが
     枠のリセットまでが長いため、平常時は Opus・用途はこの2例外に限定して温存）。
@@ -140,15 +184,18 @@ HPC 境界は `rules/hpc.md` を参照。
 - **設計**: Grok 4.7（**必ず非 Fast**）
 - **実装**: Composer 2.5（**必ず非 Fast**）
 
-### 2.3 Gemini 3.8 Flash（agy）
+### 2.3 Gemini 4 Hydrogen（agy、旧 3.8 Flash から移行）
 
-- **実装（W1）からは今すぐ外す**（2026-10-30 時点）。
-- **2026-10-31 の週次枠リセット後**: 実装なしで残りの役割だけ試す。
-  それでも週次枠を使い切るなら、役割をさらに減らすことを検討する。
+- **日常実装（W1）には使わない**（W1 は Codex、探索・W2・Visual QA・yomiyasu に
+  集中させる方針を維持）。
+- **設定**: `agy` ではカタログ既定が `high` のため、T3 `delegate_task` では
+  `thinking_level: "medium"`（機械的抽出は `"low"`）を明示する（§1.2）。
 - **担当**: ファイル探索、Web 検索（Flag: Search）、横断検索、全体把握（W2）、
   ログ要約、一覧化、整形、**Visual QA の第一候補（PNG / 画面の目視。
   フォールバックは §2.1 の Grok 4.7）**。
   **人が読む日本語の推敲（yomiyasu、§2.8）** — ログ要約と混同しない。
+- 旧 **Gemini 3.8 Flash**（`flash-sub`）は Hydrogen が使えない旧環境等の
+  レガシー控えに留める。
 
 ## 2.5 Worker（実装役）とオーケストレーション
 
@@ -159,7 +206,7 @@ HPC 境界は `rules/hpc.md` を参照。
   **Grok 4.7 代行**（Opus 不在時に代行できるのが Grok のみ・Grok 枠は
   リセットまで長いので温存）。
 - **研究以外のリポジトリ**: 本人の運用に合わせ、司令塔は Grok
-  （Cursor・非 Fast）または Gemini Flash。以下の Opus 司令塔・
+  （Cursor・非 Fast）または Gemini 4 Hydrogen（旧 Flash）。以下の Opus 司令塔・
   ループ頭設計は研究の既定であり、非研究へ自動適用しない。Private の
   外部送信制約と従量課金・HPC 等の境界は維持する。
 
@@ -272,7 +319,7 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 2.8 yomiyasu（`nanaism/yomiyasu`）
 
 - **大きなループの終わり**、人が読む文章に使う。担当モデルは
-  **Gemini 3.8 Flash**（agy）。
+  **Gemini 4 Hydrogen**（`agy`、`thinking_level: medium` 明示）。
 - 依頼文で、【事実】【解釈】【未確認】などの **【】接頭辞**、見出し、
   箇条書き、番号、数値を**変えない**よう明示する。
 - 推敲後は**元文との diff** を取って確認する。
@@ -323,9 +370,9 @@ HPC 境界は `rules/hpc.md` を参照。
 - **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/
   細部・W1・セルフレビュー = Codex（`codex-sub`）/ 控え = `dsh-sub` /
   Cloud 実装 = Composer 2.5 / 敵対レビュー = §2.5「暫定監査」を優先、
-  恒久方針はループ末 Opus 5.5 / Flash = W2・Extract・整形・
-  Visual QA 第一候補（yomiyasu は §2.8 のみ）。ローカル Grok 4.7 =
-  Visual QA フォールバック・Opus 不在時の司令塔代行のみ（§2.1）。
+  恒久方針はループ末 Opus 5.5 / **Gemini 4 Hydrogen**（`agy`、`medium` 明示）=
+  W2・Extract・整形・Visual QA 第一候補（yomiyasu は §2.8 のみ）。
+  ローカル Grok 4.7 = Visual QA フォールバック・Opus 不在時の司令塔代行のみ（§2.1）。
 - **effort を変えるときは新しいスレッドで始める**。同一スレッドの途中で
   変えると、それまでの履歴を読み直すうえキャッシュも効きにくい
   （Antigravity の運用知見）。
@@ -337,26 +384,32 @@ HPC 境界は `rules/hpc.md` を参照。
 | --- | --- | --- |
 | claudeAgent の Sonnet | **high** | `options` で medium を明示する |
 | claudeAgent の Opus / Fable | medium | 明示不要。high にするときだけ書く |
+| agy の Hydrogen | **high** | `thinking_level: "medium"`（軽作業 `"low"`）明示 |
 | antigravity の Argon | ライブカタログで確認 | 設定明示 (*2) |
 
-(*2) T3 は公開設定で medium 明示、CLI は `gemini-4-argon-medium`。high は要申請。
+(*2) T3 は公開設定で medium 明示、CLI は `gemini-4-argon-medium`。
+`agy` の high や Codex の high は要申請（Google API の high / xhigh は
+§0.5 により理由 1 行記録で事後報告可、無意味な引き上げは禁止）。
 
 ## 3.6 許可の所在
 
 - 呼び出し前の申請は **ファミリーと effort の格上げ** だけ。5h / 週枠の
-
   消費％を推定して申請しない。
 - **オーケストレーターのハンドオフ**（`rules/delegation.md` §1）: 司令塔が
   `docs/routing.md` に従い Worker（W1 `codex-sub` 等）・探索・レビュアへ
   `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
 - **要申請**: Codex の medium から high への格上げ（依頼前に1行で申請し、
-  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / Argon high
-  （格上げ、3.7）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** /
+  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / `agy` の Argon high・
+  Hydrogen high・xhigh（格上げ、3.7。ただし Google API 経由の high/xhigh は
+  §0.5 の 1 行記録で事後報告可）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** /
   **Opus 5.5 のうち、下記「申請不要」に該当しない用途**
   （例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、
   agy 週枠の Opus 5.5）。
 - **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/
-  Gemini 3.8 Flash / Argon medium / Sonnet 5.5 (medium)（**名指し時**）/
+  **Gemini 4 Hydrogen（`agy` は `medium` / `low` 明示。旧 3.8 Flash はフォールバック時）** /
+  Argon medium / **Google API（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
+  `carbon-sub`、§0.5 の事前確認済み Prepay 経路・既定 `medium`。`high` / `xhigh` は
+  理由 1 行記録で事後報告可）** / Sonnet 5.5 (medium)（**名指し時**）/
   **W1 の Codex（ChatGPT ログイン、T3 `delegate_task` または `codex-sub`）** /
   **DeepSeek API（§2.5 の利用条件を満たす場合のみ）** /
   **Opus 5.5 の次の用途**:
@@ -377,10 +430,10 @@ HPC 境界は `rules/hpc.md` を参照。
   再利用できる作業（調査・列挙・材料集め）は medium で進めてよい。
 - 提案は1行・選択肢は最大2つ・推奨を1つ。返事が無いまま次の区切りを
   過ぎたら「保留」と報告し、他の再利用可能な作業へ移る（全体は止めない）。
-- 格上げ先の順序: ①同一モデルの effort 上げ（要許可）②前提崩れ・同指摘2回は
-  **Opus 5.5**（§3.6 申請不要。Sonnet 5.5 high より優先）③別ファミリー
-  medium ④Fable（核ボタン・要許可）。**要申請の格上げ先は、承認が出るまで
-  切り替えない。**
+- 格上げ先の順序: ①同一モデルの effort 上げ（要許可。Google API は §0.5 事後報告可）
+  ②前提崩れ・同指摘2回は **Opus 5.5**（§3.6 申請不要。Sonnet 5.5 high より優先）
+  ③別ファミリー medium ④Fable（核ボタン・要許可）。**要申請の格上げ先は、
+  承認が出るまで切り替えない。**
 - 名指しモデルの変更は承認があったときだけ（Strict Model Fidelity）。
   「任せる」と言われた場合はこの限りでない。
 
@@ -392,8 +445,8 @@ HPC 境界は `rules/hpc.md` を参照。
   モデル・コンテキスト完全隔離）」を遵守すること。**Maker** は Codex
   （`codex-sub`、フォールバック時は DeepSeek **`dsh-sub`**）。
   **Breaker** は §2.5「暫定監査」を優先し、恒久方針はループ末の
-  **Opus 5.5**（T1/T2/T3 は当面なし。**Gemini 3.8 Flash は敵対レビューに
-  使わない**）。選定と詳細手順はスキル `adversarial-review` および
+  **Opus 5.5**（T1/T2/T3 は当面なし。**Gemini 4 Hydrogen・旧 3.8 Flash は
+  敵対レビューに使わない**）。選定と詳細手順はスキル `adversarial-review` および
   `model-route` を参照。
 
 ## Typst（共通スキルの分担・実行制約）
@@ -402,10 +455,10 @@ HPC 境界は `rules/hpc.md` を参照。
   明示readする。
 - 論旨・主張・章立ては **Opus**。確定材料からの本文下書き/修正・図表・
   体裁・テンプレ移植は **Codex medium**。
-- 推敲は **Flash + yomiyasu本体**。意味・数値・引用を元文とのdiffで
-  確認する。
-- PNG目視は **Flash → Grok（画像判断能力は未確認）**。同じ問題が2回なら
-  **Opus**。ループ末の独立reviewは §2.5「暫定監査」を優先する
+- 推敲は **Gemini 4 Hydrogen（medium 明示）+ yomiyasu本体**。意味・数値・引用を
+  元文とのdiffで確認する。
+- PNG目視は **Gemini 4 Hydrogen（medium 明示）→ Grok（画像判断能力は未確認）**。
+  同じ問題が2回なら **Opus**。ループ末の独立reviewは §2.5「暫定監査」を優先する
   （Makerの自己確認とは別）。
 - T3では `delegate_task` のcodexが基本。`target.options` は
   `{"serviceTier": "default", "reasoningEffort": "medium"}`。
