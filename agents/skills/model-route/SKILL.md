@@ -46,7 +46,8 @@ research-brain の `survey-papers` スキルは読解・整理の手順を担当
 1. **公式ポジション（全領域で Hydrogen > Argon ではない）**:
    - **Hydrogen (`gemini-4-hydrogen`)**: 旧 `3.8 Flash` からの推奨移行先。
      Search・W2・Extract・整形・Visual QA・yomiyasu と並列実行向き。
-     **`agy` は既定 `high` のため `thinking_level: medium`（軽作業 `low`）を必ず明示**する。
+     **`agy`・`hydrogen-sub` とも既定 `high`（無指定で可、軽作業 `low` 可）**。
+     `xhigh` は無意味な引き上げを禁止し、必要時は理由 1 行記録で事後報告可。
    - **Argon (`gemini-4-argon`)**: 低ハルシネーション（`AA-Omniscience`）・
      図表読解・科学ベンチでなお優位。`agy` では非繰越の独立週枠を発想と
      暫定監査（`models.md` §2.5）に集中させ、**有料 API では最小限に抑える**。
@@ -68,8 +69,10 @@ research-brain の `survey-papers` スキルは読解・整理の手順を担当
    - **API 利用時の主軸**: `hydrogen-sub` または `carbon-sub`（限界を試す難所のみ）を
      優先し、`argon-sub` の乱発を避ける。Carbon は `--timeout 900`・圧縮プロンプトを
      維持し、タイムアウト時は圧縮再試行または `argon-sub` / `hydrogen-sub` へ退避する。
-   - **effort**: 既定 `medium`（軽作業 `low`）。API でも無意味な `high` / `xhigh`
-     引き上げは禁止。必要なときは **理由を 1 行記録して事後報告可**（`models.md` §0.5）。
+   - **effort**: Hydrogen は既定 `high`（軽作業 `low` 可、`xhigh` は無意味な
+     引き上げ禁止・理由 1 行記録で事後報告可）。Argon / Carbon は既定 `medium`、
+     API の `high` 引き上げも無意味禁止・理由 1 行記録で事後報告可（`models.md`
+     §0.5・§1.2）。
 4. **価格**: Argon と Carbon の導入期間は 2026-11-30 まで、標準単価は
    2026-12-01 から（スケジュール同一）。金額は写さず料金表を見る
    （`models.md` §0.5・§1.1）。Carbon はトークンが多いため、割引終了後も

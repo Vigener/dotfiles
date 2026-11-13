@@ -33,10 +33,9 @@
   契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。
   例: Argon / Hydrogen は通常 `antigravity`、Google API 経路は
   `rules/models.md` §0.5、cursor に `gemini-4-argon` や `gemini-4-carbon` や
-  `gemini-4-hydrogen` が出ても選ばない。`antigravity` の
-  `gemini-4-hydrogen` は既定 `thinking_level` が `high` のため、必ず
-  `options` に `{"thinking_level": "medium"}`（軽作業は `"low"`）を明示する。
-  使い分けはスキル `model-route`、事実は `rules/models.md` §1.1–§1.2）。
+  `gemini-4-hydrogen` が出ても選ばない。`antigravity` の `gemini-4-hydrogen`
+  は既定 `high` のまま無指定で可、軽作業は `"low"` 可。使い分けはスキル
+  `model-route`、事実は `rules/models.md` §1.1–§1.2）。
 - 同一モデルの軽い並列なら native `subagent`（Antigravity の `invoke_subagent`）
   でもよい（T3 の子スレッドは作られない）。
 
@@ -91,16 +90,18 @@ Bash 経由で外部 CLI を別プロセス起動する。
     スキル `deepseek-harness`。
   - `agy --dangerously-skip-permissions --model <model-id> --print "..." < /dev/null`:
     Google AI Pro / Antigravity 枠（Hydrogen, Argon 等）。
-  - `bin/gemini-sub`, `bin/hydrogen-sub`, `bin/carbon-sub`, `bin/argon-sub`,
-    `bin/flash-sub`: Google Developer API 経路（既定 `medium`。
-    `~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF 確認済み、
+  - `bin/gemini-sub`・`bin/hydrogen-sub`（既定 `high`）、`bin/carbon-sub`・
+    `bin/argon-sub`・`bin/flash-sub`（既定 `medium`）: Google Developer API 経路
+    （`~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF 確認済み、
     `rules/models.md` §0.5）。
   - `cursor-agent -p --yolo --model <model-id> "..." < /dev/null`:
     Cursor Pro 枠（Private 時の非 Fast Composer 等）。
   - `claude -p`: Claude Team 枠（Opus 等）。
-- effort は既定 **medium**。high（Hydrogen は xhigh 可）は「成功条件が開いている」
-  案件だけに使い、Google API（`gemini-sub` 系）は理由を 1 行記録して事後報告可、
-  `agy` / Codex 等は事前申請に従う（無意味な引き上げは禁止、`rules/models.md` §0.5・§3.6）。
+- effort は原則既定 **medium**（Hydrogen は `agy`・`hydrogen-sub` とも既定
+  **high**）。格上げ（Argon / Carbon の `high`、Hydrogen の `xhigh` 等）は
+  「成功条件が開いている」案件だけに使い、Google API および Hydrogen の
+  `xhigh` は理由を 1 行記録して事後報告可、`agy` Argon 等や Codex の `high` は
+  事前申請に従う（無意味な引き上げは禁止、`rules/models.md` §0.5・§1.2・§3.6）。
 
 **非対話呼び出しの罠（2026-10-21 実測）。忘れると20分溶ける。**
 

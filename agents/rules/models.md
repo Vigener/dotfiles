@@ -36,11 +36,13 @@ HPC 境界は `rules/hpc.md` を参照。
   （例: Antigravity 未掲載間の `carbon-sub`）の適合タスクでは、都度確認なしで
   設定済みの Google API 経路（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
   `carbon-sub`）を呼び出してよい。サブスクが回復したらサブスクへ戻す。
-- API も既定 `medium`（機械的処理は `low`）。**無意味に `high` / `xhigh` へ
-  引き上げることは禁止**する。難所・開かれた問題等で `high`（`gemini-4-hydrogen`
-  のみ `xhigh` 可）が必要なときは、Google API に限り **理由を 1 行記録すれば
-  事後報告可**とする（§3.6–§3.7 の事前承認待ちを要しない。Codex / Opus /
-  Fable の事前承認規則や、用途禁止・Private 境界は解除しない）。
+- API の既定はモデルごとの規定どおり（`hydrogen-sub` / Hydrogen は既定 `high`・
+  軽作業のみ `low` 可、`argon-sub` / `carbon-sub` / `flash-sub` は既定
+  `medium`）。**無意味な格上げ（Argon / Carbon の `high`、Hydrogen の
+  `xhigh`）は禁止**する。難所・開かれた問題等でこれらが必要なときは、理由を
+  1 行記録すれば **事後報告可**とする（Google API および Hydrogen の
+  `xhigh` は §3.6–§3.7 の事前承認待ちを要しない。Codex / Opus / Fable の
+  事前承認規則や、用途禁止・Private 境界は解除しない）。
 - API の利用許可と課金設定の変更は別。未設定経路の開通・チャージ・オートチャージ
   有効化は禁止。Prepay 枯渇（`429` / `RESOURCE_EXHAUSTED`）時は即時停止
   （`exit 3`）し、課金設定を変えない。支出・トークン使用量・理由を記録し、
@@ -59,9 +61,9 @@ HPC 境界は `rules/hpc.md` を参照。
 - **実行チャネルと認証隔離（サブスク保護）**: T3 Code 設定やシェル全体
   （`.zshrc` 等）に `GEMINI_API_KEY` を登録しない（サブスク枠の誤消費・API
   引きずり込み防止）。API 実行は独立 CLI `bin/gemini-sub`（既定
-  `gemini-4-hydrogen` / `medium`、SSE ストリーミング `:streamGenerateContent?alt=sse`・
+  `gemini-4-hydrogen` / `high`、SSE ストリーミング `:streamGenerateContent?alt=sse`・
   `xhigh` 対応）および既定モデル固定ラッパー `bin/hydrogen-sub`
-  （`gemini-4-hydrogen` / `medium`）・`bin/carbon-sub`（`gemini-4-carbon` /
+  （`gemini-4-hydrogen` / `high`）・`bin/carbon-sub`（`gemini-4-carbon` /
   `medium`）・`bin/argon-sub`（`gemini-4-argon` / `medium`）・`bin/flash-sub`
   （`gemini-3.8-flash` / `medium`、レガシー控え）を使い、キーは専用ファイル
   `~/.config/gemini-sub/.env`（パーミッション `600`）または一時環境変数からのみ
@@ -125,10 +127,11 @@ HPC 境界は `rules/hpc.md` を参照。
   先かつ Antigravity Agent の既定モデルと位置づける。Gemini 4 共通の統合 1M
   コンテキスト、同期 64K 出力（長文デコード最大 1M）、4 段階の `thinking_level`
   （`low` / `medium` / `high` / `xhigh`。`minimal` は非対応でエラー）を持つ。
-- **既定 `thinking_level` の注意**: Argon / Carbon / 3.8 Flash（既定 `medium`）と
-  異なり、**Hydrogen は既定が `high`**。`agy`（T3 `delegate_task`）で呼ぶときは
-  **必ず `options` に `{"thinking_level": "medium"}`（機械的抽出は `"low"`）を明示**
-  する。`high` / `xhigh` の利用条件は §0.5・§3.5–§3.7 に従う。
+- **既定 `thinking_level`**: Argon / Carbon / 3.8 Flash は既定 `medium`、
+  **Hydrogen は `agy`・API（`hydrogen-sub`）とも既定 `high` のまま運用**する
+  （呼び出し時の `medium` 明示は不要。単純な抽出・整形のみ任意で `low` 可）。
+  **`xhigh`** はチャネルを問わず無意味な引き上げを禁止し、難所等で必要なときだけ
+  **理由を 1 行記録して事後報告可**（§0.5・§3.6）。
 - **Argon・Carbon との公式比較（全領域で Hydrogen > Argon ではない）**:
   - **Hydrogen が上回る領域**: 応答速度（3.8 Flash 比約 2.5 倍、Argon より高速）、
     API 単価の低さ（金額は写さず料金表を参照）、3.8 Flash 比 5 倍以上の捏造削減、
@@ -188,8 +191,9 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - **日常実装（W1）には使わない**（W1 は Codex、探索・W2・Visual QA・yomiyasu に
   集中させる方針を維持）。
-- **設定**: `agy` ではカタログ既定が `high` のため、T3 `delegate_task` では
-  `thinking_level: "medium"`（機械的抽出は `"low"`）を明示する（§1.2）。
+- **設定**: `agy`・`hydrogen-sub` とも **既定 `high`（無指定で可）**。
+  単純な機械的抽出は任意で `"low"` 可。`xhigh` は無意味な引き上げを禁止し、
+  必要時のみ理由 1 行記録で事後報告可（§1.2）。
 - **担当**: ファイル探索、Web 検索（Flag: Search）、横断検索、全体把握（W2）、
   ログ要約、一覧化、整形、**Visual QA の第一候補（PNG / 画面の目視。
   フォールバックは §2.1 の Grok 4.7）**。
@@ -319,7 +323,7 @@ HPC 境界は `rules/hpc.md` を参照。
 ## 2.8 yomiyasu（`nanaism/yomiyasu`）
 
 - **大きなループの終わり**、人が読む文章に使う。担当モデルは
-  **Gemini 4 Hydrogen**（`agy`、`thinking_level: medium` 明示）。
+  **Gemini 4 Hydrogen**（`agy`、既定 `high`）。
 - 依頼文で、【事実】【解釈】【未確認】などの **【】接頭辞**、見出し、
   箇条書き、番号、数値を**変えない**よう明示する。
 - 推敲後は**元文との diff** を取って確認する。
@@ -360,9 +364,10 @@ HPC 境界は `rules/hpc.md` を参照。
 
 ## 3.5 effort の既定値
 
-- 既定は **medium**。high は「成功条件が開いている」案件だけに使う。
-- 閉じている（ルーブリック・DoD・テスト・差分がある）: medium。
-- 開いている（何が良いか自体を決める）: high。
+- 原則既定は **medium**（**Gemini 4 Hydrogen は `agy`・`hydrogen-sub` とも
+  既定 `high`**）。格上げは「成功条件が開いている」案件だけに使う。
+- 閉じている（ルーブリック・DoD・テスト・差分がある）: medium（Hydrogen は既定 high）。
+- 開いている（何が良いか自体を決める）: high（Hydrogen は xhigh 可）。
 - 機械的（整形・分類・抽出）: low。ただし T3 Codex 子・孫の既定は
   medium（§2.5）。
 - モデルと effort は別軸。モデルを上げる前に effort を下げられないか
@@ -370,7 +375,7 @@ HPC 境界は `rules/hpc.md` を参照。
 - **役割の目安**: ループ頭の設計 = Opus 5.5 high（§3.6 申請不要）/
   細部・W1・セルフレビュー = Codex（`codex-sub`）/ 控え = `dsh-sub` /
   Cloud 実装 = Composer 2.5 / 敵対レビュー = §2.5「暫定監査」を優先、
-  恒久方針はループ末 Opus 5.5 / **Gemini 4 Hydrogen**（`agy`、`medium` 明示）=
+  恒久方針はループ末 Opus 5.5 / **Gemini 4 Hydrogen**（`agy`・既定 `high`）=
   W2・Extract・整形・Visual QA 第一候補（yomiyasu は §2.8 のみ）。
   ローカル Grok 4.7 = Visual QA フォールバック・Opus 不在時の司令塔代行のみ（§2.1）。
 - **effort を変えるときは新しいスレッドで始める**。同一スレッドの途中で
@@ -384,12 +389,13 @@ HPC 境界は `rules/hpc.md` を参照。
 | --- | --- | --- |
 | claudeAgent の Sonnet | **high** | `options` で medium を明示する |
 | claudeAgent の Opus / Fable | medium | 明示不要。high にするときだけ書く |
-| agy の Hydrogen | **high** | `thinking_level: "medium"`（軽作業 `"low"`）明示 |
+| agy / API Hydrogen | **high** | 既定 high で可（軽作業 `low`・`xhigh` 事後報告可） |
 | antigravity の Argon | ライブカタログで確認 | 設定明示 (*2) |
 
 (*2) T3 は公開設定で medium 明示、CLI は `gemini-4-argon-medium`。
-`agy` の high や Codex の high は要申請（Google API の high / xhigh は
-§0.5 により理由 1 行記録で事後報告可、無意味な引き上げは禁止）。
+`agy` の Argon high や Codex の high は要申請（Hydrogen の `xhigh` および
+Google API の格上げは §0.5・§1.2 により理由 1 行記録で事後報告可、無意味な
+引き上げは禁止）。
 
 ## 3.6 許可の所在
 
@@ -399,17 +405,19 @@ HPC 境界は `rules/hpc.md` を参照。
   `docs/routing.md` に従い Worker（W1 `codex-sub` 等）・探索・レビュアへ
   `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
 - **要申請**: Codex の medium から high への格上げ（依頼前に1行で申請し、
-  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / `agy` の Argon high・
-  Hydrogen high・xhigh（格上げ、3.7。ただし Google API 経由の high/xhigh は
-  §0.5 の 1 行記録で事後報告可）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** /
+  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / `agy` の Argon high
+  （格上げ、3.7。Google API の Argon / Carbon high は §0.5 の 1 行記録で
+  事後報告可）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** /
   **Opus 5.5 のうち、下記「申請不要」に該当しない用途**
   （例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、
   agy 週枠の Opus 5.5）。
 - **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/
-  **Gemini 4 Hydrogen（`agy` は `medium` / `low` 明示。旧 3.8 Flash はフォールバック時）** /
-  Argon medium / **Google API（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
-  `carbon-sub`、§0.5 の事前確認済み Prepay 経路・既定 `medium`。`high` / `xhigh` は
-  理由 1 行記録で事後報告可）** / Sonnet 5.5 (medium)（**名指し時**）/
+  **Gemini 4 Hydrogen（`agy`・`hydrogen-sub` とも既定 `high`、軽作業 `low` 可。
+  `xhigh` は無意味な引き上げを禁止し、必要時は理由 1 行記録で事後報告可。
+  旧 3.8 Flash はフォールバック時）** / Argon medium /
+  **Google API（`gemini-sub` / `hydrogen-sub` / `argon-sub` / `carbon-sub`、
+  §0.5 の事前確認済み Prepay 経路。Argon / Carbon の `high` や Hydrogen の
+  `xhigh` は理由 1 行記録で事後報告可）** / Sonnet 5.5 (medium)（**名指し時**）/
   **W1 の Codex（ChatGPT ログイン、T3 `delegate_task` または `codex-sub`）** /
   **DeepSeek API（§2.5 の利用条件を満たす場合のみ）** /
   **Opus 5.5 の次の用途**:
@@ -430,7 +438,7 @@ HPC 境界は `rules/hpc.md` を参照。
   再利用できる作業（調査・列挙・材料集め）は medium で進めてよい。
 - 提案は1行・選択肢は最大2つ・推奨を1つ。返事が無いまま次の区切りを
   過ぎたら「保留」と報告し、他の再利用可能な作業へ移る（全体は止めない）。
-- 格上げ先の順序: ①同一モデルの effort 上げ（要許可。Google API は §0.5 事後報告可）
+- 格上げ先の順序: ①同一モデルの effort 上げ（要許可。Google API・Hydrogen `xhigh` は事後報告可）
   ②前提崩れ・同指摘2回は **Opus 5.5**（§3.6 申請不要。Sonnet 5.5 high より優先）
   ③別ファミリー medium ④Fable（核ボタン・要許可）。**要申請の格上げ先は、
   承認が出るまで切り替えない。**
@@ -455,9 +463,9 @@ HPC 境界は `rules/hpc.md` を参照。
   明示readする。
 - 論旨・主張・章立ては **Opus**。確定材料からの本文下書き/修正・図表・
   体裁・テンプレ移植は **Codex medium**。
-- 推敲は **Gemini 4 Hydrogen（medium 明示）+ yomiyasu本体**。意味・数値・引用を
+- 推敲は **Gemini 4 Hydrogen（既定 high）+ yomiyasu本体**。意味・数値・引用を
   元文とのdiffで確認する。
-- PNG目視は **Gemini 4 Hydrogen（medium 明示）→ Grok（画像判断能力は未確認）**。
+- PNG目視は **Gemini 4 Hydrogen（既定 high）→ Grok（画像判断能力は未確認）**。
   同じ問題が2回なら **Opus**。ループ末の独立reviewは §2.5「暫定監査」を優先する
   （Makerの自己確認とは別）。
 - T3では `delegate_task` のcodexが基本。`target.options` は
