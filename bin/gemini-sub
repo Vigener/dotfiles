@@ -17,7 +17,7 @@
  *   --repo <dir>        workspace root (required)
  *   --prompt <text|->   task prompt; '-' reads stdin (required)
  *   --model <id>        model id (default: gemini-4-hydrogen)
- *   --effort <level>    off | low | medium | high | xhigh (default: medium; xhigh for gemini-4-hydrogen)
+ *   --effort <level>    off | low | medium | high | xhigh (default: high for gemini-4-hydrogen, medium otherwise)
  *   --timeout <sec>     wall-clock timeout in seconds (default: 900)
  *   --key-file <path>   explicit path to .env containing GEMINI_API_KEY
  *   --dry-run           validate auth, options, and payload without making API calls
@@ -68,7 +68,7 @@ function failApiError(errObj, fallbackStatus) {
 function parseArgs(argv) {
   const out = {
     model: 'gemini-4-hydrogen',
-    effort: 'medium',
+    effort: null,
     timeout: 900,
     dryRun: false,
   }
@@ -98,6 +98,10 @@ function parseArgs(argv) {
         if (arg.startsWith('--')) fail(`unknown option: ${arg}`, EXIT.usage)
         fail(`unexpected argument: ${arg}`, EXIT.usage)
     }
+  }
+
+  if (!out.effort) {
+    out.effort = out.model.includes('gemini-4-hydrogen') ? 'high' : 'medium'
   }
 
   return out

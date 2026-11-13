@@ -1,4 +1,4 @@
 #!/bin/sh
-# hydrogen-sub: call gemini-sub with gemini-4-hydrogen (default medium effort)
+# hydrogen-sub: call gemini-sub with gemini-4-hydrogen (default high effort)
 # Used as fallback when Antigravity Gemini subscription limit is reached, or for fast Gemini API tasks.
-exec "$(dirname "$0")/gemini-sub" --model gemini-4-hydrogen --effort medium "$@"
+exec "$(dirname "$0")/gemini-sub" --model gemini-4-hydrogen --effort high "$@"

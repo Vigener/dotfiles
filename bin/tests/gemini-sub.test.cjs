@@ -48,7 +48,8 @@ test('gemini-sub CLI argument parsing, key resolution, and error handling', () =
     assert.equal(out5.ok, true)
     assert.equal(out5.hasKey, true)
     assert.equal(out5.model, 'gemini-4-hydrogen')
-    assert.equal(out5.thinkingConfig.thinkingLevel, 'medium') // default medium
+    assert.equal(out5.effort, 'high')
+    assert.equal(out5.thinkingConfig.thinkingLevel, 'high') // default high for hydrogen
 
     // 5b. xhigh thinkingLevel on gemini-4-hydrogen
     const r5b = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'hello', '--model', 'gemini-4-hydrogen', '--effort', 'xhigh', '--dry-run'], {
@@ -59,6 +60,17 @@ test('gemini-sub CLI argument parsing, key resolution, and error handling', () =
     const out5b = JSON.parse(r5b.stdout.trim().split('\n').pop())
     assert.equal(out5b.effort, 'xhigh')
     assert.equal(out5b.thinkingConfig.thinkingLevel, 'xhigh')
+
+    // 5c. Non-Hydrogen models still default to medium when --effort is omitted
+    const r5c = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'hello', '--model', 'gemini-4-argon', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(r5c.status, 0, r5c.stderr)
+    const out5c = JSON.parse(r5c.stdout.trim().split('\n').pop())
+    assert.equal(out5c.model, 'gemini-4-argon')
+    assert.equal(out5c.effort, 'medium')
+    assert.equal(out5c.thinkingConfig.thinkingLevel, 'medium')
 
     // 6. Gemini 2.5 numeric thinkingBudget mapping when explicitly specified
     const r6 = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'hello', '--model', 'gemini-2.5-pro', '--effort', 'high', '--dry-run'], {
@@ -344,8 +356,18 @@ test('argon-sub, carbon-sub, hydrogen-sub, and flash-sub shell wrappers dispatch
     assert.equal(rHydrogen.status, 0, rHydrogen.stderr)
     const outHydrogen = JSON.parse(rHydrogen.stdout.trim().split('\n').pop())
     assert.equal(outHydrogen.model, 'gemini-4-hydrogen')
-    assert.equal(outHydrogen.effort, 'medium')
-    assert.equal(outHydrogen.thinkingConfig.thinkingLevel, 'medium')
+    assert.equal(outHydrogen.effort, 'high')
+    assert.equal(outHydrogen.thinkingConfig.thinkingLevel, 'high')
+
+    // Test hydrogen-sub low override
+    const rHydrogenLow = spawnSync(hydrogenBin, ['--repo', root, '--prompt', 'hello', '--effort', 'low', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(rHydrogenLow.status, 0, rHydrogenLow.stderr)
+    const outHydrogenLow = JSON.parse(rHydrogenLow.stdout.trim().split('\n').pop())
+    assert.equal(outHydrogenLow.effort, 'low')
+    assert.equal(outHydrogenLow.thinkingConfig.thinkingLevel, 'low')
 
     // Test hydrogen-sub xhigh override
     const rHydrogenXhigh = spawnSync(hydrogenBin, ['--repo', root, '--prompt', 'hello', '--effort', 'xhigh', '--dry-run'], {
