@@ -18,6 +18,7 @@ HPC/量子コンピュータ研究者として、「ノイズレス」「OS非�
 
 - `zsh/.zshrc`: Zsh のメイン設定ファイル。（`~/.zshrc` へリンク）
 - `Brewfile`: Homebrew による Mac アプリ・CLI ツールの一括管理リスト。
+    - ⚠️ **セキュリティ重要ルール**: `ente-auth` などの 2FA 認証器・機密アプリは、研究室の共有 Mac mini への流入を防ぐため `Brewfile` には含めず、手元端末（MBA）でのみ単体手動インストール（`brew install --cask ente-auth`）する。また、誤削除防止のため `brew bundle cleanup --force` は禁止。
 - `karabiner/index.ts`: Karabiner-Elements のキーバインド設定。TypeScript ベースで管理され、ビルドにより `~/.config/karabiner/karabiner.json` に出力されます。（macOS のみ）
     - ⚠️ 自動生成される `karabiner.json` は Git 管理対象外です。編集は `index.ts` のみで行います。
 - `herdr/.config/herdr/config.toml`: herdr（エージェント用ターミナルワークスペース）の共有設定。`~/.config/herdr/config.toml` へ symlink。

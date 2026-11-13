@@ -31,8 +31,12 @@
 - 子は親の会話履歴を引き継がない。brief に前提・制約・完了条件を全部書く。
 - `target` は **(provider, model) の組**で選ぶ。モデル名がカタログにあっても、
   契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。
-  例: Argon は通常 `antigravity`、Google API 例外は `rules/models.md` §0.5、
-  cursor に `gemini-4-argon` が出ても選ばない）。
+  例: Argon / Hydrogen は通常 `antigravity`、Google API 経路は
+  `rules/models.md` §0.5、cursor に `gemini-4-argon` や `gemini-4-carbon` や
+  `gemini-4-hydrogen` が出ても選ばない。`antigravity` の
+  `gemini-4-hydrogen` は既定 `thinking_level` が `high` のため、必ず
+  `options` に `{"thinking_level": "medium"}`（軽作業は `"low"`）を明示する。
+  使い分けはスキル `model-route`、事実は `rules/models.md` §1.1–§1.2）。
 - 同一モデルの軽い並列なら native `subagent`（Antigravity の `invoke_subagent`）
   でもよい（T3 の子スレッドは作られない）。
 
@@ -86,14 +90,17 @@ Bash 経由で外部 CLI を別プロセス起動する。
     （`rules/models.md` §2.5 の利用条件を満たす場合のみ直接呼ぶ）。
     スキル `deepseek-harness`。
   - `agy --dangerously-skip-permissions --model <model-id> --print "..." < /dev/null`:
-    Google AI Pro / Antigravity 枠（Flash, Argon 等）。
-  - `bin/gemini-sub`, `bin/argon-sub`, `bin/flash-sub`: Google API 経路
-    （weekly limit 到達時などの例外時のみ。`rules/models.md` §0.5）。
+    Google AI Pro / Antigravity 枠（Hydrogen, Argon 等）。
+  - `bin/gemini-sub`, `bin/hydrogen-sub`, `bin/carbon-sub`, `bin/argon-sub`,
+    `bin/flash-sub`: Google Developer API 経路（既定 `medium`。
+    `~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF 確認済み、
+    `rules/models.md` §0.5）。
   - `cursor-agent -p --yolo --model <model-id> "..." < /dev/null`:
     Cursor Pro 枠（Private 時の非 Fast Composer 等）。
   - `claude -p`: Claude Team 枠（Opus 等）。
-- effort は既定 **medium**。high は「成功条件が開いている」案件（何が良いか
-  自体を決める）だけに使い、呼ぶ前に1行で理由を書く。
+- effort は既定 **medium**。high（Hydrogen は xhigh 可）は「成功条件が開いている」
+  案件だけに使い、Google API（`gemini-sub` 系）は理由を 1 行記録して事後報告可、
+  `agy` / Codex 等は事前申請に従う（無意味な引き上げは禁止、`rules/models.md` §0.5・§3.6）。
 
 **非対話呼び出しの罠（2026-10-21 実測）。忘れると20分溶ける。**
 
@@ -138,12 +145,12 @@ Bash 経由で外部 CLI を別プロセス起動する。
      CLI。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**:
    モデルは `rules/models.md` §2.5 の暫定指示を優先する（恒久方針はループ末
-   Opus 5.5、T1/T2/T3 は当面なし）。Gemini 3.8 Flash は使わない。
+   Opus 5.5、T1/T2/T3 は当面なし）。Gemini 4 Hydrogen・旧 3.8 Flash は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。
    モデル切替は `/model`。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は
    `{通称} {短い作業}`（例: `Fable open-artifact audit`）。通称は人が呼ぶ
-   名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Flash）。
+   名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Hydrogen / Gemini Flash）。
    版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前に
    チャットへ `{通称} を呼び出します` を1行。
 5. **Cursor を `delegate_task` で呼ぶとき**: `target.options` に

@@ -90,6 +90,14 @@ link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
 link_file "$DOTFILES/bin/t3-refresh" "$HOME/.local/bin/t3-refresh"
 
+# Subagent CLI scripts (Gemini / Codex / Argon / Carbon / Hydrogen)
+link_file "$DOTFILES/bin/argon-sub" "$HOME/.local/bin/argon-sub"
+link_file "$DOTFILES/bin/carbon-sub" "$HOME/.local/bin/carbon-sub"
+link_file "$DOTFILES/bin/hydrogen-sub" "$HOME/.local/bin/hydrogen-sub"
+link_file "$DOTFILES/bin/gemini-sub" "$HOME/.local/bin/gemini-sub"
+link_file "$DOTFILES/bin/flash-sub" "$HOME/.local/bin/flash-sub"
+link_file "$DOTFILES/bin/codex-sub" "$HOME/.local/bin/codex-sub"
+
 # Cursor Quota Guard (Gemini誤爆・高額モデル暴走防止)
 mkdir -p "$HOME/.local/share/cursor-agent"
 mkdir -p "$HOME/.cargo/bin"

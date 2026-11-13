@@ -47,7 +47,18 @@ test('gemini-sub CLI argument parsing, key resolution, and error handling', () =
     const out5 = JSON.parse(r5.stdout.trim().split('\n').pop())
     assert.equal(out5.ok, true)
     assert.equal(out5.hasKey, true)
-    assert.equal(out5.thinkingConfig.thinkingLevel, 'medium') // default 3.8 medium
+    assert.equal(out5.model, 'gemini-4-hydrogen')
+    assert.equal(out5.thinkingConfig.thinkingLevel, 'medium') // default medium
+
+    // 5b. xhigh thinkingLevel on gemini-4-hydrogen
+    const r5b = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'hello', '--model', 'gemini-4-hydrogen', '--effort', 'xhigh', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(r5b.status, 0, r5b.stderr)
+    const out5b = JSON.parse(r5b.stdout.trim().split('\n').pop())
+    assert.equal(out5b.effort, 'xhigh')
+    assert.equal(out5b.thinkingConfig.thinkingLevel, 'xhigh')
 
     // 6. Gemini 2.5 numeric thinkingBudget mapping when explicitly specified
     const r6 = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'hello', '--model', 'gemini-2.5-pro', '--effort', 'high', '--dry-run'], {
@@ -73,7 +84,7 @@ test('gemini-sub CLI argument parsing, key resolution, and error handling', () =
   }
 })
 
-test('gemini-sub fetch mocking: success, 429 quota exhaustion, and auth failure', () => {
+test('gemini-sub fetch mocking: SSE stream, thought filtering, 429 quota exhaustion, auth failure, and timeout', () => {
   const root = fs.mkdtempSync(path.join(__dirname, '.gemini-sub-mock-'))
   const binPath = path.join(__dirname, '../gemini-sub')
   const preloadPath = path.join(root, 'preload.cjs')
@@ -82,7 +93,11 @@ test('gemini-sub fetch mocking: success, 429 quota exhaustion, and auth failure'
   fs.writeFileSync(preloadPath, `
 const mode = process.env.MOCK_FETCH_MODE;
 if (mode) {
+  const enc = new TextEncoder();
   globalThis.fetch = async (url, options) => {
+    if (!url.includes(':streamGenerateContent?alt=sse')) {
+      throw new Error('Expected SSE endpoint, got: ' + url);
+    }
     if (mode === 'success') {
       return {
         ok: true,
@@ -92,6 +107,35 @@ if (mode) {
           usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 6, totalTokenCount: 18 },
         }),
       };
+    }
+    if (mode === 'sse') {
+      const ssePayload = [
+        ': keepalive\\n\\n',
+        'data: ' + JSON.stringify({ candidates: [{ content: { parts: [{ text: 'secret thought', thought: true }] } }], usageMetadata: { promptTokenCount: 10, thoughtsTokenCount: 50, totalTokenCount: 60 } }) + '\\n\\n',
+        'data: ' + JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Hello ' }] } }], usageMetadata: { promptTokenCount: 10, thoughtsTokenCount: 50, candidatesTokenCount: 1, totalTokenCount: 61 } }) + '\\n\\n',
+        'data: ' + JSON.stringify({ candidates: [{ content: { parts: [{ text: '世界!' }] } }], usageMetadata: { promptTokenCount: 10, thoughtsTokenCount: 50, candidatesTokenCount: 3, totalTokenCount: 63 } }) + '\\n\\n',
+        'data: [DONE]\\n\\n',
+      ].join('');
+      const bytes = enc.encode(ssePayload);
+      const mid = Math.floor(bytes.length / 2);
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(bytes.slice(0, mid));
+          controller.enqueue(bytes.slice(mid));
+          controller.close();
+        },
+      });
+      return { ok: true, status: 200, body };
+    }
+    if (mode === 'sse_quota') {
+      const ssePayload = 'data: ' + JSON.stringify({ error: { code: 429, message: 'Stream quota exhausted', status: 'RESOURCE_EXHAUSTED' } }) + '\\n\\n';
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(enc.encode(ssePayload));
+          controller.close();
+        },
+      });
+      return { ok: true, status: 200, body };
     }
     if (mode === 'quota') {
       return {
@@ -126,13 +170,28 @@ if (mode) {
         }
       });
     }
+    if (mode === 'stream_hang') {
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(enc.encode(': keepalive\\n\\n'));
+          if (options && options.signal) {
+            options.signal.addEventListener('abort', () => {
+              const err = new Error('The operation was aborted');
+              err.name = 'AbortError';
+              controller.error(err);
+            });
+          }
+        },
+      });
+      return { ok: true, status: 200, body };
+    }
     throw new Error('Unknown mock mode: ' + mode);
   };
 }
 `)
 
   try {
-    // 1. Success case
+    // 1. Legacy non-body JSON fallback
     const rSuccess = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task'], {
       encoding: 'utf8',
       env: {
@@ -147,6 +206,36 @@ if (mode) {
     assert.equal(outSuccess.ok, true)
     assert.equal(outSuccess.text, 'Mock response text')
     assert.equal(outSuccess.usage.totalTokenCount, 18)
+
+    // 1b. SSE ReadableStream with split UTF-8 chunk & thought filtering
+    const rSse = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task'], {
+      encoding: 'utf8',
+      env: {
+        PATH: process.env.PATH,
+        NODE_OPTIONS: `--require=${preloadPath}`,
+        MOCK_FETCH_MODE: 'sse',
+        GEMINI_API_KEY: 'test-key',
+      },
+    })
+    assert.equal(rSse.status, 0, rSse.stderr)
+    const outSse = JSON.parse(rSse.stdout.trim().split('\n').pop())
+    assert.equal(outSse.ok, true)
+    assert.equal(outSse.text, 'Hello 世界!')
+    assert.equal(outSse.usage.totalTokenCount, 63)
+
+    // 1c. Mid-stream SSE error chunk (RESOURCE_EXHAUSTED)
+    const rSseQuota = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task'], {
+      encoding: 'utf8',
+      env: {
+        PATH: process.env.PATH,
+        NODE_OPTIONS: `--require=${preloadPath}`,
+        MOCK_FETCH_MODE: 'sse_quota',
+        GEMINI_API_KEY: 'test-key',
+      },
+    })
+    assert.equal(rSseQuota.status, 3)
+    const outSseQuota = JSON.parse(rSseQuota.stdout.trim().split('\n').pop())
+    assert.equal(outSseQuota.code, 'USAGE_LIMIT')
 
     // 2. Quota / Prepay exhausted (429)
     const rQuota = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task'], {
@@ -179,7 +268,7 @@ if (mode) {
     assert.equal(outAuth.ok, false)
     assert.equal(outAuth.code, 'AUTH_FAILED')
 
-    // 4. Timeout case (exit 4)
+    // 4. Timeout before headers (exit 4)
     const rTimeout = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task', '--timeout', '0.2'], {
       encoding: 'utf8',
       env: {
@@ -193,14 +282,31 @@ if (mode) {
     const outTimeout = JSON.parse(rTimeout.stdout.trim().split('\n').pop())
     assert.equal(outTimeout.ok, false)
     assert.equal(outTimeout.code, 'TIMEOUT')
+
+    // 5. Timeout during SSE body read (exit 4)
+    const rStreamTimeout = spawnSync(process.execPath, [binPath, '--repo', root, '--prompt', 'mock task', '--timeout', '0.2'], {
+      encoding: 'utf8',
+      env: {
+        PATH: process.env.PATH,
+        NODE_OPTIONS: `--require=${preloadPath}`,
+        MOCK_FETCH_MODE: 'stream_hang',
+        GEMINI_API_KEY: 'test-key',
+      },
+    })
+    assert.equal(rStreamTimeout.status, 4)
+    const outStreamTimeout = JSON.parse(rStreamTimeout.stdout.trim().split('\n').pop())
+    assert.equal(outStreamTimeout.ok, false)
+    assert.equal(outStreamTimeout.code, 'TIMEOUT')
   } finally {
     fs.rmSync(root, { recursive: true, force: true })
   }
 })
 
-test('argon-sub and flash-sub shell wrappers dispatch with correct default models and effort', () => {
+test('argon-sub, carbon-sub, hydrogen-sub, and flash-sub shell wrappers dispatch with correct default models and effort', () => {
   const root = fs.mkdtempSync(path.join(__dirname, '.gemini-wrappers-test-'))
   const argonBin = path.join(__dirname, '../argon-sub')
+  const carbonBin = path.join(__dirname, '../carbon-sub')
+  const hydrogenBin = path.join(__dirname, '../hydrogen-sub')
   const flashBin = path.join(__dirname, '../flash-sub')
 
   try {
@@ -218,6 +324,38 @@ test('argon-sub and flash-sub shell wrappers dispatch with correct default model
     assert.equal(outArgon.model, 'gemini-4-argon')
     assert.equal(outArgon.effort, 'medium')
     assert.equal(outArgon.thinkingConfig.thinkingLevel, 'medium')
+
+    // Test carbon-sub defaults
+    const rCarbon = spawnSync(carbonBin, ['--repo', root, '--prompt', 'hello', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(rCarbon.status, 0, rCarbon.stderr)
+    const outCarbon = JSON.parse(rCarbon.stdout.trim().split('\n').pop())
+    assert.equal(outCarbon.model, 'gemini-4-carbon')
+    assert.equal(outCarbon.effort, 'medium')
+    assert.equal(outCarbon.thinkingConfig.thinkingLevel, 'medium')
+
+    // Test hydrogen-sub defaults
+    const rHydrogen = spawnSync(hydrogenBin, ['--repo', root, '--prompt', 'hello', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(rHydrogen.status, 0, rHydrogen.stderr)
+    const outHydrogen = JSON.parse(rHydrogen.stdout.trim().split('\n').pop())
+    assert.equal(outHydrogen.model, 'gemini-4-hydrogen')
+    assert.equal(outHydrogen.effort, 'medium')
+    assert.equal(outHydrogen.thinkingConfig.thinkingLevel, 'medium')
+
+    // Test hydrogen-sub xhigh override
+    const rHydrogenXhigh = spawnSync(hydrogenBin, ['--repo', root, '--prompt', 'hello', '--effort', 'xhigh', '--dry-run'], {
+      encoding: 'utf8',
+      env: { PATH: process.env.PATH, HOME: root },
+    })
+    assert.equal(rHydrogenXhigh.status, 0, rHydrogenXhigh.stderr)
+    const outHydrogenXhigh = JSON.parse(rHydrogenXhigh.stdout.trim().split('\n').pop())
+    assert.equal(outHydrogenXhigh.effort, 'xhigh')
+    assert.equal(outHydrogenXhigh.thinkingConfig.thinkingLevel, 'xhigh')
 
     // Test flash-sub defaults
     const rFlash = spawnSync(flashBin, ['--repo', root, '--prompt', 'hello', '--dry-run'], {
