@@ -32,7 +32,9 @@
 - `target` は **(provider, model) の組**で選ぶ。モデル名がカタログにあっても、
   契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。
   例: Argon は通常 `antigravity`、Google API 例外は `rules/models.md` §0.5、
-  cursor に `gemini-4-argon` が出ても選ばない）。
+  cursor に `gemini-4-argon` や `gemini-4-carbon` が出ても選ばない。
+  Carbon の使い分けはスキル `model-route`「Argon と Carbon」
+  （事実は `rules/models.md` §1.1））。
 - 同一モデルの軽い並列なら native `subagent`（Antigravity の `invoke_subagent`）
   でもよい（T3 の子スレッドは作られない）。
 

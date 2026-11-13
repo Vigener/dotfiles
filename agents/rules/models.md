@@ -72,6 +72,38 @@ HPC 境界は `rules/hpc.md` を参照。
   禁止は維持する。
 - 消化後は Web 版 Argon へフォールバックしてよい（従来どおり）。
 
+## 1.1 Gemini 4 Carbon（Argon の置換ではない。2026-11-11）
+
+- 公開は 2026-11-10。モデルカードは Carbon を Argon ベースと書く。公式の使い分けは、
+  Argon をソフトウェア工学と知識労働の多数向け、Carbon を知能の限界を試す作業
+  （複雑な多段のコーディングとデバッグ、開かれた科学的探求）向けとする。
+  Carbon は Argon より多くのトークンを使って探索・推論・検証する。料金表は
+  Argon を、Carbon より応答が速くターンあたりのトークンが少ない側と書く。
+- Developer API の有料枠に `gemini-4-carbon` と `gemini-4-argon` が並ぶ
+  （Free は両方なし）。2026-11-11 に設定済みキーの models.list でも両方を
+  確認した。`gemini-sub --model` で指定できる形ではある。`carbon-sub` は置かない。
+- 2026-11-11 の料金表では、両者の導入期間は 2026-11-30 まで、標準単価は
+  2026-12-01 から。入出力単価のスケジュールは両者で同じ。Argon の導入期間
+  だけが先に終わる、という公式記載は無い。金額は写さない（§0.5）。
+  期間後に料金表とこの節が食い違っても、Carbon を安い代替として自動優先しない。
+  人間がこの節を直すまで、下の役割のままにする。
+- 掲載単価が同じでも Carbon はトークンが多い。タスク費用が Argon 以下になる
+  前提で、割引終了後に Carbon へ切り替えない。
+- 人間の前提（2026-11-11）: Carbon は Google AI Pro の Antigravity にも来る。
+  同日のプラン説明では Pro は Argon、Carbon は Ultra と API 有料枠。
+  この環境の T3 カタログも `antigravity` は Argon と Flash のみ。未掲載を
+  「来ない」方針にはしない。判定手順はスキル `model-route` の「Argon と Carbon」。
+  呼ぶ直前にライブカタログを見て、`antigravity` に出たときだけサブスクで呼ぶ。
+  `cursor` に出ても選ばない（Other Models は Fable 専用）。
+- 掲載後も、発想と暫定監査は Argon（§1、§2.5）。設計・仕様・W1 は Opus / Codex
+  のまま。Carbon は複雑な多段デバッグと開かれた科学的探求に限る。
+  weekly limit 時の API は同一モデルだけ（§0.5）。Argon の枠切れを Carbon の
+  API で埋めない。
+
+出典: [Gemini 4 Carbon is now available](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/)、
+[Gemini Developer API pricing](https://aistudio.google.com/docs/pricing)、
+[Google AI plans](https://one.google.com/about/google-ai-plans/)。
+
 ## 2. Cursor Pro（ローカルと Cloud Agent）
 
 ### 2.1 ローカル（T3 / `cursor-agent`）

@@ -31,6 +31,10 @@
 > 本書内の Opus レビュー役の記述は恒久方針であり、暫定中は同節の
 > Argon medium に置き換える。設計・引き上げの役割は変えない。
 >
+> **Carbon**: Google AI Pro に来る前提。手順はスキル `model-route`
+> 「Argon と Carbon」。`antigravity` に出るまで呼ばない。導入価格の
+> 終了後も、Argon の安い代替にはしない。
+>
 > **DeepSeek の代替欄**: `rules/models.md` §2.5 の利用条件付き。
 > 枠不足・エラーだけでは自動利用しない。Codex CLI ラッパーは API へ
 > 自動切替しない。
@@ -114,6 +118,7 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | `w1 in api` | DeepSeek 従量（1017） | `dsh-sub --repo … --prompt …`（条件付き控え） |
 | `flash in agy` | Google AI Pro（Gemini 枠） | 探索・W2・整形・Visual QA・推敲 |
 | `argon in agy` | Argon 独立週枠 | 発想・暫定監査（`rules/models.md` §2.5） |
+| `carbon in agy` | Google AI Pro（来る前提。掲載後） | 限界を試す作業（スキル `model-route`） |
 | `sonnet in agy` | Google AI Pro（Claude 週枠） | 名指し時のみ |
 | `opus in claude` | **Claude Team** | オーケストレーター・ループ頭尾 |
 | `composer in cursor` | Cursor Pro | **Private のみ**（非 Fast 明示） |
@@ -129,6 +134,7 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | W1 Codex | `codex-sub` / T3 `codex` | API キー Codex・Private への Codex は禁止 |
 | W1 DeepSeek | `dsh-sub`（条件付き） | Free は使わない |
 | Argon | 通常 `antigravity` (*4) | 設計・仕様には使わない |
+| Carbon | `antigravity`（掲載後。`rules/models.md` §1.1） | cursor。未掲載の間は呼ばない |
 | Sonnet 5.5 | `agy` → Team | cursor |
 | Opus 5.5 | `claudeAgent` / Team | cursor、agy（余剰時のみ・要許可） |
 | Fable 5.1 | `cursor` のみ | それ以外 |
@@ -192,6 +198,8 @@ Anthropic / OpenAI の従量 API への自動フォールバックは禁止（�
 
 - **Fable 5.1 を許可なく Cursor で呼ぶ**。
 - **Argon を設計・仕様・W1 前段に使う**。
+- **Carbon を、未掲載のチャネル、Argon の担当、または導入価格終了後の安い代替として使う**
+  （スキル `model-route`「Argon と Carbon」）。
 - **ローカル W1 に Gemini Flash / Composer を使う**（Private / Cloud Agent
   を除く）。
 - `Private` フラグのタスクを agy に投げる。
