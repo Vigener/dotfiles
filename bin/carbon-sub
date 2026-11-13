@@ -1,0 +1,4 @@
+#!/bin/sh
+# carbon-sub: call gemini-sub with gemini-4-carbon (default medium effort)
+# Used for frontier reasoning, complex debugging, and open-ended scientific tasks via Gemini API.
+exec "$(dirname "$0")/gemini-sub" --model gemini-4-carbon --effort medium "$@"

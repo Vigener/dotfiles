@@ -3,7 +3,8 @@
  * gemini-sub: Google GenAI API CLI wrapper for one-shot text requests.
  *
  * Designed to operate independently from T3 Code Antigravity (Google account subscription),
- * preserving subscription quotas and activating only on weekly-limit spillover or explicit request.
+ * preserving subscription quotas and activating on weekly-limit spillover, authorized API runs,
+ * or explicit request.
  *
  * Sends only the supplied prompt. --repo validates a directory; it does not read
  * repository files or provide file editing, shell tools, or an agent loop.
@@ -15,8 +16,8 @@
  * Options:
  *   --repo <dir>        workspace root (required)
  *   --prompt <text|->   task prompt; '-' reads stdin (required)
- *   --model <id>        model id (default: gemini-3.8-flash)
- *   --effort <level>    off | low | medium | high (default: medium)
+ *   --model <id>        model id (default: gemini-4-hydrogen)
+ *   --effort <level>    off | low | medium | high | xhigh (default: medium; xhigh for gemini-4-hydrogen)
  *   --timeout <sec>     wall-clock timeout in seconds (default: 900)
  *   --key-file <path>   explicit path to .env containing GEMINI_API_KEY
  *   --dry-run           validate auth, options, and payload without making API calls
@@ -50,9 +51,23 @@ function fail(message, code = EXIT.usage, extra = {}) {
   process.exit(code)
 }
 
+function failApiError(errObj, fallbackStatus) {
+  const status = errObj?.code || fallbackStatus || 500
+  const errMsg = errObj?.message || `HTTP ${status}`
+  const errStatus = errObj?.status || `HTTP_${status}`
+
+  if (status === 401 || status === 403) {
+    fail(`Authentication failed: ${errMsg}`, EXIT.failed, { code: 'AUTH_FAILED', status })
+  } else if (status === 429 || errStatus === 'RESOURCE_EXHAUSTED') {
+    fail(`Quota/Resource exhausted: ${errMsg}`, EXIT.failed, { code: 'USAGE_LIMIT', status })
+  } else {
+    fail(`API error: ${errMsg}`, EXIT.failed, { code: 'API_ERROR', status })
+  }
+}
+
 function parseArgs(argv) {
   const out = {
-    model: 'gemini-3.8-flash',
+    model: 'gemini-4-hydrogen',
     effort: 'medium',
     timeout: 900,
     dryRun: false,
@@ -98,11 +113,11 @@ function readEnvFile(filePath) {
       const match = line.match(/^([A-Za-z_0-9]+)\s*=\s*(.*)$/)
       if (match) {
         const keyName = match[1]
-        let rawVal = match[2].trim()
+        const rawVal = match[2].trim()
 
         // Extract quoted string if present
         const quotedMatch = rawVal.match(/^"([^"]*)"/) || rawVal.match(/^'([^']*)'/)
-        let val = quotedMatch ? quotedMatch[1] : rawVal.split(/\s+#/)[0].trim()
+        const val = quotedMatch ? quotedMatch[1] : rawVal.split(/\s+#/)[0].trim()
 
         if (keyName === 'GEMINI_SUB_API_KEY' || keyName === 'GEMINI_API_KEY') {
           return val.trim()
@@ -139,10 +154,10 @@ function buildThinkingConfig(model, effort) {
     return { thinkingBudget: 0 }
   }
 
-  const isGemini3 = model.includes('gemini-3') || model.includes('gemini-4')
-  if (isGemini3) {
+  const isGemini3Or4 = model.includes('gemini-3') || model.includes('gemini-4')
+  if (isGemini3Or4) {
     // Categorical reasoning level for 3.x / 4.x models
-    const levelMap = { low: 'low', medium: 'medium', high: 'high' }
+    const levelMap = { low: 'low', medium: 'medium', high: 'high', xhigh: 'xhigh' }
     return { thinkingLevel: levelMap[effort] || 'medium' }
   }
 
@@ -151,8 +166,120 @@ function buildThinkingConfig(model, effort) {
     low: 1024,
     medium: 8192,
     high: 32768,
+    xhigh: 32768,
   }
   return { thinkingBudget: budgetMap[effort] || 8192 }
+}
+
+function consumePayloadChunk(data, state) {
+  if (!data || typeof data !== 'object') return
+  if (data.error) {
+    failApiError(data.error, data.error.code || 500)
+  }
+  const candidates = data.candidates || []
+  if (candidates.length > 0) {
+    state.sawCandidate = true
+    const parts = candidates[0].content?.parts || []
+    for (const part of parts) {
+      if (part.text && !part.thought) {
+        state.textParts.push(part.text)
+      }
+    }
+  }
+  if (data.usageMetadata) {
+    state.usage = data.usageMetadata
+  }
+}
+
+async function readResponsePayload(res) {
+  const state = {
+    sawCandidate: false,
+    textParts: [],
+    usage: null,
+  }
+
+  if (!res.body) {
+    const data = await res.json()
+    if (Array.isArray(data)) {
+      for (const item of data) consumePayloadChunk(item, state)
+    } else {
+      consumePayloadChunk(data, state)
+    }
+    return {
+      sawCandidate: state.sawCandidate,
+      text: state.textParts.join(Array.isArray(data) ? '' : '\n'),
+      usage: state.usage,
+    }
+  }
+
+  const decoder = new TextDecoder('utf-8')
+  let buffer = ''
+  let sawSseDataLine = false
+  let rawText = ''
+
+  const processLine = (rawLine) => {
+    const line = rawLine.replace(/\r$/, '')
+    if (!line || line.startsWith(':')) return
+    if (line.startsWith('data:')) {
+      sawSseDataLine = true
+      const jsonStr = line.slice(5).trim()
+      if (!jsonStr || jsonStr === '[DONE]') return
+      let parsed
+      try {
+        parsed = JSON.parse(jsonStr)
+      } catch (err) {
+        fail(`Invalid SSE JSON chunk from Gemini API: ${err.message}`, EXIT.failed, { code: 'API_ERROR' })
+      }
+      consumePayloadChunk(parsed, state)
+    }
+  }
+
+  const processTextChunk = (chunkText) => {
+    rawText += chunkText
+    buffer += chunkText
+    let newlineIdx = buffer.indexOf('\n')
+    while (newlineIdx !== -1) {
+      const line = buffer.slice(0, newlineIdx)
+      buffer = buffer.slice(newlineIdx + 1)
+      processLine(line)
+      newlineIdx = buffer.indexOf('\n')
+    }
+  }
+
+  if (typeof res.body.getReader === 'function') {
+    const reader = res.body.getReader()
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      if (value) {
+        processTextChunk(typeof value === 'string' ? value : decoder.decode(value, { stream: true }))
+      }
+    }
+  } else {
+    for await (const chunk of res.body) {
+      processTextChunk(typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true }))
+    }
+  }
+
+  const tail = decoder.decode()
+  if (tail) processTextChunk(tail)
+  if (buffer.trim()) processLine(buffer)
+
+  // Fallback if an endpoint returned plain JSON instead of SSE
+  if (!sawSseDataLine && rawText.trim()) {
+    const parsed = JSON.parse(rawText)
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) consumePayloadChunk(item, state)
+    } else {
+      consumePayloadChunk(parsed, state)
+    }
+  }
+
+  return {
+    sawCandidate: state.sawCandidate,
+    text: state.textParts.join(''),
+    usage: state.usage,
+  }
 }
 
 async function main() {
@@ -169,7 +296,7 @@ async function main() {
     fail(`repo directory does not exist: ${args.repo}`, EXIT.usage)
   }
 
-  const validEfforts = ['off', 'low', 'medium', 'high']
+  const validEfforts = ['off', 'low', 'medium', 'high', 'xhigh']
   if (!validEfforts.includes(args.effort)) {
     fail(`invalid effort: ${args.effort} (must be one of ${validEfforts.join(', ')})`, EXIT.usage)
   }
@@ -225,7 +352,7 @@ async function main() {
   }
 
   const baseEndpoint = process.env.GEMINI_API_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models'
-  const endpoint = `${baseEndpoint}/${encodeURIComponent(args.model)}:generateContent`
+  const endpoint = `${baseEndpoint}/${encodeURIComponent(args.model)}:streamGenerateContent?alt=sse`
 
   const controller = new AbortController()
   const timer = setTimeout(() => {
@@ -243,8 +370,6 @@ async function main() {
       signal: controller.signal,
     })
 
-    clearTimeout(timer)
-
     if (!res.ok) {
       let errBody = null
       try {
@@ -253,38 +378,28 @@ async function main() {
         // Not JSON
       }
 
+      clearTimeout(timer)
       const status = res.status
-      const errMsg = errBody?.error?.message || `HTTP ${status} ${res.statusText}`
-      const errStatus = errBody?.error?.status || `HTTP_${status}`
-
-      if (status === 401 || status === 403) {
-        fail(`Authentication failed: ${errMsg}`, EXIT.failed, { code: 'AUTH_FAILED', status })
-      } else if (status === 429 || errStatus === 'RESOURCE_EXHAUSTED') {
-        fail(`Quota/Resource exhausted: ${errMsg}`, EXIT.failed, { code: 'USAGE_LIMIT', status })
-      } else {
-        fail(`API error: ${errMsg}`, EXIT.failed, { code: 'API_ERROR', status })
-      }
+      failApiError(
+        errBody?.error || { code: status, message: `HTTP ${status} ${res.statusText}`, status: `HTTP_${status}` },
+        status
+      )
     }
 
-    const data = await res.json()
-    const candidates = data.candidates || []
-    if (candidates.length === 0) {
+    const result = await readResponsePayload(res)
+    clearTimeout(timer)
+
+    if (!result.sawCandidate) {
       fail('No response candidate returned by Gemini API', EXIT.failed, { code: 'EMPTY_RESPONSE' })
     }
-
-    const parts = candidates[0].content?.parts || []
-    const responseText = parts
-      .filter((p) => p.text && !p.thought)
-      .map((p) => p.text)
-      .join('\n')
 
     const outJson = {
       ok: true,
       provider: 'gemini-sub',
       model: args.model,
       effort: args.effort,
-      text: responseText,
-      usage: data.usageMetadata || null,
+      text: result.text,
+      usage: result.usage || null,
     }
 
     process.stdout.write(JSON.stringify(outJson) + '\n')
