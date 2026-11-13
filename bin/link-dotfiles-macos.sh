@@ -89,6 +89,7 @@ mkdir -p "$HOME/.local/bin"
 link_file "$DOTFILES/bin/md-to-html" "$HOME/.local/bin/md-to-html"
 link_file "$DOTFILES/bin/update-ai-usage" "$HOME/.local/bin/update-ai-usage"
 link_file "$DOTFILES/bin/t3-refresh" "$HOME/.local/bin/t3-refresh"
+link_file "$DOTFILES/bin/update-github-mirrors" "$HOME/.local/bin/update-github-mirrors"
 
 # Subagent CLI scripts (Gemini / Codex / Argon / Carbon / Hydrogen)
 link_file "$DOTFILES/bin/argon-sub" "$HOME/.local/bin/argon-sub"
@@ -114,6 +115,9 @@ link_file "$DOTFILES/bin/chrome-open-or-reload" "$HOME/bin/chrome-open-or-reload
 mkdir -p "$HOME/Library/LaunchAgents"
 if [[ -f "$DOTFILES/launchd/com.vigener.ai-usage.plist" ]]; then
   link_file "$DOTFILES/launchd/com.vigener.ai-usage.plist" "$HOME/Library/LaunchAgents/com.vigener.ai-usage.plist"
+fi
+if [[ -f "$DOTFILES/launchd/com.vigener.github-mirrors.plist" && "$(scutil --get LocalHostName 2>/dev/null || true)" == *mac-mini* ]]; then
+  link_file "$DOTFILES/launchd/com.vigener.github-mirrors.plist" "$HOME/Library/LaunchAgents/com.vigener.github-mirrors.plist"
 fi
 
 mkdir -p "$HOME/.gemini/config/skills"

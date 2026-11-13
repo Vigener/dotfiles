@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.vigener.github-mirrors</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-l</string>
+        <string>-c</string>
+        <string>if [[ -x "$HOME/dotfiles/bin/update-github-mirrors" ]]; then "$HOME/dotfiles/bin/update-github-mirrors"; elif [[ -x "$HOME/.local/bin/update-github-mirrors" ]]; then "$HOME/.local/bin/update-github-mirrors"; fi</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/mikoto/.local/bin:/Users/mikoto/bin</string>
+        <key>HOME</key>
+        <string>/Users/mikoto</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>4</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/tmp/com.vigener.github-mirrors.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.vigener.github-mirrors.stderr.log</string>
+</dict>
+</plist>
