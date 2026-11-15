@@ -54,11 +54,14 @@ research-brain の `survey-papers` スキルは読解・整理の手順を担当
    - **Carbon (`gemini-4-carbon`)**: 限界を試す作業（複雑多段デバッグ・
      開かれた科学的探求）。設計・仕様・W1・ループ頭と引き上げは従来どおり
      Opus / Codex であり、Carbon へ付け替えない。
-2. **Antigravity の Carbon ガード**:
-   - **前提**: Carbon は Google AI Pro の Antigravity にも来る想定。
-   - **呼ぶ直前**: `orchestrator_capabilities` で `antigravity` に Carbon が
-     あるか見る。あるときだけサブスクで呼ぶ。無い間はサブスクで呼ばず報告する。
-     `cursor` に出ていても選ばない。
+2. **Antigravity の Carbon 運用**:
+   - **サブスク優先**: Google AI Pro の `antigravity` で `gemini-4-carbon`（既定
+     `medium`、`high` は `models.md` §3.6）が利用可能。`cursor` に出ていても選ばない。
+   - **枠切れ時**: `agy` の Carbon が weekly limit に達した場合、限界を試す
+     難所・科学的探求に限り `carbon-sub`（`models.md` §0.5）へフォールバックし、
+     サブスク回復後に戻す。
+   - **使い分け維持**: 発想・暫定監査は Argon、探索・W2・Visual QA は Hydrogen、
+     設計・仕様・W1 は Opus / Codex のまま維持し、Argon の枠切れを Carbon で埋めない。
 3. **API（`gemini-sub` 系）とクォータ切れフォールバック**:
    - `~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF が確認済み
      （`models.md` §0.5）。サブスク優先を維持しつつ、枠切れ時や API 適合タスクでは

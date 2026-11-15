@@ -32,9 +32,9 @@ HPC 境界は `rules/hpc.md` を参照。
 
 - Google AI Pro のサブスク（`antigravity`）を優先する。ただし専用経路
   `~/.config/gemini-sub/.env` は **Prepay / オートチャージ OFF が確認済み**
-  （2026-11-13）であり、該当モデルの weekly limit 到達時や、API 専用モデル
-  （例: Antigravity 未掲載間の `carbon-sub`）の適合タスクでは、都度確認なしで
-  設定済みの Google API 経路（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
+  （2026-11-13）であり、該当モデルの weekly limit 到達時や、API 適合タスク
+  （難所・科学的探求向けの `carbon-sub` 等）では、都度確認なしで設定済みの
+  Google API 経路（`gemini-sub` / `hydrogen-sub` / `argon-sub` /
   `carbon-sub`）を呼び出してよい。サブスクが回復したらサブスクへ戻す。
 - API の既定はモデルごとの規定どおり（`hydrogen-sub` / Hydrogen は既定 `high`・
   軽作業のみ `low` 可、`argon-sub` / `carbon-sub` / `flash-sub` は既定
@@ -107,15 +107,13 @@ HPC 境界は `rules/hpc.md` を参照。
   単価スケジュールは同じで、金額は写さない（§0.5）。期間後に料金表とこの節が
   食い違っても、Carbon を安い代替として自動優先しない。掲載単価が同じでも
   Carbon はトークンが多いため、割引終了後に Argon の安い代替へ切り替えない。
-- 人間の前提（2026-11-11）: Carbon は Google AI Pro の Antigravity にも来る。
-  2026-11-13 時点の T3 ライブカタログ `antigravity` は `gemini-4-argon`、
-  `gemini-4-hydrogen`、`gemini-3.8-flash` で、Carbon は未掲載（`cursor` に
-  出ても選ばない）。サブスク枠での判定手順はスキル `model-route` に従い、
-  呼ぶ直前に `orchestrator_capabilities` で `antigravity` を確認し、出たときだけ
-  サブスクで呼ぶ。
+- Google AI Pro の Antigravity カタログに `gemini-4-carbon` が解放済み
+  （`antigravity` 経由のサブスク枠を優先。既定 `medium`、high は §3.6–§3.7 要申請。
+  `cursor` に出ても選ばない）。weekly limit 到達時のみ API 経路（`bin/carbon-sub`、
+  §0.5）へフォールバックし、サブスク回復後に戻す。
 - 掲載後も、発想と暫定監査は Argon（§1、§2.5）。設計・仕様・W1 は Opus / Codex
   のまま。Carbon は複雑な多段デバッグと開かれた科学的探求に限る。
-  Argon の weekly limit を Carbon（`carbon-sub`）で埋めない（§0.5）。
+  Argon の weekly limit を Carbon（`agy` Carbon / `carbon-sub`）で埋めない（§0.5）。
 
 出典: [Gemini 4 Carbon is now available](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/)、
 [Gemini Developer API pricing](https://aistudio.google.com/docs/pricing)、
@@ -405,16 +403,17 @@ Google API の格上げは §0.5・§1.2 により理由 1 行記録で事後報
   `docs/routing.md` に従い Worker（W1 `codex-sub` 等）・探索・レビュアへ
   `delegate_task` / CLI で委譲するのは**本人が許可済み**。都度の申請は不要。
 - **要申請**: Codex の medium から high への格上げ（依頼前に1行で申請し、
-  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / `agy` の Argon high
-  （格上げ、3.7。Google API の Argon / Carbon high は §0.5 の 1 行記録で
-  事後報告可）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での Codex** /
-  **Opus 5.5 のうち、下記「申請不要」に該当しない用途**
+  承認を待つ。§3.7）/ Fable 5.1 / Sonnet 5.5 の high / `agy` の Argon high・
+  Carbon high（格上げ、3.7。Google API の Argon / Carbon high は §0.5 の
+  1 行記録で事後報告可）/ Anthropic・OpenAI の従量 API / **OpenAI 従量での
+  Codex** / **Opus 5.5 のうち、下記「申請不要」に該当しない用途**
   （例: Phase-First の節目 Opus 5.5、発想・裁定のみの追加 Opus 5.5、
   agy 週枠の Opus 5.5）。
 - **申請不要**: Composer / Grok（`fastMode: false` を明示した場合のみ。§2）/
   **Gemini 4 Hydrogen（`agy`・`hydrogen-sub` とも既定 `high`、軽作業 `low` 可。
   `xhigh` は無意味な引き上げを禁止し、必要時は理由 1 行記録で事後報告可。
   旧 3.8 Flash はフォールバック時）** / Argon medium /
+  Carbon medium（`agy`、限界探求・多段デバッグ限定）/
   **Google API（`gemini-sub` / `hydrogen-sub` / `argon-sub` / `carbon-sub`、
   §0.5 の事前確認済み Prepay 経路。Argon / Carbon の `high` や Hydrogen の
   `xhigh` は理由 1 行記録で事後報告可）** / Sonnet 5.5 (medium)（**名指し時**）/

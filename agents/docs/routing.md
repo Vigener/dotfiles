@@ -36,10 +36,10 @@
 > **既定 `high`（無指定で可、軽作業のみ `low` 可）**。`xhigh` は無意味な引き上げを
 > 禁止し、必要時は理由 1 行記録で事後報告可（`rules/models.md` §1.2）。
 >
-> **Carbon**: Google AI Pro に来る前提。サブスク枠は `antigravity` に出るまで
-> 呼ばない（スキル `model-route`）。API 経路は `carbon-sub` を配備済みだが
-> トークン消費が多いため限界を試す難所・科学的探求に限る（`rules/models.md`
-> §0.5・§1.1）。導入価格の終了後も、Argon の安い代替にはしない。
+> **Carbon**: Google AI Pro（`antigravity`）と API（`carbon-sub`）の両経路で
+> 限界を試す作業（多段デバッグ・科学的探求）に利用可。`antigravity` 優先
+> （既定 `medium`、`cursor` 不可）。導入価格の終了後も、Argon の安い代替には
+> しない（`rules/models.md` §1.1）。
 >
 > **DeepSeek の代替欄**: `rules/models.md` §2.5 の利用条件付き。
 > 枠不足・エラーだけでは自動利用しない。Codex CLI ラッパーは API へ
@@ -53,6 +53,7 @@
 | **Design（細部）** | 仕様・疑似コード | `codex-sub`（effort medium） | 条件付き `dsh-sub` |
 | **Design（発想）** | 発想・問い直し | `agy: Argon` (medium) | Hydrogen / Web (*2) |
 | **Implement（中段）** | 打鍵・実装・修正（W1） | `codex-sub`（T3 は §3 参照） | 条件付き `dsh-sub` |
+| **限界探求・難デバッグ** | 多段デバッグ・科学 | `agy: Carbon` (medium) | `carbon-sub` |
 | **Implement（後段）** | 監査（Breaker） | 暫定 Argon medium (*1) | `argon-sub` (*2) |
 | **Extract / W2** | 走査・要約・整形 | `agy: Hydrogen` (既定 high) | `hydrogen-sub` |
 | **Flag: Private** | 機密情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
@@ -126,7 +127,7 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | `w1 in api` | DeepSeek 従量（1017） | `dsh-sub --repo … --prompt …`（条件付き控え） |
 | `hydrogen in agy` | Google AI Pro (Gemini) | 探索・W2・Visual QA（既定 high） |
 | `argon in agy` | Argon 独立週枠 | 発想・暫定監査（`rules/models.md` §2.5） |
-| `carbon in agy` | Google AI Pro（来る前提。掲載後） | 限界を試す作業（スキル `model-route`） |
+| `carbon in agy` | Google AI Pro (Carbon) | 限界探求・多段デバッグ（medium） |
 | `*-sub` (Google API) | Prepay OFF 確認済み | 枠切れ・適合（`models.md` §0.5） |
 | `sonnet in agy` | Google AI Pro（Claude 週枠） | 名指し時のみ |
 | `opus in claude` | **Claude Team** | オーケストレーター・ループ頭尾 |
@@ -144,7 +145,7 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | W1 DeepSeek | `dsh-sub`（条件付き） | Free は使わない |
 | Gemini 4 Hydrogen | `agy` / `hydrogen-sub`（既定 high） | 実装 W1・`cursor` |
 | Argon | 通常 `antigravity` (*4) / `argon-sub` | 設計・仕様・`cursor` |
-| Carbon | `agy`（掲載後）/ `carbon-sub` (*4) | `cursor`・未掲載時のサブスク |
+| Carbon | `agy` (medium) / `carbon-sub` (*4) | 発想/W1 置換・`cursor` |
 | Gemini 3.8 Flash | レガシー控え（`agy` / `flash-sub`） | 実装 W1・Hydrogen 可時の既定 |
 | Sonnet 5.5 | `agy` → Team | cursor |
 | Opus 5.5 | `claudeAgent` / Team | cursor、agy（余剰時のみ・要許可） |
@@ -209,7 +210,7 @@ Anthropic / OpenAI の従量 API への自動フォールバックは禁止（�
 
 - **Fable 5.1 を許可なく Cursor で呼ぶ**。
 - **Argon を設計・仕様・W1 前段に使う**。
-- **Carbon を、未掲載のサブスクチャネル、Argon の担当、または導入価格終了後の安い代替として使う**
+- **Carbon を、Argon の担当（発想・暫定監査）・W1・導入価格終了後の安い代替として使う**
   （スキル `model-route`）。
 - **ローカル W1 に Gemini Hydrogen / Flash / Composer を使う**（Private / Cloud Agent
   を除く）。
