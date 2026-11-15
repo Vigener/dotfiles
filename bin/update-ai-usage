@@ -973,6 +973,9 @@ def format_markdown(agy, cursor, deepseek, claude=None, codex=None):
                     lines.append(f"  - ⚠️ **枯渇予測 (ETA to 0%)**: **{eta_str}** に全損予定（リセットまで残り {w_pacing['remaining_hours']/24:.1f}日）")
                     lines.append(f"  - 🛡️ **推奨安全ペース**: 1日あたり **~{w_pacing['safe_daily_pct']:.1f}%** 以内に抑制")
             lines.append("")
+    elif agy.get("disabled"):
+        reason = agy.get("reason", "Temporarily disabled")
+        lines.append(f"> ⏸️ {reason}\n")
     else:
         err = agy.get("error", "Unknown error")
         lines.append(f"> ⚠️ Failed to fetch Antigravity usage: `{err}`\n")
@@ -1127,8 +1130,12 @@ def main():
 
     args = parser.parse_args()
 
-    agy_bin = find_agy_binary()
-    agy = fetch_antigravity_usage(agy_bin)
+    # Disabled: invoking `agy -p /usage` via automated polling or another agent
+    # risks violating Google Antigravity ToS under personal Google OAuth login.
+    agy = {
+        "disabled": True,
+        "reason": "Antigravity (agy) check disabled for ToS compliance",
+    }
     cursor = fetch_cursor_usage()
     deepseek = fetch_deepseek_balance()
     claude = fetch_claude_usage()
