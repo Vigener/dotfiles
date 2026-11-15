@@ -33,9 +33,8 @@
   （他プロバイダからだけでなく `antigravity` 自身から `delegate_task` で
   `antigravity` を起動するのも禁止、Google 規約対策）。`antigravity` は
   **人間が直接起動・入力する T3 ルートスレッド専用**とする。エージェントが
-  Gemini（Hydrogen / Argon / Carbon）を使う場合は §5 の Google Developer API
-  ラッパー（`bin/hydrogen-sub` / `bin/argon-sub` / `bin/carbon-sub`）のみを使う
-  （`rules/models.md` §0.5）。
+  Gemini を使う場合は §5 の `bin/carbon-sub` のみを使う。
+  `hydrogen-sub` と `argon-sub` は選ばない（`rules/models.md` §0.5）。
 - `target` は **(provider, model) の組**で選ぶ。モデル名がカタログにあっても、
   契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。
   例: `cursor` に `gemini-4-argon` や `gemini-4-carbon` や `gemini-4-hydrogen`
@@ -101,19 +100,19 @@ Bash 経由で外部 CLI を別プロセス起動する。
     エージェントやスクリプト・`launchd`・`cron` から `agy` CLI を非対話起動
     してはならない（Google 側モデルを CLI で呼ぶ場合は必ず下の `*-sub` API
     ラッパーを使う）。
-  - `bin/gemini-sub`・`bin/hydrogen-sub`（既定 `high`）、`bin/carbon-sub`・
-    `bin/argon-sub`・`bin/flash-sub`（既定 `medium`）: Google Developer API 経路
-    （`~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF 確認済み、
-    単発テキスト API、ツールループ・PNG 目視なし、`rules/models.md` §0.5）。
+  - `bin/carbon-sub`（既定 `medium`）: エージェントが使う Google Developer API。
+    発想・暫定監査・渡したテキストの要約と推敲。`hydrogen-sub` / `argon-sub` /
+    `flash-sub` は起動しない（`~/.config/gemini-sub/.env` は Prepay /
+    オートチャージ OFF 確認済み、単発テキスト API、ツールループ・PNG 目視なし、
+    `rules/models.md` §0.5）。
   - `cursor-agent -p --yolo --model <model-id> "..." < /dev/null`:
     Cursor Pro 枠（Private 時の非 Fast Composer 等）。
   - `claude -p`: Claude Team 枠（Opus 等）。
-- effort は原則既定 **medium**（Hydrogen / `hydrogen-sub` は既定 **high**）。
-  格上げ（Argon / Carbon の `high`、Hydrogen の `xhigh` 等）は
-  「成功条件が開いている」案件だけに使い、Google API および Hydrogen の
-  `xhigh` は理由を 1 行記録して事後報告可、Codex の `high` や人間直操作の
-  `antigravity` Argon high 等は事前申請に従う（無意味な引き上げは禁止、
-  `rules/models.md` §0.5・§1.2・§3.6）。
+- effort は原則既定 **medium**（`carbon-sub` も medium）。
+  Carbon の `high` は「成功条件が開いている」案件だけ、理由を 1 行記録して
+  事後報告可。Codex の `high` は事前申請（無意味な引き上げは禁止、
+  `rules/models.md` §0.5・§3.6）。エージェントは Argon / Hydrogen を
+  この格上げ先にしない。
 
 **非対話呼び出しの罠（2026-10-21 実測）。忘れると20分溶ける。**
 
@@ -154,7 +153,8 @@ Bash 経由で外部 CLI を別プロセス起動する。
      CLI。
 2. **敵対レビュー・視点提案・採点（read-only・短時間・戻り値で足りる）**:
    モデルは `rules/models.md` §2.5 の暫定指示を優先する（恒久方針はループ末
-   Opus 5.5、T1/T2/T3 は当面なし）。Gemini 4 Hydrogen・旧 3.8 Flash は使わない。
+   Opus 5.5、T1/T2/T3 は当面なし）。暫定監査は `carbon-sub`。
+   Argon・Hydrogen・旧 3.8 Flash は使わない。
 3. **コンテキスト分離**: 別 BRIEF は `/clear` または別スレッド。
    モデル切替は `/model`。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は

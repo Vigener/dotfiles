@@ -21,7 +21,7 @@
   `delegate_task(..., "antigravity")` も禁止）。`antigravity` は**人間が直接
   入力する T3 ルートスレッド**（およびその内部でのみ `invoke_subagent`
   `Model: "inherit"`）専用。他エージェントが Gemini を使う場合は API キー経路
-  （`bin/hydrogen-sub` / `bin/argon-sub` / `bin/carbon-sub`）のみ使う。
+  （`bin/carbon-sub` のみ。`argon-sub` と `hydrogen-sub` は選ばない）を使う。
   → `rules/models.md` §0.5・`rules/delegation.md` §3–§5
 - **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、
   明示指示があるときだけ。
