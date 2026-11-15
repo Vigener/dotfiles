@@ -14,8 +14,10 @@
 - `~/.t3/userdata/settings.json` を稼働中に書き換えると、プロバイダのリロードで実行中セッションが
   強制終了する（書き込んだ側と無関係のスレッドも道連れになる）。`antigravity` に `customModels` を
   注入するのは仕様外。
-- Claude は **agy（週枠）> cursor（月枠）> claudeAgent（従量）** の順。`claudeAgent` は明示指示が
-  あるときだけ。agy の Claude は `delegate_task` に露出しないので CLI から呼ぶ。
+- （2026-10-18 当時の記録）Claude は agy（週枠）> cursor（月枠）> claudeAgent の順、
+  と書いてあった。**2026-11-16 以降この順は無効**。エージェントから `agy` /
+  `antigravity` を呼ぶことは禁止（`rules/models.md` §0.5）。Claude は Team
+  （`claudeAgent`）を使う。
 
 ## 3. Anthropic 5.x は「思考を切る」指定で 400 になる
 
@@ -41,7 +43,7 @@
 | Claude（T3 の `claudeAgent`） | **スレッド**（`claude --input-format stream-json --session-id` が終了後も残る） | 新スレッド |
 | Cursor（T3 の `cursor`） | ターン（`cursor-agent` は残らなかった） | 次ターン |
 | Antigravity（T3 の ACP） | スレッドと推定（週枠 0% で未検証） | 新スレッド |
-| CLI 直叩き（`claude -p` / `cursor-agent -p` / `agy -p`） | 実行ごと | 何もしなくてよい |
+| CLI 直叩き（`claude -p` / `cursor-agent -p`。`agy -p` は 2026-11-16 以降エージェントから禁止） | 実行ごと | ルール反映に再起動は不要。`agy` の起動許可ではない |
 
 **OpenCode だけ手順が重い**（アプリ全体が古いルールを配るため）。
 
@@ -57,7 +59,7 @@
 
 - `claude` はターン終了後も**プロセスが残る**（実測: 完了2分後も生存）。だから同一スレッドの続きは古いルールのまま。
 - `opencode` だけは**アプリ全体で1プロセス**なので、影響が全スレッドに及ぶ。ルール変更後は `pkill -f 'opencode serve'` → T3 再起動が確実。
-- CLI 直叩き（`claude -p` / `cursor-agent -p` / `agy -p` / `opencode run --standalone`）は毎回新プロセスなので、そのまま最新。
+- CLI 直叩き（`claude -p` / `cursor-agent -p` / `opencode run --standalone`）は毎回新プロセスなので、そのまま最新。`agy -p` も当時は同様だったが、2026-11-16 以降エージェントからの起動は禁止（`rules/models.md` §0.5）。
 
 ## 6. Claude Team の 5h : 週 の消費比（2026-10-21 実測）
 

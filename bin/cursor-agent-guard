@@ -45,8 +45,9 @@ if [[ "$target_model_lower" =~ gemini ]]; then
   echo "   Attempted model : $target_model" >&2
   echo "   Reason          : Invoking Gemini models via cursor-agent wastes valuable" >&2
   echo "                     Cursor usage (Fable quota). This is blocked at system level." >&2
-  echo "   How to use agy  : Use the Antigravity CLI instead (free & quota-safe):" >&2
-  echo "                     agy -p --model gemini-3.8-flash-high \"<prompt>\"" >&2
+  echo "   How to call Gemini : Use API wrapper (hydrogen-sub / gemini-sub) from agents," >&2
+  echo "                        or open an Antigravity thread directly as a human in T3 Code." >&2
+  echo "                        (Never run 'agy -p' from agents or automation — Google ToS risk.)" >&2
   echo "========================================================================" >&2
   exit 126
 fi

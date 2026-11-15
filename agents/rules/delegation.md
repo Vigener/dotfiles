@@ -29,15 +29,21 @@
 - 実行環境のツール契約を優先し、子 run の `next` 指示に従う。ポーリング
   （`task_status` や sleep のループ）は行わない。
 - 子は親の会話履歴を引き継がない。brief に前提・制約・完了条件を全部書く。
+- **`providerInstanceId: "antigravity"` への `delegate_task` は全面禁止**
+  （他プロバイダからだけでなく `antigravity` 自身から `delegate_task` で
+  `antigravity` を起動するのも禁止、Google 規約対策）。`antigravity` は
+  **人間が直接起動・入力する T3 ルートスレッド専用**とする。エージェントが
+  Gemini（Hydrogen / Argon / Carbon）を使う場合は §5 の Google Developer API
+  ラッパー（`bin/hydrogen-sub` / `bin/argon-sub` / `bin/carbon-sub`）のみを使う
+  （`rules/models.md` §0.5）。
 - `target` は **(provider, model) の組**で選ぶ。モデル名がカタログにあっても、
   契約が違うプロバイダでは選ばない（固定表は `docs/routing.md` §4。
-  例: Argon / Hydrogen は通常 `antigravity`、Google API 経路は
-  `rules/models.md` §0.5、cursor に `gemini-4-argon` や `gemini-4-carbon` や
-  `gemini-4-hydrogen` が出ても選ばない。`antigravity` の `gemini-4-hydrogen`
-  は既定 `high` のまま無指定で可、軽作業は `"low"` 可。使い分けはスキル
-  `model-route`、事実は `rules/models.md` §1.1–§1.2）。
-- 同一モデルの軽い並列なら native `subagent`（Antigravity の `invoke_subagent`）
-  でもよい（T3 の子スレッドは作られない）。
+  例: `cursor` に `gemini-4-argon` や `gemini-4-carbon` や `gemini-4-hydrogen`
+  が出ても選ばない。使い分けはスキル `model-route`、事実は `rules/models.md`
+  §0.5・§1.1–§1.2）。
+- 人間が直接入力した `antigravity` ルートスレッド内の同一モデル軽い並列に限り、
+  native `subagent`（`invoke_subagent`, `Model: "inherit"`）を使える
+  （T3 の子スレッドは作られない。§4）。
 
 ### 追補・訂正・別ラウンドの使い分け
 
@@ -65,7 +71,9 @@
 
 ## 4. Antigravity（`invoke_subagent`）
 
-**用途**: 親と同じモデルでの軽量・高速並行処理。
+**用途**: **人間が直接起動・入力した `antigravity` ルートスレッド内**における、
+親と同じモデルでの軽量・高速並行処理（他エージェントから `delegate_task` で
+`antigravity` を起動した先で使わせる構成は禁止）。
 
 - 必ず `Model: "inherit"` を指定する。
 - `Model: "flash"` / `"pro"` などの明示文字列は、ローカル ACP ハーネスの
@@ -88,31 +96,31 @@ Bash 経由で外部 CLI を別プロセス起動する。
   - `dsh-sub --repo <dir> --prompt "..."`: DeepSeek API 呼び出し
     （`rules/models.md` §2.5 の利用条件を満たす場合のみ直接呼ぶ）。
     スキル `deepseek-harness`。
-  - `agy --dangerously-skip-permissions --model <model-id> --print "..." < /dev/null`:
-    Google AI Pro / Antigravity 枠（Hydrogen, Argon 等）。
+  - **`agy -p` / `agy --print` / `agy acp` はエージェント・自動化から起動禁止**:
+    個人 Google アカウント（`oauth-personal`）の規約違反リスク対策として、
+    エージェントやスクリプト・`launchd`・`cron` から `agy` CLI を非対話起動
+    してはならない（Google 側モデルを CLI で呼ぶ場合は必ず下の `*-sub` API
+    ラッパーを使う）。
   - `bin/gemini-sub`・`bin/hydrogen-sub`（既定 `high`）、`bin/carbon-sub`・
     `bin/argon-sub`・`bin/flash-sub`（既定 `medium`）: Google Developer API 経路
     （`~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF 確認済み、
-    `rules/models.md` §0.5）。
+    単発テキスト API、ツールループ・PNG 目視なし、`rules/models.md` §0.5）。
   - `cursor-agent -p --yolo --model <model-id> "..." < /dev/null`:
     Cursor Pro 枠（Private 時の非 Fast Composer 等）。
   - `claude -p`: Claude Team 枠（Opus 等）。
-- effort は原則既定 **medium**（Hydrogen は `agy`・`hydrogen-sub` とも既定
-  **high**）。格上げ（Argon / Carbon の `high`、Hydrogen の `xhigh` 等）は
+- effort は原則既定 **medium**（Hydrogen / `hydrogen-sub` は既定 **high**）。
+  格上げ（Argon / Carbon の `high`、Hydrogen の `xhigh` 等）は
   「成功条件が開いている」案件だけに使い、Google API および Hydrogen の
-  `xhigh` は理由を 1 行記録して事後報告可、`agy` Argon 等や Codex の `high` は
-  事前申請に従う（無意味な引き上げは禁止、`rules/models.md` §0.5・§1.2・§3.6）。
+  `xhigh` は理由を 1 行記録して事後報告可、Codex の `high` や人間直操作の
+  `antigravity` Argon high 等は事前申請に従う（無意味な引き上げは禁止、
+  `rules/models.md` §0.5・§1.2・§3.6）。
 
 **非対話呼び出しの罠（2026-10-21 実測）。忘れると20分溶ける。**
 
 - **`</dev/null` を必ず付ける**。`opencode run` は常駐サービスと協調するため、
   stdin を開いたままだと入力待ちでブロックする。
-- **`agy` はフラグの順序に注意**。`agy -p --dangerously-skip-permissions ...`
-  と書くと、`-p` が後続のフラグをプロンプト文字列として食い、`code 2` で
-  落ちる。`--dangerously-skip-permissions --print "..."` の順にする
-  （または `-p="..."`）。
 - **YOLO フラグはツールごとに違う**: opencode は `run --auto`、
-  cursor-agent は `-p --yolo`、agy は `--dangerously-skip-permissions`。
+  cursor-agent は `-p --yolo`（`agy` CLI の非対話起動は禁止）。
 - **OpenCode の思考抑制**は `-m "deepseek/deepseek-flash#none"`
   （`#low` / `#high` / `#max`）。整形・分類・抽出のような機械的作業で使う。
 
@@ -152,7 +160,7 @@ Bash 経由で外部 CLI を別プロセス起動する。
 4. **モデル名を先頭に（可視性）**: Cursor Task の `description` は
    `{通称} {短い作業}`（例: `Fable open-artifact audit`）。通称は人が呼ぶ
    名前だけ（Grok / Fable / Composer / Gemini Pro / Gemini Hydrogen / Gemini Flash）。
-   版数・slug は書かない。inherit なら親と同じ。agy / CLI は呼ぶ直前に
+   版数・slug は書かない。inherit なら親と同じ。許可済み CLI（`codex-sub` / `*-sub` 等）は呼ぶ直前に
    チャットへ `{通称} を呼び出します` を1行。
 5. **Cursor を `delegate_task` で呼ぶとき**: `target.options` に
    `{"fastMode": false}` を必ず明示し、応答の `options` で確認する。

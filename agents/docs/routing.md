@@ -12,6 +12,12 @@
 
 ## 1. 判定順序
 
+**2026-11-16 暫定追補**: 判断材料・発想・監査で Argon を使うときは原則
+Hydrogen とペアにする。Grok + Hydrogen も許可済み用途での試行候補。
+Hydrogen 消費が速すぎる場合は Argon + Grok 等への見直しもあり得るが、
+残量による自動変更はしない。役割分担と例外は `rules/models.md` §0.4 が正本。
+以下の表の Argon 単独表記も同節を適用する。Carbon のサブスク解放は前提にしない。
+
 1. **環境**: ローカル（T3 / CLI）か **Cursor Cloud Agent** か。Cloud は
    本書 §3「Cursor Cloud Agent」を先に適用する。
 2. **Phase-First Override**: 教員報告前・数理難所・章立て・仕様策定の山場なら、
@@ -21,9 +27,11 @@
 3. **Task**: Design / Implement / Extract を判定。見た目で合否が決まる成果物は
    Task を増やさず、本書 §3 Visual QA を適用する。
 4. **Flag**: Private / Search / Orchestration を判定。
-5. **チャネル**: `in agy` / `in claude` / `codex-sub` / `dsh-sub`（明示 DeepSeek）/
-   `hydrogen-sub`・`carbon-sub`・`argon-sub`・`flash-sub`・`gemini-sub`
-   （`rules/models.md` §0.5）/ `in cursor`（例外のみ）の指定を確認。
+5. **チャネル**: エージェント実行は `hydrogen-sub`・`carbon-sub`・`argon-sub`・
+   `flash-sub`・`gemini-sub`（`rules/models.md` §0.5）/ `in claude` /
+   `codex-sub` / `dsh-sub`（明示 DeepSeek）/ `in cursor`（例外のみ）。
+   `in agy` は**人間が T3 で直接開いたスレッドだけ**。エージェントからの
+   `delegate_task(..., "antigravity")` と `agy -p` / `agy acp` は禁止。
    省略時は下のフォールバック順。
 6. **残量**: 動的振り分けはしない。使い切り防止の確認に `update-ai-usage` を
    使う（`rules/models.md` §2.9）。
@@ -32,14 +40,16 @@
 > 本書内の Opus レビュー役の記述は恒久方針であり、暫定中は同節の
 > Argon medium に置き換える。設計・引き上げの役割は変えない。
 >
-> **Hydrogen**: `Gemini 3.8 Flash` からの正規移行先。`agy`・`hydrogen-sub` とも
-> **既定 `high`（無指定で可、軽作業のみ `low` 可）**。`xhigh` は無意味な引き上げを
+> **Hydrogen**: `Gemini 3.8 Flash` からの正規移行先。エージェントは
+> `hydrogen-sub`、**既定 `high`（無指定で可、軽作業のみ `low` 可）**。
+> `agy` の同じ既定は人間が直接開いたスレッドだけ。`xhigh` は無意味な引き上げを
 > 禁止し、必要時は理由 1 行記録で事後報告可（`rules/models.md` §1.2）。
 >
-> **Carbon**: Google AI Pro に来る前提。サブスク枠は `antigravity` に出るまで
-> 呼ばない（スキル `model-route`）。API 経路は `carbon-sub` を配備済みだが
-> トークン消費が多いため限界を試す難所・科学的探求に限る（`rules/models.md`
-> §0.5・§1.1）。導入価格の終了後も、Argon の安い代替にはしない。
+> **Carbon**: エージェントは `carbon-sub` のみ（限界を試す難所・科学的探求、
+> `rules/models.md` §0.5・§1.1）。サブスク枠は、人間が T3 で直接スレッドを
+> 開く場合に限り、`antigravity` へ掲載されたあとだけ使う。エージェントは
+> 掲載確認のために `antigravity` を呼ばない。導入価格の終了後も、Argon の
+> 安い代替にはしない。
 >
 > **DeepSeek の代替欄**: `rules/models.md` §2.5 の利用条件付き。
 > 枠不足・エラーだけでは自動利用しない。Codex CLI ラッパーは API へ
@@ -51,19 +61,19 @@
 | --- | --- | --- | --- |
 | **Design（ループ頭）** | 方向・骨子・DoD | `claude: Opus 5.5`（high・申請不要） | — |
 | **Design（細部）** | 仕様・疑似コード | `codex-sub`（effort medium） | 条件付き `dsh-sub` |
-| **Design（発想）** | 発想・問い直し | `agy: Argon` (medium) | Hydrogen / Web (*2) |
+| **Design（発想）** | 発想・問い直し | `argon-sub` (medium) | 人間直操作 `antigravity` Argon / Web (*2) |
 | **Implement（中段）** | 打鍵・実装・修正（W1） | `codex-sub`（T3 は §3 参照） | 条件付き `dsh-sub` |
-| **Implement（後段）** | 監査（Breaker） | 暫定 Argon medium (*1) | `argon-sub` (*2) |
-| **Extract / W2** | 走査・要約・整形 | `agy: Hydrogen` (既定 high) | `hydrogen-sub` |
+| **Implement（後段）** | 監査（Breaker） | 暫定 `argon-sub` medium (*1) | 人間直操作 `antigravity` Argon |
+| **Extract / W2** | 走査・要約・整形 | テキストは `hydrogen-sub` (既定 high)。ツール走査は `codex` / `claudeAgent` | 人間直操作 `antigravity` Hydrogen |
 | **Flag: Private** | 機密情報 | `cursor: Composer 2.5`（非 Fast） | `claude`（Team） |
-| **Flag: Search** | Web 調査・動向 | `agy: Hydrogen` (既定 high) | `hydrogen-sub` |
-| **Flag: Orchestration** | 指揮・並行管理 | `claude: Opus 5.5`（Team） | T3 委譲 |
-| **推敲（ループ末）** | 人向け日本語 | yomiyasu + Hydrogen (既定 high) | `hydrogen-sub` |
+| **Flag: Search** | Web 調査・動向 | `codex`（Luna）または `claudeAgent` | 人間直操作 `antigravity` Hydrogen。テキスト整理のみ `hydrogen-sub` |
+| **Flag: Orchestration** | 指揮・並行管理 | `claude: Opus 5.5`（Team） | T3 委譲（`antigravity` 以外） |
+| **推敲（ループ末）** | 人向け日本語 | yomiyasu + `hydrogen-sub` (既定 high) | 人間直操作 `antigravity` Hydrogen |
 
 (*1) `rules/models.md` §2.5「暫定監査」を優先。恒久方針はループ末 Opus 5.5。
-T1/T2/T3 は当面なし。
-(*2) Argon 枠切れ時のフォールバック順（`agy` Hydrogen / Web Argon → 必要時
-`argon-sub`）は `rules/models.md` §0.5 を参照。
+T1/T2/T3 は当面なし。エージェントは `argon-sub`。
+(*2) 人間直操作の Argon 枠切れ順（その人間の `antigravity` Hydrogen / Web Argon
+→ 必要時 `argon-sub`）は `rules/models.md` §0.5。エージェントは `agy` へ逃がさない。
 
 ## 3. 役割別モデル（ローカル）
 
@@ -86,10 +96,11 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 
 - **スクリプト・数値・フォント・再現性**: W1（`codex-sub` / フォールバック
   `dsh-sub`）。ここは閉じた Implement。
-- **PNG / 画面の目視**: W1 の自己申告は証拠にしない。**第一候補は
-  Gemini 4 Hydrogen**（`agy`・既定 `high`・マルチモーダル）。
-  **フォールバックは Grok 4.7**（Cursor・非 Fast）。Grok 4.7 がローカルで
-  PNG をどこまで判断できるかは**未確認**（試す前に期待値を上げない）。
+- **PNG / 画面の目視**: W1 の自己申告は証拠にしない。**エージェント実行の
+  第一候補は Grok 4.7**（Cursor・非 Fast）。Grok 4.7 がローカルで PNG を
+  どこまで判断できるかは**未確認**（試す前に期待値を上げない）。
+  人間が T3 UI で直接 `antigravity` Hydrogen スレッドを開く場合は Hydrogen
+  （既定 `high`）を優先してよい。エージェントから `antigravity` へ委譲しない。
   DeepSeek / Composer に「PNG を見て重なりなしと報告せよ」とだけ頼まない。
   **通常の Visual QA に Opus 5.5 は使わない**（引き上げ時のみ `models.md` §3.6）。
 - **最初の 1 回の見た目直しは想定内**。同じ見た目クラス（重なり・余白・改行）
@@ -104,9 +115,11 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 ### Grok 4.7（研究タスクのローカルでの位置づけ）
 
 - **司令塔・設計の主軸にしない**（平常時のオーケストレーターは Opus 5.5）。
-- **用途（この2つのみ）**: **Visual QA フォールバック**（Hydrogen のあと）、
+- **用途（研究の既定はこの2つ）**: **エージェント実行の Visual QA**
+  （人間直操作の Hydrogen をエージェントから呼ばない。§3）、
   **Opus 5.5 が使えないときのオーケストレーター代行**（Opus 不在時に代行
   できるのが Grok だけで、Grok の枠はリセットまでが長いため温存する）。
+  QEC・ftqc・b4 の追加許可は `rules/models.md` §0.4。
 - **Fast は使わない**（`rules/models.md` §2.1、`rules/delegation.md` §8、
   `docs/routing.md` §8）。T3 `delegate_task` は `fastMode: false` 必須。
 - Maker-Breaker: Maker は Codex（フォールバック DeepSeek）。Breaker は
@@ -114,8 +127,10 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 
 ### yomiyasu
 
-- 大きなループの**終わり**、**Gemini 4 Hydrogen**（`agy`、既定 `high`）が
-  推敲を担当。CLI は `nanaism/yomiyasu` の**本体**（2026-10-30 決定。詳細は RES-24）。
+- 大きなループの**終わり**、**Gemini 4 Hydrogen** が推敲を担当する。
+  エージェントは `hydrogen-sub`（既定 `high`）。人間が直接開いた
+  `antigravity` スレッドでも可。CLI は `nanaism/yomiyasu` の**本体**
+  （2026-10-30 決定。詳細は RES-24）。
 - 【】接頭辞・見出し・箇条書き・番号・数値を保持。推敲後 diff 確認。
 
 ## 4. 環境の指定とフォールバック
@@ -124,11 +139,11 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | --- | --- | --- |
 | `w1 in codex` | ChatGPT Plus（Codex CLI） | `codex-sub --repo … --prompt …` |
 | `w1 in api` | DeepSeek 従量（1017） | `dsh-sub --repo … --prompt …`（条件付き控え） |
-| `hydrogen in agy` | Google AI Pro (Gemini) | 探索・W2・Visual QA（既定 high） |
-| `argon in agy` | Argon 独立週枠 | 発想・暫定監査（`rules/models.md` §2.5） |
-| `carbon in agy` | Google AI Pro（来る前提。掲載後） | 限界を試す作業（スキル `model-route`） |
-| `*-sub` (Google API) | Prepay OFF 確認済み | 枠切れ・適合（`models.md` §0.5） |
-| `sonnet in agy` | Google AI Pro（Claude 週枠） | 名指し時のみ |
+| `hydrogen in agy` | 人間が T3 で直接開くスレッドのみ | エージェントは `hydrogen-sub`（既定 high） |
+| `argon in agy` | 人間直操作の Argon 独立週枠 | 発想・暫定監査。エージェントは `argon-sub` |
+| `carbon in agy` | 人間直操作・掲載後のみ | エージェントは `carbon-sub`（スキル `model-route`） |
+| `*-sub` (Google API) | Prepay OFF 確認済み | エージェントの Gemini 経路（`models.md` §0.5） |
+| `sonnet in agy` | 人間直操作の Claude 週枠のみ | エージェントの名指しは Team（`claudeAgent`） |
 | `opus in claude` | **Claude Team** | オーケストレーター・ループ頭尾 |
 | `composer in cursor` | Cursor Pro | **Private のみ**（非 Fast 明示） |
 | `grok in cursor` | Cursor Pro | Visual QA 目視・司令塔代行（非 Fast） |
@@ -142,12 +157,12 @@ HTML の重なり）は、スクリプト実装と目視を分ける。Task 列�
 | --- | --- | --- |
 | W1 Codex | `codex-sub` / T3 `codex` | API キー Codex・Private への Codex は禁止 |
 | W1 DeepSeek | `dsh-sub`（条件付き） | Free は使わない |
-| Gemini 4 Hydrogen | `agy` / `hydrogen-sub`（既定 high） | 実装 W1・`cursor` |
-| Argon | 通常 `antigravity` (*4) / `argon-sub` | 設計・仕様・`cursor` |
-| Carbon | `agy`（掲載後）/ `carbon-sub` (*4) | `cursor`・未掲載時のサブスク |
-| Gemini 3.8 Flash | レガシー控え（`agy` / `flash-sub`） | 実装 W1・Hydrogen 可時の既定 |
-| Sonnet 5.5 | `agy` → Team | cursor |
-| Opus 5.5 | `claudeAgent` / Team | cursor、agy（余剰時のみ・要許可） |
+| Gemini 4 Hydrogen | エージェントは `hydrogen-sub`。人間直操作のみ `antigravity` | 実装 W1・`cursor`・エージェントからの `antigravity` |
+| Argon | エージェントは `argon-sub`。人間直操作のみ `antigravity` (*4) | 設計・仕様・`cursor` |
+| Carbon | エージェントは `carbon-sub`。人間直操作は掲載後の `antigravity` のみ (*4) | `cursor`・エージェントからの `antigravity` |
+| Gemini 3.8 Flash | レガシー控え（`flash-sub` のみ） | 実装 W1・Hydrogen 可時の既定・エージェントからの `agy` |
+| Sonnet 5.5 | Team（`claudeAgent`）。`agy` は人間直操作の名指しのみ | cursor・エージェントからの `agy` |
+| Opus 5.5 | `claudeAgent` / Team | cursor、エージェントからの `agy` |
 | Fable 5.1 | `cursor` のみ | それ以外 |
 | Composer / Grok | `cursor` | ローカル W1・設計には使わない（例外のみ） |
 
@@ -213,6 +228,9 @@ Anthropic / OpenAI の従量 API への自動フォールバックは禁止（�
   （スキル `model-route`）。
 - **ローカル W1 に Gemini Hydrogen / Flash / Composer を使う**（Private / Cloud Agent
   を除く）。
+- **エージェントから `delegate_task(..., "antigravity")`、または `agy -p` /
+  `agy acp` を起動する**（人間が直接開いたスレッドと、その中の
+  `invoke_subagent` `Model: "inherit"` を除く。`rules/models.md` §0.5）。
 - `Private` フラグのタスクを agy に投げる。
 - 明示指示なしに Anthropic / OpenAI の従量 API を使う。
 - **Codex を API キー（`OPENAI_API_KEY`）で呼ぶ**。
