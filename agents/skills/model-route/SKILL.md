@@ -19,6 +19,19 @@ description: >-
 
 ## 判定
 
+QEC・ftqc・b4 の研究担当と worker の分担許可は `models.md` §0.4 を参照。
+本3タスクでは Hydrogen / Grok の積極利用を本人承認済み。Grok の探索・案出し・
+比較検討・範囲を切った実装も許可する（従来の用途制限へのタスク限定例外）。
+担当が全実装・探索を抱えず、切り出せる実装は Terra / Sonnet、検索・抽出は
+Luna / Haiku / Hydrogen 等へ渡せる。ライブ提供確認・契約境界・総消費を守る。
+
+**暫定ペア運用（2026-11-16）**: 正本 `models.md` §0.4 を優先する。
+Argon を判断材料・発想・監査へ出すときは原則 Hydrogen と組み合わせる。
+Grok + Hydrogen も許可済み用途で試行候補。Hydrogen の消費速度が問題に
+なれば Argon + Grok 等へ見直し得るが、自動切替せず本人と相談する。
+Carbon のサブスク解放を待機条件にしない。Hydrogen 単独調査の常時二重化や
+ペアの合意による正しさ保証ではなく、役割・制約・不一致の扱いは正本に従う。
+
 1. 依頼のモデル・effort・チャネル指定、Private、API・追加委譲禁止などの制約を
    確認する。名指しの無断変更はしない。
 2. ローカル／Cursor Cloud、T3／CLI と、作業の種類・役割（設計・実装・抽出・
@@ -45,27 +58,36 @@ research-brain の `survey-papers` スキルは読解・整理の手順を担当
 
 1. **公式ポジション（全領域で Hydrogen > Argon ではない）**:
    - **Hydrogen (`gemini-4-hydrogen`)**: 旧 `3.8 Flash` からの推奨移行先。
-     Search・W2・Extract・整形・Visual QA・yomiyasu と並列実行向き。
-     **`agy`・`hydrogen-sub` とも既定 `high`（無指定で可、軽作業 `low` 可）**。
-     `xhigh` は無意味な引き上げを禁止し、必要時は理由 1 行記録で事後報告可。
+     テキストの W2・Extract・整形・yomiyasu 向き。**既定 `high`（無指定で可、
+     軽作業 `low` 可）**。エージェントは `hydrogen-sub` のみ。ツール探索・
+     PNG 目視は `models.md` §2.3 の非 Google 経路。人間が直接開いた
+     `antigravity` スレッドでも同じ既定。`xhigh` は無意味な引き上げを禁止し、
+     必要時は理由 1 行記録で事後報告可。
    - **Argon (`gemini-4-argon`)**: 低ハルシネーション（`AA-Omniscience`）・
-     図表読解・科学ベンチでなお優位。`agy` では非繰越の独立週枠を発想と
-     暫定監査（`models.md` §2.5）に集中させ、**有料 API では最小限に抑える**。
+     図表読解・科学ベンチでなお優位。人間直操作の独立週枠は発想と暫定監査
+     （`models.md` §2.5）に集中する。エージェントは `argon-sub` に限る。
+     **有料 API では最小限に抑える**。
    - **Carbon (`gemini-4-carbon`)**: 限界を試す作業（複雑多段デバッグ・
      開かれた科学的探求）。設計・仕様・W1・ループ頭と引き上げは従来どおり
-     Opus / Codex であり、Carbon へ付け替えない。
-2. **Antigravity の Carbon ガード**:
-   - **前提**: Carbon は Google AI Pro の Antigravity にも来る想定。
-   - **呼ぶ直前**: `orchestrator_capabilities` で `antigravity` に Carbon が
-     あるか見る。あるときだけサブスクで呼ぶ。無い間はサブスクで呼ばず報告する。
-     `cursor` に出ていても選ばない。
-3. **API（`gemini-sub` 系）とクォータ切れフォールバック**:
+     Opus / Codex であり、Carbon へ付け替えない。エージェントは `carbon-sub`。
+2. **チャネル境界（エージェントは Antigravity を起動しない）**:
+   - エージェントは `delegate_task` の `providerInstanceId: "antigravity"` と
+     `agy -p` / `agy acp` を使わない（`antigravity` 自身からの `delegate_task`
+     も含む）。Gemini は `hydrogen-sub` / `argon-sub` / `carbon-sub` /
+     `flash-sub`。
+   - `antigravity` は人間が T3 UI で直接開いたルートスレッド専用
+     （同スレッド内の `invoke_subagent` は `Model: "inherit"` のみ）。
+   - Carbon が `antigravity` に掲載されても、エージェントはサブスク枠を呼ばない。
+     掲載確認のために `orchestrator_capabilities` で `antigravity` を開かない。
+     `cursor` に出ていても選ばない。人間が自分でスレッドを開くときだけ、
+     掲載後のサブスクを使える。
+3. **API（`gemini-sub` 系）と枠切れ**:
    - `~/.config/gemini-sub/.env` は Prepay / オートチャージ OFF が確認済み
-     （`models.md` §0.5）。サブスク優先を維持しつつ、枠切れ時や API 適合タスクでは
-     都度確認なしで呼んでよい。
-   - **`agy` Argon 枠切れ時**: Argon の低ハルシネーション必須でなければ
-     `agy` Hydrogen または Web 版 Argon を優先。Argon 自体が必要なら `argon-sub`。
-   - **`agy` Gemini 枠切れ時**: `hydrogen-sub`。
+     （`models.md` §0.5）。エージェント適合タスクでは都度確認なしで呼んでよい。
+   - **枯渇時**: API が `429` / `RESOURCE_EXHAUSTED` なら停止し、`agy` へ
+     自動逃避しない。人間直操作の Argon 週枠を使い切ったあとの順
+     （その人間の `antigravity` Hydrogen / Web Argon → 必要時 `argon-sub`）は
+     人間が操作するときだけ（`models.md` §0.5）。
    - **API 利用時の主軸**: `hydrogen-sub` または `carbon-sub`（限界を試す難所のみ）を
      優先し、`argon-sub` の乱発を避ける。Carbon は `--timeout 900`・圧縮プロンプトを
      維持し、タイムアウト時は圧縮再試行または `argon-sub` / `hydrogen-sub` へ退避する。

@@ -23,7 +23,7 @@ Linear へのタスク（Issue）起票と `now/TODO.md` への反映パイプ�
 | 実行環境 | 起票経路 | 備考 |
 | --- | --- | --- |
 | **OpenCode / Claude** | **Linear MCP を直接使用** | 接続済み MCP で起票し、ID / URL を取得 |
-| **agy / Cursor 等** | **`cursor-agent` CLI への委譲** | 非対話 CLI 経由で起票し、TODO へ反映 |
+| **agy（人間起動スレッド） / Cursor 等** | **`cursor-agent` CLI への委譲** | 非対話 CLI 経由で起票し、TODO へ反映 |
 
 ## 2. 設定確認（既存設定を保持）
 

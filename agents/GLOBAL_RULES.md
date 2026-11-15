@@ -13,6 +13,16 @@
   サブスク枠を優先する。**ChatGPT Plus の Codex** は `codex login` の
   サブスク枠。**`OPENAI_API_KEY` での Codex** は従量なので、明示指示が
   あるときだけ。→ `rules/models.md`
+- **Google Antigravity（`agy` / `antigravity`）の規約順守**: 個人 Google アカウント
+  （`oauth-personal`）の `antigravity` / `agy` を**他エージェント**
+  （`claudeAgent` / `codex` / `cursor` / `opencode` 等）や自動化
+  （`launchd` / `cron` / `update-ai-usage`）から `delegate_task` または
+  `agy -p` / `agy acp` で呼び出すことは**全面禁止**（`antigravity` 自身からの
+  `delegate_task(..., "antigravity")` も禁止）。`antigravity` は**人間が直接
+  入力する T3 ルートスレッド**（およびその内部でのみ `invoke_subagent`
+  `Model: "inherit"`）専用。他エージェントが Gemini を使う場合は API キー経路
+  （`bin/hydrogen-sub` / `bin/argon-sub` / `bin/carbon-sub`）のみ使う。
+  → `rules/models.md` §0.5・`rules/delegation.md` §3–§5
 - **破壊的 git**: `push --force` / `reset --hard` / 共有ブランチの書き換えは、
   明示指示があるときだけ。
 - **Cursor の Fast（2 倍課金）**: Composer / Grok を T3 `delegate_task` で
