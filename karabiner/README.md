@@ -22,10 +22,11 @@
     - 長文: `かな` を押したまま `M` を素早く「トントン」と2回叩くことで、Wispr Flow の仕様によりハンズフリー録音を開始可能（喋り終わったら `かな＋M` を1回叩いて終了）。
   - メイン作業環境が T3 Code（`かな＋J`）に移行したことで、Ghostty（旧 `かな＋M`）の優先度が低下したため、右手一等地のキーを最頻出の音声入力に最適化した。
 
-- **AIエージェントへの "continue" / "yes" 送信を「かな＋Enter」「Shift＋かな＋Enter」にした理由**
-  - T3 Code、Antigravity、Cursor、Ghostty / cmux などのAIエージェント環境において、処理継続を促す "continue" や、ゲート審査・危険操作確認に対する "yes" の送信頻度が極めて高い。
+- **AIエージェントへの "continue" / "yes" / "approve" 送信を「かな＋Enter」「Shift＋かな＋Enter」「かな＋右Cmd＋Enter」にした理由**
+  - T3 Code、Antigravity、Cursor、Ghostty / cmux などのAIエージェント環境において、処理継続を促す "continue"、質問確認への "yes"、Planレビューやゲート審査を正式承認する "approve" の送信頻度が極めて高い。
   - **通常送信（前進）**: 右親指（かなキー）＋ 右小指（Enterキー）で `continue` をノールック送信。
-  - **修飾付き送信（承認・一段強いGO）**: 右親指（かなキー）＋ 右小指（Shift & Enter同時押し）で `yes` を送信。
+  - **正式承認（右手完結の強いGO）**: 右親指で `かな`＋`右Cmd` を同時にベタ押し ＋ 右小指（Enterキー）で `approve` を送信。旧 `かな＋右Cmd`（Raycast Switch Windows）の死蔵スロットを廃止し、右手完結の承認操作として再利用した。
+  - **修飾付き送信（確認応答・単純肯定）**: 右親指（かなキー）＋ Shift ＋ 右小指（Enterキー）で `yes` を送信（CLIの `[y/N]` 確認や単純質問向け）。
   - 音量系（U:アップ, I:ダウン, Y:ミュート）のマッスルメモリーを一切破壊せず、右手Enter周辺に「AIエージェントへの送信系」を綺麗に集約。
   - 日本語入力中（IME ON）でも誤作動しないよう、キー送信シーケンスの先頭に `japanese_eisuu`（英数キー）を挟むことで、全角未確定にならず確実に半角で送信できるようにした。
 
@@ -225,7 +226,6 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力                       | 条件              | 出力              | 想定アクション |
 | -------------------------- | ----------------- | ----------------- | -------------- |
-| Right Cmd + optionalAny    | kana_pressed = 1  | Cmd+Opt+Tab       | Raycast Switch Windows を開く（選択型） |
 | Tab + optionalAny          | eisuu_pressed = 1 | Tab（Opt は英数側でホールド） | AltTab 前進。英数を離すまで UI 維持。OS 標準 Cmd+Tab は温存 |
 | Shift+Tab (+ any)          | eisuu_pressed = 1 | Shift+Tab（同上） | AltTab 後退（Tab を離してから Shift+Tab しても可） |
 
@@ -246,7 +246,8 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 
 | 入力 | 条件 | 出力 | 備考 |
 | --- | --- | --- | --- |
-| Shift+Enter + any | kana_pressed = 1 | 英数 → "yes" → Enter | AIエージェントへの承認・許可送信（最優先評価） |
+| Right Cmd+Enter + any | kana_pressed = 1 | 英数 → "approve" → Enter | AIエージェントへの正式承認・ゲート通過（右手完結・最優先評価） |
+| Shift+Enter + any | kana_pressed = 1 | 英数 → "yes" → Enter | AIエージェントへの確認応答・単純肯定（最優先評価） |
 | Enter + optionalAny | kana_pressed = 1 | 英数 → "continue" → Enter | AIエージェントへの続行送信（IME全角化防止付き） |
 
 #### メディア操作

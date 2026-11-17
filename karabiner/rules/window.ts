@@ -1,13 +1,4 @@
-import { ifApp, ifDevice, ifVar, map, mapPointingButton, rule } from "karabiner.ts";
-
-// =====================================================================
-// 🛡️ 条件定義: RaycastのSwitch Windowsモード中であること
-// =====================================================================
-// Raycastが前面にある時のみ発火させることで、変数が残り続けた際の誤発を完全に防ぐ
-const ifRaycastMode = [
-  ifVar("raycast_window_mode", 1),
-  ifApp("^com\\.raycast\\.macos$"),
-];
+import { ifDevice, ifVar, map, mapPointingButton, rule } from "karabiner.ts";
 
 // =====================================================================
 // [WINDOW] 両親指レイヤー (英数 + かな + HJKL)
@@ -119,14 +110,8 @@ export const windowRules = [
         .condition(ifVar("kana_pressed", 1)),
 
       // ----------------
-      // 2. ウィンドウ / アプリ切替（かなレイヤー）
+      // 2. ウィンドウ / アプリ切替
       // ----------------
-      // かな + Right Cmd: Raycast Switch Windows
-      map("right_command", "optionalAny")
-        .to("tab", ["command", "option"])
-        .toVar("raycast_window_mode", 1)
-        .condition(ifVar("kana_pressed", 1)),
-
       // ======= AltTab（英数ホールドで前後送り）=======
       // 英数を離すまで UI を維持。OS 標準 Cmd+Tab は潰さない。
       map("tab", ["left_shift"], "any")
@@ -135,46 +120,6 @@ export const windowRules = [
       map("tab", "optionalAny")
         .to("tab")
         .condition(ifVar("eisuu_pressed", 1)),
-
-      // ======= Raycast Switch Windows モード中の Vim風キーバインド =======
-      // ※ 修飾キーなしの単押しのみ許可し、予期せぬ誤発を防ぐ
-      map("j")
-        .to("down_arrow")
-        .condition(...ifRaycastMode),
-      map("k")
-        .to("up_arrow")
-        .condition(...ifRaycastMode),
-
-      // アクションメニューの展開 (Space で Cmd+K を代行)
-      map("spacebar")
-        .to("k", "left_command")
-        .condition(...ifRaycastMode),
-
-      // ウィンドウアクションの単押しショートカット化
-      map("m")
-        .to("m", "left_command")
-        .condition(...ifRaycastMode), // 最小化
-      map("f")
-        .to("f", "left_command")
-        .condition(...ifRaycastMode), // フルスクリーン
-      map("w")
-        .to("w", ["left_command", "left_shift"])
-        .condition(...ifRaycastMode), // 閉じる
-      map("h")
-        .to("h", "left_command")
-        .condition(...ifRaycastMode), // 隠す
-
-      // ======= モードの解除 =======
-      // 選択決定、またはキャンセル時にフラグをリセットし、本来のキーを送信する
-      map("return_or_enter", "optionalAny")
-        .to("return_or_enter")
-        .toVar("raycast_window_mode", 0)
-        .condition(...ifRaycastMode),
-
-      map("escape", "optionalAny")
-        .to("escape")
-        .toVar("raycast_window_mode", 0)
-        .condition(...ifRaycastMode),
     ],
   ),
 

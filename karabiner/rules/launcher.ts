@@ -162,7 +162,21 @@ export const launcherRules = [
     // -------------------------------------------------------------
     // AIエージェント操作 / 音声入力 / 定型文入力
     // -------------------------------------------------------------
-    // 【最優先】Shift + かな + Enter: "yes" を入力して Enter 送信（ゲート審査・承認GO）
+    // 【最優先】かな + 右Cmd + Enter: "approve" を入力して Enter 送信（右手完結・ゲート承認/Plan通過）
+    // ※ 右親指でかな+右Cmdベタ押し＋小指Enter。optionalAny の通常 Enter (continue) より先に評価する
+    map("return_or_enter", "right_command", "any")
+      .to("japanese_eisuu")
+      .to("a")
+      .to("p")
+      .to("p")
+      .to("r")
+      .to("o")
+      .to("v")
+      .to("e")
+      .to("return_or_enter")
+      .condition(ifVar("kana_pressed", 1)),
+
+    // 【最優先】Shift + かな + Enter: "yes" を入力して Enter 送信（確認応答・単純肯定）
     // ※ optionalAny の通常 Enter より先に評価して確実に拾う
     map("return_or_enter", "left_shift", "any")
       .to("japanese_eisuu")
