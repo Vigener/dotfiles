@@ -108,18 +108,6 @@ export const windowRules = [
       map("quote", "optionalAny")
         .to("up_arrow", "control")
         .condition(ifVar("kana_pressed", 1)),
-
-      // ----------------
-      // 2. ウィンドウ / アプリ切替
-      // ----------------
-      // ======= AltTab（英数ホールドで前後送り）=======
-      // 英数を離すまで UI を維持。OS 標準 Cmd+Tab は潰さない。
-      map("tab", ["left_shift"], "any")
-        .to("tab", ["left_shift"])
-        .condition(ifVar("eisuu_pressed", 1)),
-      map("tab", "optionalAny")
-        .to("tab")
-        .condition(ifVar("eisuu_pressed", 1)),
     ],
   ),
 

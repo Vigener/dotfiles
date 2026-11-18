@@ -222,13 +222,6 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | pointing button1      | kana_pressed = 1 かつ device vendor_id=0x1D50 product_id=0x615E | Ctrl+Opt+Cmd+Right | Next Display（Conductor MB1、L 右隣）   |
 | D + optionalAny       | kana_pressed = 1                                                     | Cmd+Opt+Ctrl+Shift+D | Switch Display Preset                 |
 
-#### ウィンドウ / アプリ切替
-
-| 入力                       | 条件              | 出力              | 想定アクション |
-| -------------------------- | ----------------- | ----------------- | -------------- |
-| Tab + optionalAny          | eisuu_pressed = 1 | Tab（Opt は英数側でホールド） | AltTab 前進。英数を離すまで UI 維持。OS 標準 Cmd+Tab は温存 |
-| Shift+Tab (+ any)          | eisuu_pressed = 1 | Shift+Tab（同上） | AltTab 後退（Tab を離してから Shift+Tab しても可） |
-
 ### WINDOW（Raycast Windows Management - グローバル）
 
 | 入力  | 条件 | 出力               | 想定アクション                   |
