@@ -279,4 +279,4 @@ Ghostty が前面のとき、左 Alt+Q / W / R は herdr の基準（Ctrl+Alt+1�
 | ルール                                         | 入力      | 条件                       | 出力    | 備考 |
 | ---------------------------------------------- | --------- | -------------------------- | ------- | ---- |
 | 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | quote     | Input Source language = ja | hyphen  | 長音 |
-| 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | semicolon | Input Source language = ja | x, t, u | 促音（macOS標準IME向け） |
+<!-- | 【AZIK】セミコロンで促音(っ)、コロンで長音(ー) | semicolon | Input Source language = ja | x, t, u | 促音（Google日本語入力競合のため無効化中） | -->
